@@ -1,0 +1,14 @@
+.contactinsearch {
+	background-color: var(--theme-background-color);
+	box-sizing: initial;
+	cursor: pointer;
+	transition: all 0.1s ease;
+	z-index:20;
+	padding: 10px 12px 10px 12px;
+	display:flex;
+	justify-content: space-between;
+	align-items: flex-start;
+}
+.contactinsearch:hover {
+	background-color: var(--theme-accent-color-light);
+}

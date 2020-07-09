@@ -1,0 +1,24 @@
+.mediaheader{
+    display: flex;
+	min-width: 300px;
+	width: 500px;
+    max-width: 85%;
+    align-items: center;
+}
+.mediadevicename{
+    margin-right: 8px;
+    font-weight: bold;
+    font-size: large;
+}
+.mediavolumecontainer{
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+}
+.mediavolumecontainer svg{
+    fill: var(--theme-text-color);
+}
+.mediavolumerange{
+    flex-grow: 1;
+    width: auto;
+}

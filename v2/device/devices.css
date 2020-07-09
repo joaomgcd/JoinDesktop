@@ -1,0 +1,67 @@
+#devices{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+    padding: 16px;
+}
+
+.deviceiconcontainer{
+    border-radius: 100%;
+    height: 50px;
+    width: 50px;
+    display: flex;
+}
+.deviceicon{
+    height: 30px;
+    display: block;
+    margin: auto;
+}
+.device{
+    display: flex;
+    margin-top: 5px;
+    flex-direction: column;
+    align-items: center;
+    width: 70px;
+    opacity: 0.4;
+    cursor: pointer;
+}
+.device .deviceiconcontainer{
+    position: relative;
+    background-color: var(--theme-accent-color);
+}
+.selecteddevice{
+    opacity: 1;
+}
+.devicename{    
+    font-size: small;
+    font-weight: bold;
+}
+
+.devicelocalnetwork{
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    bottom: 0px;
+    left: 0px;
+    opacity: 1;
+    fill: var(--theme-text-color);
+}
+
+.devicewarning{
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    bottom: 0px;
+    right: 0px;
+    opacity: 1;
+}
+.devicelocalnetworkcontainer{
+    z-index: 100;
+}
+.devicelocalnetworkcontainer:hover .devicelocalnetworktext {
+    display: block;
+}
+.filedragover{
+    padding: 8px;
+}

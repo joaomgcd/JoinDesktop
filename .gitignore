@@ -1,0 +1,7 @@
+node_modules
+
+out/
+package-lock.json
+joindashboard.code-workspace
+index.html.bak
+main.js.bak

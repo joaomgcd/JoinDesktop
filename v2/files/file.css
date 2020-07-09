@@ -1,0 +1,52 @@
+.file{
+    display: flex;
+    cursor: pointer;
+    padding: 8px;
+    align-items: center;
+}
+.loading .file{
+    cursor: not-allowed;
+}
+.loading .file:hover{
+    background-color: var(--theme-background-color);
+}
+.file:hover{
+    background-color: var(--theme-accent-color-light);
+}
+.file svg{
+    fill: var(--theme-background-color);
+}
+.fileright{
+    display: flex;
+    flex-direction: column;
+    margin-left: 16px;
+    flex-grow: 1;
+}
+.filerightbottom{
+    display:flex;
+    flex-direction: row;
+    font-size: small;
+    opacity: 0.7;
+    margin-top: 4px;
+    flex-grow: 1;
+}
+.fileicon{
+    background-color: var(--theme-accent-color);
+    height: 42px;
+    width: 42px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 100%;
+    min-width: 42px;
+    min-height: 42px;
+}
+.filename{
+    overflow-x: hidden;
+}
+.filesize{
+    flex-grow: 1;
+}
+.fileiconfolder{
+    opacity: 0.75;
+}

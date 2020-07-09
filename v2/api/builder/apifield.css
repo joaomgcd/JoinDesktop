@@ -1,0 +1,10 @@
+
+#apibuilder input:focus ~ label, #apibuilder input:valid ~ label 		{
+    color:white;
+}
+#apibuilder .bar:before, #apibuilder .bar:after 	{
+    background:white; 
+}
+#apifield{
+    margin-bottom:45px;
+}

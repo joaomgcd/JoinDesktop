@@ -1,0 +1,18 @@
+.settingswrapper{
+    overflow-y: auto;
+    background-color: var(--theme-background-color-panel);
+    display: flex;
+    justify-content: center;
+}
+.settings{
+    background-color: var(--theme-background-color);
+    margin: 16px;
+    border-radius: 4px;    
+    box-shadow: 0 2px 6px -3px black;
+    min-width: 300px;
+    width: 70%;
+    max-width: 70%;
+}
+.settings>*{
+    padding: 24px;
+}

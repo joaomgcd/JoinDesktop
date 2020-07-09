@@ -1,0 +1,40 @@
+#apibuilder{
+    background-color: black;
+    /*transition: all 0.3s;*/
+    width: 100vw;
+    color:white;
+    overflow-y: auto;
+    animation: slidein 0.3s ease-in 0.0s forwards;
+}
+@keyframes slidein {
+    from {height: 0;}
+    to {height: 100%;}
+  }
+#apibuilder input{    
+    color:white;
+}
+#apibuilder.hidden{
+    display: block !important;
+    /*height: 0;*/
+    /*opacity: 0;    
+    transform: translateY(100px);*/
+    animation: slideout 0.3s ease-out 0.0s forwards;
+}
+@keyframes slideout {
+    from {height: 100%;}
+    to {height: 0;}
+  }
+#apifields{    
+    padding-top: 32px;
+}
+
+.infosection{
+    margin-top: 0px;
+    margin-bottom: 16px;
+}
+.deviceproperty{
+    display: inline;
+    color: var(--theme-accent-color);
+    font-weight: bolder;
+    margin-left: 8px;
+} 

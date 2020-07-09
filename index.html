@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Join</title>    
+    <script>
+        self.joinServer = "https://testsjoaomgcd.appspot.com/";
+    </script>
+	<meta charset="utf-8"/>
+	<meta name="description" content="Bring your devices together">
+	<meta name="viewport" content="width=device-width, height=device-height,initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<script src="./v2/util.js"></script>
+	<script>
+		const errorHandler = (e) => {
+            console.error("Caught unexpected error", e);
+            var message = e;
+            if(!Util.isString(e)){
+                message = e.message;
+            }
+            message = `Unexpected Error: ${message}`;
+            if(e.filename){
+                message = `${message} in file ${e.filename}`;
+            }
+            if(e.lineno){
+                message = `${message} at line ${e.lineno}`;
+            }
+            if(e.stack){
+                message = `${message}<br/><br/>Trace:<br/>${Util.replaceAll(e.stack,"\n","<br/>")}`;
+            }
+
+			alert(message);
+		}
+        window.onerror = errorHandler;
+		window.onunhandledrejection = errorPromise=>errorPromise.promise.catch(errorHandler);
+	</script>
+	<script src="./v2/gcm/gcmbase.js"></script>
+	<script src="./v2/dexie.js"></script>
+    <script type="module">	
+		 import { AppDashboard } from './appdashboard.js';
+		 const app = new AppDashboard(document.querySelector("body")).load();	
+	</script>
+</head>
+<body class="panel">
+	Loading Join...
+</body>
+</html>

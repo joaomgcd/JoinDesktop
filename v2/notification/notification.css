@@ -1,0 +1,136 @@
+.notification.card {
+	margin: 0.5rem !important;
+	cursor: default;
+	overflow: visible !important;
+}
+.notification.card:hover #closebutton {
+	display: block;
+}
+.notification{
+	flex-direction: column;
+	box-shadow: 5px 5px 5px grey;
+	padding: 8px;
+	background-color: var(--theme-background-color);
+	color: var(--theme-text-color);
+	box-sizing: initial;
+	position: relative;
+	align-self: center;
+	min-width: 300px;
+	width: 500px;
+	max-width: 85%;
+}
+#closebutton{
+	position: absolute;
+	height: 13px;
+	top: 4px;
+	right: 4px;
+	padding: 4px;
+	opacity: 0.5;
+	cursor: pointer; cursor: hand;
+	display:none;
+	z-index: 80;
+	transition: all 0.3s ease;
+}
+#closebutton:hover {
+	opacity: 1;
+	background-color: var(--theme-background-color-panel);
+}
+.notificationBody{
+	display:flex;
+	background-color: var(--theme-background-color);
+	margin: 8px 0px 8px 0px;
+	cursor: pointer;
+}
+.notificationright{
+	display:flex;
+	flex-direction: column;
+	flex-grow: 1;
+	margin: 8px;
+	width: 0px;
+}
+.notificationtitle{
+	font-family: 'Roboto', sans-serif;
+	flex-grow: 1;
+	font-weight: bold;
+}
+.notificationtext{
+	word-wrap: break-word;
+	font-family: 'Roboto', sans-serif;
+	color: var(--theme-accent-color-lowlight);
+	overflow:hidden;
+	line-height:1.5em;
+	max-height:7.5em;
+}
+.notificationdate{
+	display: flex;
+	align-items: center;
+	font-family: 'Roboto', sans-serif;
+	color: var(--theme-accent-color-lowlight);
+	margin-left: auto;
+	font-size: small;
+}
+.notificationleft{
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin: 8px;
+}
+.notificationicon{
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+}
+.notificationiconstatusbar{
+	position: absolute;
+	top: 24px;
+	right: -5px;
+	width: 30px;
+}
+.notificationimage{
+	border-top: 1px solid #e6e6e6;
+	border-bottom: 1px solid #e6e6e6;
+	margin-top: 10px;
+	width: 100%;
+}
+.notificationbuttons{
+	display:flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+	margin-bottom: 16px;
+}
+.appname{
+	align-self: center;
+	margin-right: 8px;
+	font-size: small;
+}
+.notificationdevice{
+	margin-left: 8px;
+	font-size: small;
+}
+.notificationTop{
+	color: gray;
+	display: flex;
+	font-family: 'Roboto', sans-serif;
+	align-items: center;
+}
+#textanddate{
+	display: flex;
+}
+#clearAllNotificationButtonIcon {
+	height: 100%;
+		width: 100%;
+		background: url('icons/clear_all.png') center/60% 60% no-repeat;
+}
+
+#reply{
+	display: flex;
+}
+
+#send{
+	cursor: pointer;
+}
+#send svg{
+	fill: black;
+}

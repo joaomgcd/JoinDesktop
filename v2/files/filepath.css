@@ -1,0 +1,22 @@
+#filepaths{
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+}
+.pathsegment{
+    font-weight: bold;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+#filepathscontainer{
+    display: flex;
+}
+#filepathscontainer svg {
+    fill: var(--theme-text-color);
+    padding-right: 8px;
+    cursor: pointer;
+}
+#fileorders{
+    display: flex;
+    align-items: center;
+}

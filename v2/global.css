@@ -1,0 +1,230 @@
+:root {
+	--theme-accent-color: #FF9800;
+	--theme-accent-color-lowlight: #757575;
+	--theme-text-color: black;
+	--theme-background-color: white;
+	--theme-background-color-hover: #eeeeee;
+	--theme-background-color-panel: #F0F0F0;
+
+
+	--theme-text-color-link: var(--theme-accent-color);
+	--theme-tab-color: var(--theme-accent-color);
+	--theme-title-color: var(--theme-accent-color);
+
+	/*Will be generated automatically*/
+	--theme-accent-color-light: var(--theme-accent-color);
+	--theme-accent-color-dark: var(--theme-accent-color);
+}
+::-webkit-scrollbar{
+  width:10px;height:10px
+}
+::-webkit-scrollbar-thumb{
+  background-color:rgba(0,0,0,.6);
+  border:1px solid #fff;
+  border-radius:10px
+}
+::-webkit-scrollbar-track{
+  background-color:transparent
+}
+html{
+    margin: 0px;
+}
+body{
+    margin: 0px;
+    font-family: 'Roboto', sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
+    color: var(--theme-text-color);
+    background-color: var(--theme-background-color);
+}
+.panel{
+  background-color: var(--theme-background-color-panel);
+}
+.hidden{
+    display: none !important;
+}
+.invisible{
+    visibility: hidden !important;
+}
+.clickable{
+  cursor: pointer;
+}
+.dialog{
+  position: absolute;
+  background-color: var(--theme-background-color);
+  z-index: 999999999999999;
+  box-shadow: 0 1px 5px 0 rgba(60,64,67,.15), 0 4px 4px 0 rgba(60,64,67,.10), 0 -0.1px 3px 0 rgba(60,64,67,.08);
+  -webkit-app-region: no-drag;
+}
+.dialog *{
+  -webkit-app-region: no-drag;
+}
+#mycontroldialogsuperdimmedbackground{
+  -webkit-app-region: no-drag;
+}
+a{
+  color: var(--theme-accent-color);
+  cursor: pointer;
+}
+a:hover{
+  text-decoration: underline;
+}
+#basecontent{
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  overflow-x: hidden;
+}
+
+.buttontext{
+	align-self: center;
+	flex-grow: 1;
+	font-family: 'Roboto', sans-serif;
+	font-weight: bold;
+	margin-left: 8px;
+	margin-right: 8px;
+	transition: all 0.3s ease;
+	color: var(--theme-accent-color);
+}
+
+.buttontextwrapper {
+	border-radius: 2px;
+	cursor: pointer; cursor: hand;
+	display:flex;
+	padding: 8px;
+	transition: all 0.3s ease;
+}
+.buttontextwrapper:hover {
+	background-color: var(--theme-background-color-panel);
+}
+.buttontextwrapper:active {
+	background-color: var(--theme-accent-color);
+}
+.buttontextwrapper:active div.buttontext {
+	color: var(--theme-background-color);
+}
+
+/* form starting stylings ------------------------------- */
+.materialinput{ 
+    position:relative;    
+    width:100%;
+  }
+input 				{
+  font-size:18px;
+  padding:10px 10px 10px 5px;
+  display:block;
+  width:95%;
+  border:none;
+  border-bottom:1px solid #757575;
+  background: transparent;
+  color: var(--theme-text-color)
+}
+textarea{
+  color: var(--theme-text-color)
+}
+  input:focus 		{ outline:none; }
+  
+  /* LABEL ======================================= */
+  label 				 {
+    color:#999; 
+    font-size:18px;
+    font-weight:normal;
+    position:absolute;
+    pointer-events:none;
+    left:5px;
+    top:10px;
+    transition:0.2s ease all; 
+  }
+  
+  /* active state */
+  input:focus ~ label, input:valid ~ label ,#generatedUrl label		{
+    top:-20px;
+    font-size:14px;
+    color:var(--theme-accent-color);
+  }
+  
+  /* BOTTOM BARS ================================= */
+  .bar 	{ position:relative; display:block; width:95%; }
+  .bar:before, .bar:after 	{
+    content:'';
+    height:2px; 
+    width:0;
+    bottom:1px; 
+    position:absolute;
+    background:var(--theme-accent-color); 
+    transition:0.2s ease all; 
+  }
+  .bar:before {
+    left:50%;
+  }
+  .bar:after {
+    right:50%; 
+  }
+  
+  /* active state */
+  input:focus ~ .bar:before, input:focus ~ .bar:after {
+    width:50%;
+  }
+  
+  /* HIGHLIGHTER ================================== */
+  .highlight {
+    position:absolute;
+    height:60%; 
+    width:100px; 
+    top:25%; 
+    left:0;
+    pointer-events:none;
+    opacity:0.5;
+  }
+  
+  /* active state */
+  input:focus ~ .highlight {
+    animation:inputHighlighter 0.3s ease;
+  }
+  
+  /* ANIMATIONS ================ */
+  @-webkit-keyframes inputHighlighter {
+      from { background:var(--theme-accent-color); }
+    to 	{ width:0; background:transparent; }
+  }
+  @-moz-keyframes inputHighlighter {
+      from { background:var(--theme-accent-color); }
+    to 	{ width:0; background:transparent; }
+  }
+  @keyframes inputHighlighter {
+      from { background:var(--theme-accent-color); }
+    to 	{ width:0; background:transparent; }
+  }
+  .button{
+    background-color: var(--theme-accent-color);
+    align-self: flex-end;
+    display: inline-block;
+    position: relative;
+    box-sizing: border-box;
+    min-width: 5.14em;
+    margin: 0 0.29em;
+    text-align: center;
+    font: inherit;
+    text-transform: uppercase;
+    outline-width: 0;
+    border-radius: 3px;
+    user-select: none;
+    cursor: pointer;
+    z-index: 0;
+    padding: 0.7em 0.57em;
+  }
+  .disabled{
+    cursor: not-allowed;
+  }
+  .button.disabled{
+    background-color: var(--theme-accent-color-lowlight);
+  }
+  .important{
+      color: red;
+  }
+  svg{
+    fill: var(--theme-text-color);
+  }

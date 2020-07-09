@@ -1,0 +1,10 @@
+#smsthreadscontainer{
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+#smsthreads {
+	background-color: var(--theme-background-color-panel);
+	height: 100%;
+	flex: 1 1 auto;
+	position: relative;
+}

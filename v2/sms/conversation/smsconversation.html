@@ -1,0 +1,41 @@
+<div id="smsconversationcontainer">
+    <div id="smsconversation"> 
+    </div>
+    <!-- <div id="smstitlecontainer">
+        <div id="smsback">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"/><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        </div>
+        <img id="contactpictureconversation" />
+        <div id="smstitle"></div>
+    </div> -->
+    <div id="smssendcontainer" >
+        <div id="dropzonemms" class="dropzone hidden"><div class="small">Drop files here</div></div>
+        <div  id="mmsextras" class="hidden">
+            <textarea placeholder="Subject" type="text" class="validate materialize-textarea" id="smssubject"></textarea>
+            <input type="checkbox" id="smsurgent" /><div id="smsurgenttext">Urgent</div>
+        </div>
+        <div id="smsattachment">
+            <input type="file" id="smsattachmentfile" accept="image/*" class="hidden">
+            <svg id="smsattachmentimage" class="waves-effect" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24">
+                <path d="M18 20H4V6h9V4H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-9h-2v9zm-7.79-3.17l-1.96-2.36L5.5 18h11l-3.54-4.71zM20 4V1h-2v3h-3c.01.01 0 2 0 2h3v2.99c.01.01 2 0 2 0V6h3V4h-3z" />
+            </svg>
+            <div id="smsattachmentimagepreview" class="hidden">
+                <img id="smsattachmentimagepreviewimage" />
+                <svg  id="smsattachmentimagepreviewdelete" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 40 40" style="enable-background:new 0 0 40 40;" xml:space="preserve">
+                    <g>
+                        <path style="fill:#F78F8F;" d="M20,38.5C9.799,38.5,1.5,30.201,1.5,20S9.799,1.5,20,1.5S38.5,9.799,38.5,20S30.201,38.5,20,38.5z"></path>
+                        <path style="fill:#C74343;" d="M20,2c9.925,0,18,8.075,18,18s-8.075,18-18,18S2,29.925,2,20S10.075,2,20,2 M20,1
+                            C9.507,1,1,9.507,1,20s8.507,19,19,19s19-8.507,19-19S30.493,1,20,1L20,1z"></path>
+                    </g>
+                    <rect x="18.5" y="10" transform="matrix(-0.7071 -0.7071 0.7071 -0.7071 20 48.2843)" style="fill:#FFFFFF;" width="3" height="20"></rect>
+                    <rect x="18.5" y="10" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -8.2843 20)" style="fill:#FFFFFF;" width="3" height="20"></rect>
+                </svg>
+            </div>
+            <img id="smsattachmentimageloading" src="./icons/loading.gif" class="hidden" />
+        </div>
+        <textarea placeholder="Send message" type="text" id="smsinput"></textarea>
+        <div id="smssend" title="Long-click for Subject">
+            <svg width="24" height="24" xmlns="https://www.w3.org/2000/svg" ><path d="M5.374 19.893l14.538-6.19C20.604 13.392 21 12.67 21 12.05c0-.722-.396-1.341-1.088-1.65L5.374 4.208C4.286 3.59 3 4.416 3 5.757V8.44c0 .928.593 1.65 1.484 1.754.989.103 9.79 1.754 9.79 1.754s-8.801 1.651-9.79 1.754c-.89.103-1.484.929-1.484 1.754v2.683c0 1.341 1.286 2.167 2.374 1.754z"></path></svg>
+        </div>
+    </div>
+</div>

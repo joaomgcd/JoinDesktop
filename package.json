@@ -1,0 +1,68 @@
+{
+  "name": "join-joaoapps-companion",
+  "productName": "Join Desktop",
+  "version": "0.0.1",
+  "description": "A companion app for the Join website",
+  "main": "main_esm.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "keywords": [
+    "Join",
+    "Android"
+  ],
+  "author": "joaomgcd",
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.52",
+    "@electron-forge/maker-deb": "^6.0.0-beta.52",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.52",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.52",
+    "@electron-forge/maker-zip": "^6.0.0-beta.52",
+    "electron": "^9.0.5"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
+    "esm": "^3.2.25",
+    "http-terminator": "2.0.3",
+    "nan": "^2.14.1",
+    "node-fetch": "^2.6.0",
+    "node-notifier": "^7.0.1"
+  },
+  "interactive-notifications": {
+    "toast-activator-clsid": "F23D2B1D-8DD7-F0AA-B9B7-152B40A1478C",
+    "protocol": "joinjoaoapps://"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "com.joaomgcd.join",
+            "noMsi": false,
+            "iconUrl": "https://raw.githubusercontent.com/markwal/GpxUi/master/gpx.ico",
+            "loadingGif": "joinloading.png",
+            "setupIcon": "join.ico"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
+  }
+}

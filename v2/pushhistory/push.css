@@ -1,0 +1,58 @@
+#pushhistory{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+}
+.pushtype{
+    flex-grow: 1;
+}
+.pushicon{
+    width: 40px;
+    margin-left: 8px;
+}
+.pushitem{
+    display: flex;
+    flex-direction: column;
+    box-shadow: 5px 5px 5px grey;    
+    min-width: 300px;
+    width: 500px;
+    max-width: 85%;
+    padding: 8px;
+    margin: 8px;
+    background-color: var(--theme-background-color);
+}
+.pushtop{
+    display: flex;
+    align-items: center;
+    height: 40px;
+}
+.pushtype{
+    font-size: x-large;
+}
+.pushbottom{
+    margin-top: 16px;
+}
+.pushtitle{
+    font-weight: bold;
+}
+.pushsender{
+    font-size: 70%;
+}
+.pushdate{
+    font-size: 70%;
+    margin-left: 8px;
+}
+.pushclipboardholder{
+    display: flex;	
+}
+.pushclipboardword{
+    font-size: 70%;	
+}
+.pushsmstitle{
+    font-weight: bold;	
+}
+.pushbuttons{
+    display: flex;
+    padding: 16px;
+}

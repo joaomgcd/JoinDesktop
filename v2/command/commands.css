@@ -1,0 +1,53 @@
+
+.button-container {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;		  
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+.devicebutton {
+    background: #424242;
+    min-width: 120px !important;
+    padding-left: 8px;
+    padding-right: 8px;
+    height: 20px;
+    margin-top: 5px;
+    margin-right: 5px;
+
+    line-height: 20px;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    height: 30px !important;
+    line-height: 30px !important;
+    margin: 5px;
+    font-family: 'Roboto', sans-serif;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.25s ease-out,opacity 0.25s ease-out, box-shadow 0.25s ease-out;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    font-size: 75%; 
+    box-shadow: 4px 2px 5px #888888;
+}
+.buttonlink{    
+    color: white;
+    text-decoration: initial;
+}
+.devicebutton:hover{
+    background: var(--theme-accent-color);
+    box-shadow: 4px 4px 10px #888888;
+}
+.devicebutton:active{
+    background: #424242;
+}
+.disabled:hover{
+    background: #424242;
+    box-shadow: 4px 2px 5px #888888;
+}
+.disabled{
+    opacity: 0.25;
+}

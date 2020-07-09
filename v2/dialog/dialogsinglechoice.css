@@ -1,0 +1,7 @@
+.dialogchoice{
+    cursor: pointer;
+    padding: 4px;
+}
+.dialogchoice:hover{
+    background-color: var(--theme-accent-color-light);
+}

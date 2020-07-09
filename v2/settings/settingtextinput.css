@@ -1,0 +1,6 @@
+.settingtextinput{
+    display: flex;
+}
+.settingtextinput .materialinput{
+    margin-top: 24px;
+}

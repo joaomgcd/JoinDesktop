@@ -1,0 +1,9 @@
+.fabsecondary{    
+    width: 75%;
+    height: 75%;
+    right: 6px;
+    opacity: 0;
+}
+.fabcontainer:hover .fabsecondary{
+    opacity: 1;
+}

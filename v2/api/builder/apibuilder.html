@@ -1,0 +1,26 @@
+<div id="apibuilder" class="hidden">
+    <h4 class="infosection">Device Id: <div class="deviceproperty" id="deviceid"></div></h4>
+    <h6>More info on all these fields <a href="https://joaoapps.com/join/api/">here</a>.</h6>
+    <h4 class="infosection">
+        API Key: <div class="deviceproperty" id="apikey"></div>
+        <div id="buttonshowapikey" class="button">Show</div>
+        <div class="hidden button" id="buttonresetapikey">Reset</div>
+        <div id="buttondeleteapikey"  class="hidden button">Delete</div>
+        <div id="buttonapikeypermissions"  class="hidden button">Permissions</div>
+        <div style="display: inline;">
+            <div id="outerApiKeyPermissions" class="hidden">
+                <div>
+                    <h2>API Key Permissions:</h2>
+                    <h5>Your API key allows you to performed the selected actions</h5>
+                    <h5>To be safe uncheck any permissions you don't need</h5>
+                    <ul id="apiKeyPermissions">
+                    </ul>
+                    <div raised  type="button" id="buttonSaveApiKeyPermissions">Save</div>	
+                </div>
+            </div>
+        </div>
+        <h4 class="important hidden" id="apikeynotice">VERY IMPORTANT: this API Key gives everyone that knows it access to all your devices so be very cautious who you share it with. You can always delete or reset it so it stops working if it's ever compromised.</h4>
+    </h4>
+    
+    <div id="apifields"></div>
+</div>

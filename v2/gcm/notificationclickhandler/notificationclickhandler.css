@@ -1,0 +1,24 @@
+#notificationscontent{ 
+	background-color: var(--theme-background-color-panel);
+    overflow-y: auto;
+    height: calc(var(--vh, 1vh) * 100);
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 8px;
+    overflow-x: hidden;
+}
+#notifications{
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+#nonotifications{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: larger;
+    font-weight: bold;
+    margin: 0.82rem 0 0.656rem 0;
+}

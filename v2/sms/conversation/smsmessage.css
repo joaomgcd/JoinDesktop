@@ -1,0 +1,114 @@
+
+.smsmessagecontainer {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: flex-end;
+	margin-top: 12px;
+	margin-bottom: 6px;
+	z-index:50;
+    margin-left: 1em;
+    margin-right: 1em;
+}
+.smsmessagecontainer.sent {
+	justify-content: flex-end;
+}
+.smsmessagecontainer.firstofmultiple{
+	margin-top: 12px !important;
+}
+.smsmessagecontainer.oneofmultiple{
+	margin-bottom: 1px;
+	margin-top: 0px;
+}
+.smsmessagecontainer.lastofmultiple{
+	margin-top: 0px;
+}
+
+.smssenderpicture{	
+	height: 42px;
+	border-radius: 100%;
+	margin-right: 8px;
+}
+.smsmessage {
+	padding: 8px 14px 8px 14px;
+	background-color: var(--theme-background-color);
+	border-radius: 4px;
+	display: flex;
+	position: relative;
+	margin-left: 16px;
+	margin-right: 0;
+	flex-direction: column;
+	min-width: 0;
+	border-radius: 24px;
+	max-width: calc(60% + 40px);
+}
+.received .smsmessage {
+	background-color: var(--theme-accent-color-light);
+	margin-left: 0;
+	margin-right: 16px;
+}
+.smsmessagesender{
+	font-weight: bold;
+}
+.received a {
+	color: var(--theme-background-color);
+}
+.smsbubbletriangle {
+	position: relative;
+	right: 4px;
+}
+.smsbubbletriangle polygon {
+	fill: var(--theme-background-color);
+}
+.smsmessagetext {
+	word-wrap: break-word;
+	font-size: 16px;
+}
+.smsmessagesubject {
+	word-wrap: break-word;
+	font-size: 16px;
+	font-weight: bold;
+}
+.smsmessagesubject.hidden  {
+	display: none;
+}
+.smsmessageattachment  {
+	font-size: 16px;
+}
+.smsmessageattachment svg {
+	vertical-align: middle;
+}
+.smsmessageattachment img  {
+	max-width: 90%;
+}
+.smsmessageattachment a  {
+	cursor: pointer;
+}
+.smsmessageattachment img.loading  {
+	width: 16px;
+}
+.smsmessageattachment.hidden  {
+	display: none;
+}
+.mmsimage {
+	cursor: pointer;
+}
+.smsmessagedate {
+	flex-grow: 1;
+	color: var(--theme-accent-color-lowlight);
+	margin-top: 2px;
+    text-align: left;
+    font-size: 75%;
+}
+.smsmessagebottom {
+	align-items: baseline;
+	display: flex;
+	flex-direction: row;
+}
+.smsmessageprogress.hidden {
+	display: none;
+}
+.smsmessageprogress img {
+	height: 15px;
+	width: 15px;
+}

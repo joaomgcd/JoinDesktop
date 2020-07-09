@@ -1,0 +1,11 @@
+.dialoginput{
+    padding: 8px;
+    min-width: 300px;
+}
+.dialoginputtitle{
+    font-weight: bold;
+}
+.dialoginputinput{
+    margin-top: 24px;
+    margin-bottom: 8px;
+}

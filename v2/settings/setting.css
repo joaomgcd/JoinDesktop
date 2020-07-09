@@ -1,0 +1,22 @@
+.settinglabel{
+    font-weight: bolder;
+    font-size: larger;
+}
+.settingsubtext{
+    color: var(--theme-accent-color-dark);
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    font-size: smaller;
+}
+.settingsetnotsettext{
+    font-size: large;
+    font-weight: bold;
+    padding-top: 8px;
+}
+.settingset{
+    color: green;
+}
+.settingnotset{
+    color: red;
+}
