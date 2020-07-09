@@ -43,7 +43,7 @@ export class MediaInfos extends Array{
 		}
         super();
         this.device = device
-        if(Util.isArray(initial)){
+        if(Util.isArray(initial) || Util.isType(initial,"MediaInfos")){
             initial.mediaInfosForClients = initial;
             const first = initial[0] || {};
             initial.extraInfo = {mediaVolume:first.mediaVolume || 1,maxMediaVolume: first.maxMediaVolume || 15};
@@ -119,7 +119,7 @@ export class MediaInfo{
         this.device = device;
     }
     matches(otherMediaInfo){
-        return this.packageName == otherMediaInfo.packageName && this.device.deviceId == otherMediaInfo.device.deviceId
+        return /*this.packageName == otherMediaInfo.packageName &&*/ this.device.deviceId == otherMediaInfo.device.deviceId
     }
     update(mediaInfo){
         Object.assign(this,mediaInfo);
