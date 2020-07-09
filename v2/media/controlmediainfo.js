@@ -32,6 +32,8 @@ export class ControlMediaInfos extends Control{
         if(!controlMediaInfoDevice){
             mediaInfos = new MediaInfos(mediaInfos,mediaInfos.device);
             this.mediaInfoLists.push(mediaInfos);
+            // controlMediaInfoDevice = new ControlMediaInfoDevice(mediaInfos,this.tokenGetter);
+            // this.controlsMediaInfos.push(controlMediaInfoDevice);
             await this.render();
         }else{
             await controlMediaInfoDevice.updateMediaInfos(mediaInfos);

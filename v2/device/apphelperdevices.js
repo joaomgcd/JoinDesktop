@@ -174,7 +174,8 @@ export class AppHelperDevices extends AppHelperBase{
         const device = request.device;
         const args = await menuEntry.load(device.deviceId);
         menuEntry.args = args;
-        EventBus.post(menuEntry)
+        await EventBus.post(menuEntry)
+        menuEntry.args = null;
         // app.selectMenuEntry({menuEntry,args});
     }
     async onRequestOpenSms(request){

@@ -170,8 +170,8 @@ export class AppHelperMedia extends AppHelperBase{
         const mediaInfos = new MediaInfos(mediaInfosRaw,device);
         await mediaInfos.convertArtToBase64(await app.getAuthToken());
         await this.dbMedia.updateAll(device.deviceId,mediaInfos);
-        const promises = mediaInfos.map(mediaInfo=>this.updateMediaInfo(mediaInfo));
-        await Promise.all(promises);
+        const latest = mediaInfos.latest;
+        await this.updateMediaInfo(latest);
     }
     async onMediaAppNamePressed(mediaAppNamePressed){
         const control = this.controlMediaInfos.findMediaInfoControls(mediaAppNamePressed.mediaInfo);
