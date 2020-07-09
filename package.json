@@ -26,13 +26,8 @@
     "electron-squirrel-startup": "^1.0.0",
     "esm": "^3.2.25",
     "http-terminator": "2.0.3",
-    "nan": "^2.14.1",
     "node-fetch": "^2.6.0",
     "node-notifier": "^7.0.1"
-  },
-  "interactive-notifications": {
-    "toast-activator-clsid": "F23D2B1D-8DD7-F0AA-B9B7-152B40A1478C",
-    "protocol": "joinjoaoapps://"
   },
   "config": {
     "forge": {
@@ -42,7 +37,6 @@
           "name": "@electron-forge/maker-squirrel",
           "config": {
             "name": "com.joaomgcd.join",
-            "noMsi": false,
             "iconUrl": "https://raw.githubusercontent.com/markwal/GpxUi/master/gpx.ico",
             "loadingGif": "joinloading.png",
             "setupIcon": "join.ico"

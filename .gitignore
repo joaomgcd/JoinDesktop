@@ -1,7 +1,9 @@
 node_modules
 
-out/
+out/Join Desktop-win32-x64
 package-lock.json
 joindashboard.code-workspace
 index.html.bak
 main.js.bak
+out/make/squirrel.windows/x64/com.joaomgcd.join-0.0.1-full.nupkg
+out/make/squirrel.windows/x64/RELEASES
