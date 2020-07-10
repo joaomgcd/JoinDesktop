@@ -628,7 +628,7 @@ export class Device{
 				device[prop] = deviceRaw[prop];
 			}
 			if(device.isMyDevice){
-				device.deviceName = "This Browser";
+				device.deviceName = "This Device";
 			}
 		}
 		return device;
