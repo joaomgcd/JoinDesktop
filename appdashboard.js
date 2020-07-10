@@ -214,8 +214,8 @@ export class AppDashboard extends App{
     }
     async onWebSocketGCM(webSocketGCM){
         const gcmRaw = webSocketGCM.gcmRaw;
-        await GCMBase.executeGcmFromJson(gcmRaw.type,gcmRaw.json);
-        // window.api.send("gcm",webSocketGCM.gcmRaw);
+        //await GCMBase.executeGcmFromJson(gcmRaw.type,gcmRaw.json);
+         window.api.send("gcm",webSocketGCM.gcmRaw);
     }
     async onDevices(devices){
         window.api.send("devices",devices);
