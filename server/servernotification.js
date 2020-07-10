@@ -83,8 +83,10 @@ export class ServerNotification{
                 if(action == "activate"){
                     action = null;
                 }else{
-                    action = this.originalActions.find(originalAction=>originalAction.title == metadata.button);
-                    if(!action){
+                    if(this.originalActions){
+                        action = this.originalActions.find(originalAction=>originalAction.title == metadata.button);                            
+                    }
+                    if(!action && this.originalActions){
                         action = this.originalActions[0].action;
                     }else{
                         action = action.action;

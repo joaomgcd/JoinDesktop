@@ -97,6 +97,7 @@ class CommandNoteToSelf extends CommandPush{
         var text = await prompt("Text to send");
         if(!text) return;
 
+        push.category = "Note To Self"
         push.title = "Note To Self";
         push.text = text;
         return push;

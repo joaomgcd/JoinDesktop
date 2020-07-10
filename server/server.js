@@ -164,11 +164,7 @@ class Server{
             const isExpired = authData.isExpired;      
             console.log("Is Expired",isExpired);  
             if(!isExpired){
-                // this.window.webContents.send('usersignedin');
-                // this.window.focus();
-                // const oldWindow = this.window;
-                // oldWindow.close();
-                // await this.createWindow();
+                this.window.webContents.send('usersignedin');
                 await this.bringWindowToFront();
             }
             res.writeHead(200);
