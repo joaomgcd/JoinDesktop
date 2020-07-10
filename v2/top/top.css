@@ -113,15 +113,18 @@
 .rotating {
 	animation: rotating 0.5s linear infinite;
 }
-#closeapp{
+#closeapp, #minimizeapp{
     cursor: pointer;    
     right: 0px;
     top: 0px;
     position: absolute;
     -webkit-app-region: no-drag;
 }
-#closeapp:hover{
+#closeapp:hover, #minimizeapp:hover{
     background-color: var(--theme-accent-color-light);
+}
+#minimizeapp{
+    right: 14px;
 }
 @keyframes rotating {
 	from {	transform: rotate(0deg);	}

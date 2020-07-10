@@ -165,7 +165,8 @@ export class SettingTheme extends SettingSingleOption{
                 id:SettingTheme.themeIdLight,
                 label:"Light",
                 backgroundColor: "white",
-                backgroundColorPanel:"#F0F0F0"
+                backgroundColorPanel:"#F0F0F0",
+                accentColorLowlight:"#757575"
             },
             {
                 id:SettingTheme.themeIdDark,

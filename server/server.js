@@ -73,7 +73,20 @@ class Server{
         this.window = mainWindow;
         return mainWindow;
     }
+    async bringWindowToFront(){
+        if(!this.window) return;
+      
+        if(this.window.isMinimized()){
+          this.window.restore();
+        }
+    
+        this.window.setAlwaysOnTop(true);
+        this.window.focus();
+        await Util.sleep(1000);
+        this.window.setAlwaysOnTop(false);
+    }
     async load(){
+        app.on('second-instance',async ()=> await this.bringWindowToFront());
         await this.createWindow();
         AppContext.context.serverStorePath = __dirname + "/store.js"
         EventBus.register(this);
@@ -121,6 +134,7 @@ class Server{
             await EventBus.post(data,className);
         });
         const path = require('path');
+        return this.window;
         // ServerNotification.show({title:"Join Companion App",body:"Now running!",icon:path.join(__dirname, '../images/join.png'),actions:[{title:"Test Action"}]});
     }
     async onRequestToggleDevOptions(){
@@ -131,6 +145,9 @@ class Server{
     }
     async onCloseAppClicked(){
         app.quit();
+    }
+    async onMinimizeAppClicked(){
+        this.window.minimize();
     }
     async onRequestSendPush(request){
         await this.window.webContents.send('sendpush', request.push);
@@ -152,9 +169,7 @@ class Server{
                 // const oldWindow = this.window;
                 // oldWindow.close();
                 // await this.createWindow();
-                this.window.setAlwaysOnTop(true);
-                await Util.sleep(1000);
-                this.window.setAlwaysOnTop(false);
+                await this.bringWindowToFront();
             }
             res.writeHead(200);
             res.end(`<script>window.close()</script>`);

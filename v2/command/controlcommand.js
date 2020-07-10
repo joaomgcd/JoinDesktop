@@ -2,6 +2,7 @@ import { Control } from '../control.js';
 import { Commands } from './command.js';
 import { AppContext } from '../appcontext.js';
 import { EventBus } from '../eventbus.js';
+import { UtilDOM } from '../utildom.js';
 
 export class ControlCommands extends Control {
     constructor(args){
@@ -14,8 +15,8 @@ export class ControlCommands extends Control {
         }
         EventBus.registerSticky(this);
     }
-    getHtmlFile(){
-        return "./v2/command/commands.html";
+    getHtml(){
+        return `<div class='button-container'></div>`;
     }
     getStyleFile(){
         return "./v2/command/commands.css";
@@ -55,15 +56,23 @@ export class ControlCommand extends Control {
         super();
         this.command = command;
     }
-    getHtmlFile(){
-        return "./v2/command/command.html";
+    getHtml(){
+        return `<div class="devicebutton" role="button">
+            <div class="commandiconwrapper"></div>
+            <a class='buttonlink' ></a>
+            <a class='buttonlinkextended' ></a>
+        </div>`;
     }
     async renderSpecific({root}){
         this.commandButton = root;
         this.commandTextElement = await this.$(".buttonlink");
+        this.commandTextExtendedElement = await this.$(".buttonlinkextended");
+        this.commandIconWrapperElement = await this.$(".commandiconwrapper");
 
         this.commandTextElement.innerHTML = this.command.getText();
         this.commandButton.setAttribute("aria-label",this.command.getText());
+
+        UtilDOM.setInnerHTMLOrHide(this.commandIconWrapperElement,this.command.icon);
 
         return root;
     }
@@ -73,11 +82,14 @@ export class ControlCommand extends Control {
     updateEnabled(deviceControl){
         if(!this.commandButton) return;
 
+        const device = deviceControl.device;
         if(deviceControl && deviceControl.device && this.command.shouldEnable(deviceControl.device)){
             this.commandButton.classList.remove("disabled");
         }else{            
             this.commandButton.classList.add("disabled");
         }
+        const extendedText = this.command.getTextExtended(device);
+        this.commandTextExtendedElement.innerHTML = extendedText || this.command.getText();
     }
     set link(value){
         this.commandTextElement.href = value
