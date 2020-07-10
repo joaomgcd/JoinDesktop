@@ -273,9 +273,9 @@ export class App{
 
         await this.loadJoinApis(); 
         //await this.loadDevicesFromServer();
+        await this.gcmHandler; 
         await this.loadFcmClient();
         await this.registerBrowser({force:false});    
-        await this.gcmHandler; 
 
         const portFromConnectionRequest = AppContext.context.localStorage.get(settingKeySetupCompanion);
         if(AppContext.context.localStorage.get(settingKeySignOutCompanion) || portFromConnectionRequest){
