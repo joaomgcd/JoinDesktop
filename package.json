@@ -1,7 +1,7 @@
 {
   "name": "com.joaomgcd.join",
   "productName": "Join Desktop",
-  "homepage":"https://joaoapps.com/join/desktop",
+  "homepage": "https://joaoapps.com/join/desktop",
   "version": "0.0.1",
   "description": "A companion app for the Join website",
   "main": "main_esm.js",
@@ -19,9 +19,9 @@
     "Android"
   ],
   "author": {
-	"name":"joaomgcd",
-	"email":"support@joaoapps.com"
-   },
+    "name": "joaomgcd",
+    "email": "support@joaoapps.com"
+  },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.52",
     "@electron-forge/maker-deb": "^6.0.0-beta.52",
@@ -60,7 +60,7 @@
       ]
     },
     "linux": {
-      "icon":"build/icon.png",
+      "icon": "build/icon.png",
       "target": [
         "AppImage",
         "deb"
@@ -73,7 +73,9 @@
   },
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "out": "dist"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
