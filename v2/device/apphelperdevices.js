@@ -62,6 +62,9 @@ export class AppHelperDevices extends AppHelperBase{
         app.controlTop.loading = false;
 
     }
+    async onKeyboardShortcutClicked(keyboardShortcutClicked){
+        alert(`This will allow you to create a shortcut for <b>${keyboardShortcutClicked.command.getText()}</b> when it's implemented :)`);
+    }
     updateUrl(){
         Util.changeUrl(`?devices`);
     }
