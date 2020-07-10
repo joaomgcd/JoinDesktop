@@ -65,3 +65,19 @@
 .filedragover{
     padding: 8px;
 }
+
+@media only screen and (min-width: 600px) {
+    #devices{
+        width: 220px;
+    }
+}
+@media only screen and (min-width: 1300px) {    
+    #devices{
+        width: 400px;
+    }
+}
+@media only screen and (min-width: 1500px) {    
+    #devices{
+        width: 600px;
+    }
+}

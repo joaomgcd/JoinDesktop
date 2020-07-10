@@ -7,6 +7,19 @@ export class UtilDOM{
         }
         return element;
     }
+    static addAttribute(element,attribute,value){
+        element.setAttribute(attribute,value);
+    }
+    static removeAttribute(element,attribute){
+        element.removeAttribute(attribute);
+    }
+    static addOrRemoveAttribute(element, add, attribute, value){
+        if(add){
+            UtilDOM.addAttribute(element,attribute,value);
+        }else{
+            UtilDOM.removeAttribute(element,attribute);
+        }
+    }
     static addOrRemoveClass(element, add, clazz){
         if(!element) return;
 
@@ -134,6 +147,14 @@ export class UtilDOM{
             UtilDOM.show(imageElement)
         }else{
             UtilDOM.hide(imageElement)
+        }
+    }
+    static setInnerHTMLOrHide(element,html){
+        if(html){
+            element.innerHTML = html;
+            UtilDOM.show(element)
+        }else{
+            UtilDOM.hide(element)
         }
     }
     static onEnterKey(element,callback){

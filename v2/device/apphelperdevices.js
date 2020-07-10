@@ -30,12 +30,31 @@ export class AppHelperDevices extends AppHelperBase{
         app.controlTop.appNameClickable = false;
         const devices = await app.devicesFromDb;
         
+        const elementDevicesTabRoot = await UtilDOM.createElement({
+            type:"div",
+            id:"devicestabroot",
+            parent: app.contentElement
+        })
+        UtilDOM.addStyle(`
+            #devicestabroot{
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                width: 100vw;
+                overflow-x: hidden;
+            }
+            @media only screen and (min-width: 600px) {
+                #devicestabroot{
+                    flex-direction: row;
+                }
+            }
+        `);
         this.controlDevices = new ControlDevices(devices);
-        await app.addElement(this.controlDevices);
+        await app.addElement(this.controlDevices,elementDevicesTabRoot);
         this.controlDevices.hideNoDevices();
 
         this.controlCommands = new ControlCommands({hideSendTab:app.hideSendTabCommand});
-        await app.addElement(this.controlCommands);
+        await app.addElement(this.controlCommands,elementDevicesTabRoot);
         if(devices.length == 0){
             UtilDOM.hide(this.controlCommands);
         }    

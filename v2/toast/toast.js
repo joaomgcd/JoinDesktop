@@ -5,11 +5,38 @@ export class Toast extends Control{
     constructor(){
         super();
     }
-    getHtmlFile(){
-        return "./v2/toast/toast.html";
+    getHtml(){
+        return `<div class="toast hidden"></div>`;
     }
-    async getStyleFile(){
-        return "./v2/toast/toast.css";
+    getStyle(){
+        return `
+        .toast {
+            display: block;
+            position: fixed;
+            min-height: 48px;
+            min-width: 288px;
+            padding: 16px 24px 12px;
+            box-sizing: border-box;
+            box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+            border-radius: 2px;
+            left: 0;
+            bottom: 0;
+            margin: 12px;
+            font-size: 14px;
+            cursor: default;
+            transition: visibility 0.3s, transform 0.3s, opacity 0.3s;
+            background-color: green;
+            color: #f1f1f1;
+        }
+        .toast.hidden{
+            display: block !important;
+            opacity: 0;
+            transform: translateY(100px);
+        }
+        .toast.error{
+            background-color: red;
+        }
+        `
     }
     
     async renderSpecific({root}){
@@ -26,8 +53,10 @@ export class Toast extends Control{
             this.toastTextElement.classList.remove("error");
         }
         UtilDOM.show(this.toastTextElement);
+        UtilDOM.addAttribute(this.toastTextElement,"role","alert");
         await Util.sleep(time);
         UtilDOM.hide(this.toastTextElement);
+        UtilDOM.removeAttribute(this.toastTextElement,"role");
     }
 }
 

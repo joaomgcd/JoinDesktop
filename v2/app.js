@@ -77,6 +77,7 @@ export class App{
         this.controlTop.loading = true;
         if(this.showCloseButton()){            
             this.controlTop.showCloseAppButton();
+            this.controlTop.showMinimizeAppButton();
         }
 
         this._contentElement = document.createElement("div");

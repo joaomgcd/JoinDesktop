@@ -223,6 +223,9 @@ export class AppDashboard extends App{
     async onCloseAppClicked(closeAppClicked){
         ServerEventBus.post(closeAppClicked)
     }
+    async onMinimizeAppClicked(clicked){
+        ServerEventBus.post(clicked)
+    }
     async loadWhenNotSignedIn(){
         GoogleAccountDashboard.signIn(false);
     }

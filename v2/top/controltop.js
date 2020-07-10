@@ -31,6 +31,7 @@ export class ControlTop extends Control{
         this.registerBrowserElement = await this.$("#registerbrowser");
         this.imageRefreshElement = await this.$("#topBarRefresh");
         this.closeAppElement = await this.$("#closeapp");
+        this.minimizeAppElement = await this.$("#minimizeapp");
 
         this.imageHomeElement.src = "./images/join.png";
         const appNameClicked = async e => await EventBus.post(new AppNameClicked(e));
@@ -41,6 +42,7 @@ export class ControlTop extends Control{
         this.imageMenuElement.onclick = () => EventBus.post(new RequestOpenMenu());
         this.elementRightImage.onclick = () => EventBus.post(new RightImageClicked());
         this.closeAppElement.onclick = () => EventBus.post(new CloseAppClicked());
+        this.minimizeAppElement.onclick = () => EventBus.post(new MinimizeAppClicked());
         return root;
     }
     hideNavigation(){
@@ -52,6 +54,9 @@ export class ControlTop extends Control{
     }
     showCloseAppButton(){
         UtilDOM.show(this.closeAppElement);
+    }
+    showMinimizeAppButton(){
+        UtilDOM.show(this.minimizeAppElement);
     }
     showHomeImage(){
         UtilDOM.show(this.imageHomeElement);
@@ -138,3 +143,4 @@ class AppNameClicked{
 }
 class RightImageClicked{}
 class CloseAppClicked{}
+class MinimizeAppClicked{}
