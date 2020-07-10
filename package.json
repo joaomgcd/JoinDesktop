@@ -5,15 +5,9 @@
   "description": "A companion app for the Join website",
   "main": "main_esm.js",
   "scripts": {
-    "postinstall": "install-app-deps",
-    "start": "npm install && electron ./app",
-    "start": "./node_modules/dist/electron .",
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make",
-    "makemac": "electron-installer-dmg",
-    "pack": "electron-builder build --dir",
-    "dist": "electron-builder build"
+    "make": "electron-forge make"
   },
   "keywords": [
     "Join",
@@ -27,9 +21,7 @@
     "@electron-forge/maker-rpm": "^6.0.0-beta.52",
     "@electron-forge/maker-squirrel": "^6.0.0-beta.52",
     "@electron-forge/maker-zip": "^6.0.0-beta.52",
-    "electron": "^9.0.5",
-    "electron-builder": "latest",
-    "electron-installer-dmg": "^3.0.0"
+    "electron": "^9.0.5"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
@@ -37,36 +29,6 @@
     "http-terminator": "2.0.3",
     "node-fetch": "^2.6.0",
     "node-notifier": "^7.0.1"
-  },
-  "build": {
-    "asarUnpack": [
-      "./node_modules/node-notifier/**"
-    ],
-    "appId": "yourappid",
-    "dmg": {
-      "contents": [
-        {
-          "x": 110,
-          "y": 150
-        },
-        {
-          "x": 240,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
-        }
-      ]
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ]
-    },
-    "win": {
-      "target": "squirrel",
-      "icon": "build/icon.ico"
-    }
   },
   "config": {
     "forge": {
