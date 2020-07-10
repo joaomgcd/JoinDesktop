@@ -101,6 +101,9 @@
         color: var(--theme-accent-color-lowlight);
         font-size: 18px;
         font-weight: 400;
+        text-align: initial;
+        flex-grow: 1;
+        min-width: 350px;
     }
     .commandiconwrapper{
         display: block;
@@ -109,8 +112,21 @@
         height: 24px;
         width: 24px;
     }
+    .commandkeyboardshortcut{
+        visibility: hidden;
+        opacity: 0.25;
+    }
+    .commandkeyboardshortcut:hover{
+        opacity: 1;
+    }
+    .devicebutton:hover .commandkeyboardshortcut{
+        visibility:visible;
+    }
+    .devicebutton.disabled:hover .commandkeyboardshortcut{
+        visibility:hidden;
+    }
 }
-@media only screen and (min-width: 1100px) {    
+@media only screen and (min-width: 1170px) {    
     .button-container{
         flex-direction: column;
         width: auto;
