@@ -80,7 +80,7 @@ export class ControlCommand extends Control {
         return !this.commandButton.classList.contains("disabled");
     }
     updateEnabled(deviceControl){
-        if(!this.commandButton) return;
+        if(!this.commandButton || !deviceControl) return;
 
         const device = deviceControl.device;
         if(deviceControl && deviceControl.device && this.command.shouldEnable(deviceControl.device)){
