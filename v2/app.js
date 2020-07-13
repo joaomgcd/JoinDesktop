@@ -172,6 +172,7 @@ export class App{
                 }
                 if(!device){
                     await alert("You don't have a device that can send SMS messages.");
+                    await this.selectMenuEntry({menuEntry:this.menuEntryDevices});
                     return;
                 }
                 return {app:this,device};
@@ -192,6 +193,7 @@ export class App{
                 }
                 if(!device){
                     await alert("You don't have a device that can sync notifications.");
+                    await this.selectMenuEntry({menuEntry:this.menuEntryDevices});
                     return;
                 }
                 return {app:this,device};
@@ -222,6 +224,7 @@ export class App{
                 }
                 if(!device){
                     await alert("You don't have a device that you can view files on.");
+                    await this.selectMenuEntry({menuEntry:this.menuEntryDevices});
                     return;
                 }
                 return {app:this,device};
