@@ -191,7 +191,7 @@ export class App{
                     this.notificationsDevice = device;
                 }
                 if(!device){
-                    await alert("You don't have a device that can syncs notifications.");
+                    await alert("You don't have a device that can sync notifications.");
                     return;
                 }
                 return {app:this,device};
@@ -216,9 +216,9 @@ export class App{
             load: async (deviceId=null)=>{
                 var device = await this.getDevice(deviceId);
                 if(!device){
-                    device = await this.notificationsDevice;
+                    device = await this.filesDevice;
                 }else{
-                    this.notificationsDevice = device;
+                    this.filesDevice = device;
                 }
                 return {app:this,device};
             },
