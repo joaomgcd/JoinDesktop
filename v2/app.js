@@ -191,7 +191,7 @@ export class App{
                     this.notificationsDevice = device;
                 }
                 if(!device){
-                    await alert("You don't have a device that can syncs notifications.");
+                    await alert("You don't have a device that can sync notifications.");
                     return;
                 }
                 return {app:this,device};
