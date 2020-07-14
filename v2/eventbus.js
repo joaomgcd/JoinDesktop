@@ -93,6 +93,12 @@ export class EventBus{
 	}
     getWaitForPromise(clazz,timeout,registerFunc){
 		const me = this;
+		let nameToWait = null;
+		if(clazz && clazz.constructor && clazz.constructor.name == "String"){
+			nameToWait = clazz;
+		}else{
+			nameToWait = clazz.name;
+		}
 		return new Promise((resolve,reject)=>{        
 			var objToRegister = {};
 			var timeOutObject = null;
@@ -102,7 +108,7 @@ export class EventBus{
 					me.unregister(objToRegister);
 				},timeout);
 			}
-			objToRegister[this.getEventName(clazz.name)] = (data)=>{
+			objToRegister[this.getEventName(nameToWait)] = (data)=>{
 				if(timeOutObject){
 					clearTimeout(timeOutObject);
 				}

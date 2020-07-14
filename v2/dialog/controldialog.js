@@ -23,6 +23,11 @@ export class ControlDialog extends Control {
         return background;
     }
     async show(position = {x,y,isCenter},dimBackground = true){
+        
+        if(!position){
+            const bodyBounds = UtilDOM.getElementBounds(document.body);
+            position = {x:bodyBounds.right/2,y:bodyBounds.bottom/2,isCenter:true}
+        }
         if(!position.x || !position.y){            
             try{
                 const bounds = UtilDOM.getElementBounds(position);
@@ -75,8 +80,7 @@ const showDialog = async ({args,dialogclass,controlclass}) => {
     args.dialog = new dialogclass(args);
     const control = new controlclass(args);
     if(!args.position){
-        const bodyBounds = UtilDOM.getElementBounds(document.body);
-        args.position = {x:bodyBounds.right/2,y:bodyBounds.bottom/2,isCenter:true}
+        args.position = null;
     }
     control.show(args.position);
     return control;
@@ -249,7 +253,7 @@ export class ControlDialogOk extends ControlDialog {
     static async show(args = {position,title,text}){
         return showDialog(ControlDialogOk.getDialogArgs(args));        
     }
-    static async showAndWait(args){      
+    static async showAndWait(args= {position,title,text}){      
         const result = (await showDialogAndWait(ControlDialogOk.getDialogArgs(args)));
         if(!result) return;
         
@@ -263,7 +267,10 @@ export class ControlDialogOk extends ControlDialog {
         <div class="dialogok">
             <div class="dialogoktitle"></div>
             <div class="dialogoktext"></div>
-            <div class="dialogokbutton button">OK</div>
+            <div class="dialogbuttons">
+                <div class="dialogokbutton button">OK</div>
+                <div class="dialogbuttoncancel button hidden">Cancel</div>
+            </div>
         </div>
         `
     }
@@ -290,13 +297,26 @@ export class ControlDialogOk extends ControlDialog {
         this.titleElement = await this.$(".dialogoktitle");
         this.textElement = await this.$(".dialogoktext");
         this.buttonElement = await this.$(".dialogokbutton");
+        this.buttonCancelElement = await this.$(".dialogbuttoncancel");
 
         this.titleElement.innerHTML = this.dialog.title;
         this.textElement.innerHTML = this.dialog.text;
-        this.buttonElement.onclick = async () => await EventBus.post(new ButtonOk());
+        this.buttonElement.onclick = async () => {
+            if(!UtilDOM.isEnabled(this.buttonElement)) return;
+
+            await EventBus.post(new ButtonOk());
+        }
+        this.buttonCancelElement.onclick = async () => await EventBus.post(new ButtonCancel());
+        UtilDOM.showOrHide(this.buttonCancelElement,this.dialog.showCancel);
+        this.enableDisableButton(true);
+    }
+    enableDisableButton(enable){
+        UtilDOM.enableDisable(this.buttonElement,enable);
     }
 }
 export class ButtonOk{
+}
+export class ButtonCancel{
 }
 export class InputSubmitted{
     constructor(text){

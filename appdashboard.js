@@ -264,6 +264,11 @@ export class AppDashboard extends App{
         }*/
         return this.fcmClient;
     }
+    async onShortcutConfigured(shortcutConfigured){
+        shortcutConfigured.command = shortcutConfigured.command.constructor.name;
+        console.log("Configured shortcut",shortcutConfigured);
+        ServerEventBus.post(shortcutConfigured)
+    }
     async onGCMAutoClipboard(gcm){
         gcm.text = await Encryption.decrypt(gcm.text);
         ServerEventBus.post(gcm);
