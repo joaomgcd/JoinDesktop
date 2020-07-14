@@ -97,9 +97,7 @@ class Server{
         });
         this.clipboardChecker.start();
         
-        // globalShortcut.register('CommandOrControl+Y', () => {
-        //     console.log("Shortcut pressed")
-        // })
+        
         
         ipcMain.on("authToken",async (event,args)=>{
             // console.log("Received request for AuthToken", args);
@@ -134,14 +132,26 @@ class Server{
             // console.log("Sending to eventbus from web page",data,className)
             await EventBus.post(data,className);
         });
-        await ServerKeyboardShortcuts.clearShortcuts();
+        // await ServerKeyboardShortcuts.clearShortcuts();
+        
         return this.window;
         // const path = require('path');
         // ServerNotification.show({title:"Join Companion App",body:"Now running!",icon:path.join(__dirname, '../images/join.png'),actions:[{title:"Test Action"}]});
     }
-    async onShortcutConfigured(shortcutConfigured){
-        const {ServerKeyboardShortcuts} = await import("./serverkeyboardshortcut.js");
-        await ServerKeyboardShortcuts.storeShortcut(shortcutConfigured);
+    async onRequestListenForShortcuts(request){
+        const shortcuts = request.shortcuts;
+        ServerKeyboardShortcuts.storeShortcuts(shortcuts);
+    }
+    // async onShortcutConfigured(shortcutAndCommand){
+    //     const {ServerKeyboardShortcuts} = await import("./serverkeyboardshortcut.js");
+    //     await ServerKeyboardShortcuts.storeShortcut(shortcutAndCommand);
+    // }
+    async onShortcutPressed(shortcut){
+        this.bringWindowToFront();
+        await this.sendToPageEventBus(shortcut);
+    }
+    async onRequestClipboard(){
+        this.sendToPageEventBus(new ResponseClipboard(this.clipboardChecker.get()))
     }
     async onRequestToggleDevOptions(){
         this.window.webContents.toggleDevTools()
@@ -236,6 +246,11 @@ class Server{
     }
 }
 class ClipboardChanged{
+    constructor(text){
+        this.text = text;
+    }
+}
+class ResponseClipboard{
     constructor(text){
         this.text = text;
     }

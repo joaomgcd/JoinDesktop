@@ -67,7 +67,7 @@ class Command {
         return `javascript:(function(){ var img = new Image(1,1); img.src = '${document.location.origin.replace("8081","8080")}/_ah/api/messaging/v1/sendPush?deviceId=${device.deviceId}&apikey=${apiKey}${extraString}' ; })();`;
     }
 }
-class CommandPush extends Command {
+export class CommandPush extends Command {
     async execute(device){
         const push = await this.customizePush({device,push:{}});
         if(!push) return;
@@ -84,7 +84,7 @@ class CommandPush extends Command {
     //abstract
     async customizePush({device,push}){}
 }
-class CommandNoteToSelf extends CommandPush{
+export class CommandNoteToSelf extends CommandPush{
     getText(){
 		return "Note To Self";
     }
@@ -95,7 +95,7 @@ class CommandNoteToSelf extends CommandPush{
 		return device.canReceiveNote();
     }
     async customizePush({device,push}){
-        var text = await prompt("Text to send");
+        var text = await prompt("Note To Self");
         if(!text) return;
 
         push.category = "Note To Self"
@@ -107,7 +107,7 @@ class CommandNoteToSelf extends CommandPush{
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24" ><path d="M14,10V4.5L19.5,10M5,3C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V9L15,3H5Z"></path></svg>`;
     }
 }
-class CommandSendCommand extends CommandPush{
+export class CommandSendCommand extends CommandPush{
     getText(){
 		return "Command";
 	}
@@ -151,7 +151,7 @@ class CommandSendCommand extends CommandPush{
         </svg>`;
     }
 }
-class CommandRing extends CommandPush{
+export class CommandRing extends CommandPush{
     getText(){
 		return "Ring";
 	}
@@ -169,7 +169,7 @@ class CommandRing extends CommandPush{
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24" id="devicebuttonimage" class=" replaced-svg"><path d="M16,17V10.5C16,8 14,6 11.5,6C9,6 7,8 7,10.5V17H16M18,16L20,18V19H3V18L5,16V10.5C5,7.43 7.13,4.86 10,4.18V3.5A1.5,1.5 0 0,1 11.5,2A1.5,1.5 0 0,1 13,3.5V4.18C15.86,4.86 18,7.43 18,10.5V16M11.5,22A2,2 0 0,1 9.5,20H13.5A2,2 0 0,1 11.5,22M19.97,10C19.82,7.35 18.46,5 16.42,3.58L17.85,2.15C20.24,3.97 21.82,6.79 21.97,10H19.97M6.58,3.58C4.54,5 3.18,7.35 3,10H1C1.18,6.79 2.76,3.97 5.15,2.15L6.58,3.58Z"></path></svg>`;
     }
 }
-class CommandLocate extends CommandPush{
+export class CommandLocate extends CommandPush{
     getText(){
 		return "Locate";
 	}
@@ -187,7 +187,7 @@ class CommandLocate extends CommandPush{
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24" id="devicebuttonimage" class=" replaced-svg"><path d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z"></path></svg>`;
     }
 }
-class CommandSay extends CommandPush{
+export class CommandSay extends CommandPush{
     getText(){
 		return "Speak";
 	}
@@ -205,7 +205,7 @@ class CommandSay extends CommandPush{
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24" id="devicebuttonimage" class=" replaced-svg"><path d="M9,5A4,4 0 0,1 13,9A4,4 0 0,1 9,13A4,4 0 0,1 5,9A4,4 0 0,1 9,5M9,15C11.67,15 17,16.34 17,19V21H1V19C1,16.34 6.33,15 9,15M16.76,5.36C18.78,7.56 18.78,10.61 16.76,12.63L15.08,10.94C15.92,9.76 15.92,8.23 15.08,7.05L16.76,5.36M20.07,2C24,6.05 23.97,12.11 20.07,16L18.44,14.37C21.21,11.19 21.21,6.65 18.44,3.63L20.07,2Z"></path></svg>`;
     }
 }
-class CommandOpenApp extends CommandPush{
+export class CommandOpenApp extends CommandPush{
     getText(){
 		return "Open App";
 	}
@@ -223,7 +223,7 @@ class CommandOpenApp extends CommandPush{
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24" id="devicebuttonimage" class=" replaced-svg"><path d="M8,11.5A1.25,1.25 0 0,0 6.75,12.75A1.25,1.25 0 0,0 8,14A1.25,1.25 0 0,0 9.25,12.75A1.25,1.25 0 0,0 8,11.5M16,11.5A1.25,1.25 0 0,0 14.75,12.75A1.25,1.25 0 0,0 16,14A1.25,1.25 0 0,0 17.25,12.75A1.25,1.25 0 0,0 16,11.5M12,7C13.5,7 14.9,7.33 16.18,7.91L18.34,5.75C18.73,5.36 19.36,5.36 19.75,5.75C20.14,6.14 20.14,6.77 19.75,7.16L17.95,8.96C20.41,10.79 22,13.71 22,17H2C2,13.71 3.59,10.79 6.05,8.96L4.25,7.16C3.86,6.77 3.86,6.14 4.25,5.75C4.64,5.36 5.27,5.36 5.66,5.75L7.82,7.91C9.1,7.33 10.5,7 12,7Z"></path></svg>`;
     }
 }
-class CommandPaste extends CommandPush{
+export class CommandPaste extends CommandPush{
 	getText(){
 		return "Paste";
 	}
@@ -244,7 +244,7 @@ class CommandPaste extends CommandPush{
     }
 	
 }
-class CommandWrite extends CommandPush{
+export class CommandWrite extends CommandPush{
 	getText(){
 		return "Write";
 	}
@@ -264,7 +264,7 @@ class CommandWrite extends CommandPush{
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24" id="devicebuttonimage" class=" replaced-svg"><path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"></path></svg>`;
     }
 }
-class CommandDeleteDevice extends Command{
+export class CommandDeleteDevice extends Command{
 	getText(){
 		return "Delete";
 	}
@@ -292,7 +292,7 @@ class CommandDeleteDevice extends Command{
     }
 	
 }
-class CommandRenameDevice extends Command{
+export class CommandRenameDevice extends Command{
 	getText(){
 		return "Rename";
 	}
@@ -320,7 +320,7 @@ class CommandRenameDevice extends Command{
     }
 	
 }
-class CommandApi extends Command{
+export class CommandApi extends Command{
 	getText(){
 		return "Join API";
 	}
@@ -340,7 +340,7 @@ class CommandApi extends Command{
     }
 	
 }
-class CommandScreenshot extends Command{
+export class CommandScreenshot extends Command{
 	getText(){
 		return "Screenshot";
     }
@@ -366,7 +366,7 @@ class CommandScreenshot extends Command{
     }
 	
 }
-class CommandScreenCapture extends Command{
+export class CommandScreenCapture extends Command{
 	getText(){
 		return "Screen Capture";
     }
@@ -392,7 +392,7 @@ class CommandScreenCapture extends Command{
     }
 	
 }
-class CommandSMS extends Command{
+export class CommandSMS extends Command{
 	getText(){
 		return "SMS";
     }
@@ -418,7 +418,7 @@ class CommandSMS extends Command{
     }
 	
 }
-class CommandPhoneCall extends Command{
+export class CommandPhoneCall extends Command{
 	getText(){
 		return "Phone Call";
     }
@@ -447,7 +447,7 @@ class CommandPhoneCall extends Command{
     }
 	
 }
-class CommandTestLocalNetwork extends Command{
+export class CommandTestLocalNetwork extends Command{
 	getText(){
 		return "Local Network";
     }
@@ -482,7 +482,7 @@ class CommandTestLocalNetwork extends Command{
     }
 	
 }
-class CommandUploadFiles extends CommandPush{
+export class CommandUploadFiles extends CommandPush{
 	getText(){
 		return "Upload Files";
     }
@@ -525,7 +525,7 @@ class RequestUpdateDevice{
 		this.device = device;
 	}
 }
-class CommandFiles extends Command{
+export class CommandFiles extends Command{
     getText(){
 		return "Browse Files";
 	}
@@ -543,7 +543,7 @@ class CommandFiles extends Command{
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24"><path d="M16 0H8C6.9 0 6 .9 6 2V18C6 19.1 6.9 20 8 20H20C21.1 20 22 19.1 22 18V6L16 0M20 18H8V2H15V7H20V18M4 4V22H20V24H4C2.9 24 2 23.1 2 22V4H4Z"></path></svg>`;
     }
 }
-class CommandPushHistory extends Command{
+export class CommandPushHistory extends Command{
     getText(){
 		return "Push History";
 	}
@@ -561,7 +561,7 @@ class CommandPushHistory extends Command{
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24"><path d="M13.5,8H12V13L16.28,15.54L17,14.33L13.5,12.25V8M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3"></path></svg>`;
     }
 }
-class CommandNotifications extends Command{
+export class CommandNotifications extends Command{
     getText(){
 		return "Notifications";
 	}
@@ -580,7 +580,7 @@ class CommandNotifications extends Command{
         <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"></path></svg>`;
     }
 }
-class CommandSendTab extends Command{
+export class CommandSendTab extends Command{
     getText(){
 		return "Send Tab";
     }
@@ -600,7 +600,7 @@ class CommandSendTab extends Command{
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24" id="devicebuttonimage" class=" replaced-svg"><path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg>`;
     }
 }
-class CommandPasteSelectedText extends Command{
+export class CommandPasteSelectedText extends Command{
     getText(){
 		return "Paste Selected";
     }

@@ -12,7 +12,25 @@ import { Devices } from "./device.js";
 
 /** @type {App} */
 let app = null;
+
+const lastSelectedDeviceKey = "lastSelectedDeviceIdKey";
 export class AppHelperDevices extends AppHelperBase{
+    static get lastSelectedDevice(){
+        return (async () => {
+            const { AppContext } = await import("../appcontext.js");
+            const lastDeviceId = AppContext.context.localStorage.get(lastSelectedDeviceKey);
+            const device = await app.getDevice(lastDeviceId);
+            return device;
+        })();
+    }
+    static set lastSelectedDevice(device){
+        (async () => {
+            if(!device) return;
+
+            const { AppContext } = await import("../appcontext.js");
+            const lastDeviceId = AppContext.context.localStorage.set(lastSelectedDeviceKey,device.deviceId);
+        })();
+    }
     constructor(args = {app,allowUnsecureContent}){
         super(args.app);
         app = args.app;
@@ -70,7 +88,11 @@ export class AppHelperDevices extends AppHelperBase{
         const shortcut = await ControlKeyboardShortcut.setupNewShortcut();
         if(!shortcut) return;
 
-        await EventBus.post(new ShortcutConfigured({shortcut,command}));
+        const shortcutAndCommand = new ShortcutConfigured({shortcut,command});
+        const {DBKeyboardShortcut} = await import("../keyboard/keyboardshortcut.js");
+        const dbShortcut = new DBKeyboardShortcut(app.db);
+        await dbShortcut.updateSingle(shortcutAndCommand);
+        await EventBus.post(shortcutAndCommand);
 
         const {ControlDialogOk} = await import("../dialog/controldialog.js");
         await ControlDialogOk.showAndWait({title:"Shortcut Configured!",text:`Press ${shortcut} to run the ${command.getText()} command on the last selected device!`});
@@ -233,6 +255,7 @@ export class AppHelperDevices extends AppHelperBase{
 
         const device = controlDevice.device;
 
+        AppHelperDevices.lastSelectedDevice = device;
         if(this.apiBuilder){
             this.apiBuilder.device = device;
         }

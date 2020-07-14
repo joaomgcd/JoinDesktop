@@ -35,5 +35,8 @@ class ClipboardChecker{
         clipboard.writeText(text);
         console.log("Set clipboard",text);
     }
+    get(){
+        return clipboard.readText();
+    }
 }
 exports.ClipboardChecker = ClipboardChecker; 

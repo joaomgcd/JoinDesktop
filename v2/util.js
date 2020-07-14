@@ -173,10 +173,13 @@ class Util{
         return await navigator.clipboard.writeText(value)
         console.log("Set clipboard text",value)
     }
-    static get clipboardText(){
+    static getClipboardText(){
         if(!this.canReadClipboard) return null;
 
         return navigator.clipboard.readText()
+    }
+    static get clipboardText(){
+        return Util.getClipboardText();
     }
     static get canReadClipboard(){
         return (navigator.clipboard && navigator.clipboard.readText) ? true : false

@@ -69,31 +69,29 @@ export class KeyboardShortcuts extends Array{
 }
 export class KeyboardShortcut{
     constructor(keyEvent){
-        this.event = {
-            shiftKey:keyEvent.shiftKey,
-            ctrlKey:keyEvent.ctrlKey,
-            altKey:keyEvent.altKey,
-            keyCode:keyEvent.keyCode,
-            code:keyEvent.code,
-        };
+        this.shiftKey = keyEvent.shiftKey;
+        this.ctrlKey = keyEvent.ctrlKey;
+        this.altKey = keyEvent.altKey;
+        this.keyCode = keyEvent.keyCode;
+        this.code = keyEvent.code;
     }
     get hasShift(){
-        return this.event.shiftKey;
+        return this.shiftKey;
     }
     get hasControl(){
-        return this.event.ctrlKey;
+        return this.ctrlKey;
     }
     get hasAlt(){
-        return this.event.altKey;
+        return this.altKey;
     }
     get isShift(){
-        return this.event.keyCode == 16;
+        return this.keyCode == 16;
     }
     get isControl(){
-        return this.event.keyCode == 17;
+        return this.keyCode == 17;
     }
     get isAlt(){
-        return this.event.keyCode == 18;
+        return this.keyCode == 18;
     }
     get hasSpecialKey(){
         return this.hasShift || this.hasControl || this.hasAlt
@@ -103,6 +101,9 @@ export class KeyboardShortcut{
     }
     get isValid(){
         return this.hasSpecialKey && !this.isSpecialKey;
+    }
+    get keyName(){
+        return this.code.replace("Key","");
     }
     toString(){
         let text = "";
@@ -116,8 +117,38 @@ export class KeyboardShortcut{
             text = `Alt + ${text}`;
         }
         if(!this.isSpecialKey){
-            text += this.event.code.replace("Key","")
+            text += this.keyName;
         }
         return text;
+    }
+}
+
+const convertFromDb = async fromDb => {
+    const shortcutAndCommand = JSON.parse(fromDb.json);
+    const commandApi = await import("../command/command.js");
+    return {
+        command:new commandApi[shortcutAndCommand.command](),
+        shortcut:new KeyboardShortcut(shortcutAndCommand.shortcut)
+    }
+}
+export class DBKeyboardShortcut{
+    constructor(db){
+        this.db = db;
+    }
+    async updateSingle(shortcutAndCommand){
+        const key = shortcutAndCommand.shortcut.toString();
+        shortcutAndCommand.command = shortcutAndCommand.command.constructor.name;
+        await this.db.shortcuts.put({key,json:JSON.stringify(shortcutAndCommand)});
+    }
+    async getAll(){
+        const commandApi = await import("../command/command.js")
+        const array = await this.db.shortcuts.toArray();
+        const shortcutsAndcommands = Promise.all(array.map(convertFromDb));
+        return shortcutsAndcommands;
+    }
+    async getCommand(shortcut){
+        const fromDb = await this.db.shortcuts.get(shortcut.toString());
+        const shortcutAndCommand = await convertFromDb(fromDb);
+        return shortcutAndCommand.command;
     }
 }
