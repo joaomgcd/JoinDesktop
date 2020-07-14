@@ -22,6 +22,7 @@ dist/Join Desktop-0.0.1-mac.zip
 dist/Join Desktop-0.0.1.dmg.blockmap
 dist/latest-mac.yml
 dist/mac/.DS_Store
+dist/win-unpacked
 .DS_Store
-.DS_Store
-.DS_Store
+dist/squirrel-windows/com.joaomgcd.join-0.0.1-full.nupkg
+dist/squirrel-windows/RELEASES
