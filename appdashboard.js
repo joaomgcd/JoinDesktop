@@ -164,6 +164,13 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
     }
 }
 class RequestToggleDevOptions{}
+class RequestClipboard{}
+class ResponseClipboard{}
+class RequestListenForShortcuts{
+    constructor(shortcuts){
+        this.shortcuts = shortcuts;
+    }
+}
 export class AppDashboard extends App{
     constructor(contentElement){
         super(contentElement);
@@ -179,6 +186,11 @@ export class AppDashboard extends App{
         Util.openWindow = url => {
             ServerCommands.openPage(url);
             return true;
+        }
+        Util.getClipboardText = async () => {
+            const result = EventBus.waitFor(ResponseClipboard,3000);
+            ServerEventBus.post(new RequestClipboard());
+            return result.then(response=>response.text);
         }
         self["prompt"] = async (title,initialText) => await ControlDialogInput.showAndWait({title,initialText: (initialText ? initialText : ""),placeholder:""});
         self["alert"] = async text => await ControlDialogOk.showAndWait({text,title:"Join"});
@@ -200,6 +212,13 @@ export class AppDashboard extends App{
         UtilDOM.addScriptFile("./v2/google/drive/googledrive.js");
         await this.loadAppContext();
         await super.load();
+    }
+    async loadShortcuts(){
+
+        const {DBKeyboardShortcut} = await import("./v2/keyboard/keyboardshortcut.js");
+        const dbShortcut = new DBKeyboardShortcut(this.db);
+        const configured = await dbShortcut.getAll();
+        ServerEventBus.post(new RequestListenForShortcuts(configured.map(shortcutAndCommand=>shortcutAndCommand.shortcut)));
     }
     showCloseButton(){
         return true;
@@ -263,11 +282,6 @@ export class AppDashboard extends App{
             }
         }*/
         return this.fcmClient;
-    }
-    async onShortcutConfigured(shortcutConfigured){
-        shortcutConfigured.command = shortcutConfigured.command.constructor.name;
-        console.log("Configured shortcut",shortcutConfigured);
-        ServerEventBus.post(shortcutConfigured)
     }
     async onGCMAutoClipboard(gcm){
         gcm.text = await Encryption.decrypt(gcm.text);

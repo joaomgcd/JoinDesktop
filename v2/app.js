@@ -113,6 +113,7 @@ export class App{
 
         await this.loadApiLoader();
 
+        await this.loadShortcuts();
         if(queryObject.connectoport){
             await this.loadAppContext();
             AppContext.context.localStorage.set(settingKeySetupCompanion,queryObject.connectoport);
@@ -139,6 +140,30 @@ export class App{
             // this.controlTop.hideMessage();
             
         }
+    }
+    async loadShortcuts(){}
+
+    async onShortcutConfigured(shortcutAndCommand){
+        shortcutAndCommand.command = shortcutAndCommand.command.constructor.name;
+        console.log("Configured shortcut",shortcutAndCommand);
+        await this.loadShortcuts()
+    }
+    async onShortcutPressed(shortcutPressed){        
+        let shortcut = shortcutPressed.shortcut;
+        const { AppHelperDevices } = await import("./device/apphelperdevices.js");
+        const device = await AppHelperDevices.lastSelectedDevice;
+        if(!device){
+            alert("Please select a device before running a shortcut");
+            return;
+        }
+
+        console.log("Running command from shortcut!",shortcut,device);
+
+        const {KeyboardShortcut,DBKeyboardShortcut} = await import("./keyboard/keyboardshortcut.js");
+        shortcut = new KeyboardShortcut(shortcut);
+        const db = new DBKeyboardShortcut(this.db);
+        const commandInstance = await db.getCommand(shortcut);
+        await commandInstance.execute(device);
     }
     showCloseButton(){
         return false;
