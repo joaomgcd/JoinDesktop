@@ -30,6 +30,32 @@ let DBDevices = null;
 const importDbDevices = async () => {    
     DBDevices = (await import('./device/dbdevice.js')).DBDevices
 }
+const setStoredDeviceOfType = ({localStorageKey,device}) => {    
+    AppContext.context.localStorage.set(localStorageKey,device.deviceId);
+}
+const getStoredDeviceOfType = async ({app,localStorageKey,neededCapabilityGetter}) => {
+    const deviceId = AppContext.context.localStorage.get(localStorageKey);
+    var device = await app.getDevice(deviceId);
+    if(!device){
+        const devices = await app.devicesFromDb;
+        device = devices.find(device=>neededCapabilityGetter(device));
+    }
+    return device;
+}
+const createHelperWithDeviceArgs = async ({app,deviceId,deviceGetter,deviceSetter,messageSufix})=>{
+    let device = await app.getDevice(deviceId);
+    if(!device){
+        device = await deviceGetter();
+    }else{
+        deviceSetter(device);
+    }
+    if(!device){
+        await alert(`You don't have a device that can ${messageSufix}.`);
+        await app.selectMenuEntry({menuEntry:app.menuEntryDevices});
+        return;
+    }
+    return {app,device};
+}
 export class App{
     constructor(rootElement){
         this.rootElement = rootElement;
@@ -164,17 +190,7 @@ export class App{
             js:'./sms/apphelpersms.js',
             clazz:"AppHelperSMS",
             load: async (deviceId=null)=>{
-                var device = await this.getDevice(deviceId);
-                if(!device){
-                    device = await this.smsDevice;
-                }else{
-                    this.smsDevice = device;
-                }
-                if(!device){
-                    await alert("You don't have a device that can send SMS messages.");
-                    return;
-                }
-                return {app:this,device};
+                return await createHelperWithDeviceArgs({app:this,deviceId,deviceGetter:async ()=>await this.smsDevice,deviceSetter:device=>{this.smsDevice = device},messageSufix:"send SMS messages"});
             },
             icon:`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"></path><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12zM7 9h2v2H7zm8 0h2v2h-2zm-4 0h2v2h-2z"></path></svg>`
         });
@@ -184,17 +200,7 @@ export class App{
             js:'./notification/apphelpernotifications.js',
             clazz:"AppHelperNotifications", 
             load: async (deviceId=null)=>{
-                var device = await this.getDevice(deviceId);
-                if(!device){
-                    device = await this.notificationsDevice;
-                }else{
-                    this.notificationsDevice = device;
-                }
-                if(!device){
-                    await alert("You don't have a device that can sync notifications.");
-                    return;
-                }
-                return {app:this,device};
+                return await createHelperWithDeviceArgs({app:this,deviceId,deviceGetter:async ()=>await this.notificationsDevice,deviceSetter:device=>{this.notificationsDevice = device},messageSufix:"sync notifications"});
             },
             icon:`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" d="M0 0h24v24H0V0z"></path><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"></path></svg>`
         })
@@ -214,17 +220,7 @@ export class App{
             js:'./files/apphelperfiles.js',
             clazz:"AppHelperFiles", 
             load: async (deviceId=null)=>{
-                var device = await this.getDevice(deviceId);
-                if(!device){
-                    device = await this.filesDevice;
-                }else{
-                    this.filesDevice = device;
-                }
-                if(!device){
-                    await alert("You don't have a device that you can view files on.");
-                    return;
-                }
-                return {app:this,device};
+                return await createHelperWithDeviceArgs({app:this,deviceId,deviceGetter:async ()=>await this.filesDevice,deviceSetter:device=>{this.filesDevice = device},messageSufix:"view files on"});
             },
             icon:`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24"><path d="M16 0H8C6.9 0 6 .9 6 2V18C6 19.1 6.9 20 8 20H20C21.1 20 22 19.1 22 18V6L16 0M20 18H8V2H15V7H20V18M4 4V22H20V24H4C2.9 24 2 23.1 2 22V4H4Z"/></svg>`
         })
@@ -234,13 +230,7 @@ export class App{
             js:'./pushhistory/apphelperpushhistory.js',
             clazz:"AppHelperPushHistory", 
             load: async (deviceId=null)=>{
-                var device = await this.getDevice(deviceId);
-                if(!device){
-                    device = await this.pushHistoryDevice;
-                }else{
-                    this.pushHistoryDevice = device;
-                }
-                return {app:this,device};
+                return await createHelperWithDeviceArgs({app:this,deviceId,deviceGetter:async ()=>await this.pushHistoryDevice,deviceSetter:device=>{this.pushHistoryDevice = device},messageSufix:"view push history of"});
             },
             icon:`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24"><path d="M13.5,8H12V13L16.28,15.54L17,14.33L13.5,12.25V8M13,3A9,9 0 0,0 4,12H1L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3" /></svg>`
         })
@@ -363,60 +353,28 @@ export class App{
         await this.helper.load();
     }  
     set smsDevice(device){
-        AppContext.context.localStorage.set("smsDevice",device.deviceId);
+        setStoredDeviceOfType({localStorageKey:"smsDevice",device});
     }
     get smsDevice(){
-        return (async ()=>{
-            const deviceId = AppContext.context.localStorage.get("smsDevice");
-            var device = await this.getDevice(deviceId);
-            if(!device){
-                const devices = await this.devicesFromDb;
-                device = devices.find(device=>device.canReceiveSms());
-            }
-            return device;
-        })();
+        return getStoredDeviceOfType({app:this,localStorageKey:"smsDevice",neededCapabilityGetter:device=>device.canReceiveSms()});
     }
     set filesDevice(device){
-        AppContext.context.localStorage.set("filesDevice",device.deviceId);
+        setStoredDeviceOfType({localStorageKey:"filesDevice",device});
     }
     get filesDevice(){
-        return (async ()=>{
-            const deviceId = AppContext.context.localStorage.get("filesDevice");
-            var device = await this.getDevice(deviceId);
-            if(!device){
-                const devices = await this.devicesFromDb;
-                device = devices.find(device=>device.canBrowseFiles());
-            }
-            return device;
-        })();
+        return getStoredDeviceOfType({app:this,localStorageKey:"filesDevice",neededCapabilityGetter:device=>device.canBrowseFiles()});
     }
     set notificationsDevice(device){
-        AppContext.context.localStorage.set("notificationsDevice",device.deviceId);
+        setStoredDeviceOfType({localStorageKey:"notificationsDevice",device});
     }
     get notificationsDevice(){
-        return (async ()=>{
-            const deviceId = AppContext.context.localStorage.get("notificationsDevice");
-            var device = await this.getDevice(deviceId);
-            if(!device){
-                const devices = await this.devicesFromDb;
-                device = devices.find(device=>device.canSendNotifications());
-            }
-            return device;
-        })();
+        return getStoredDeviceOfType({app:this,localStorageKey:"notificationsDevice",neededCapabilityGetter:device=>device.canSendNotifications()});
     }
     set pushHistoryDevice(device){
-        AppContext.context.localStorage.set("pushHistoryDevice",device.deviceId);
+        setStoredDeviceOfType({localStorageKey:"pushHistoryDevice",device});
     }
     get pushHistoryDevice(){
-        return (async ()=>{
-            const deviceId = AppContext.context.localStorage.get("pushHistoryDevice");
-            var device = await this.getDevice(deviceId);
-            if(!device){
-                const devices = await this.devicesFromDb;
-                device = devices.find(device=>device.canShowPushHistory());
-            }
-            return device;
-        })();
+        return getStoredDeviceOfType({app:this,localStorageKey:"pushHistoryDevice",neededCapabilityGetter:device=>device.canShowPushHistory()});
     }
     store(key,value){
         AppContext.context.localStorage.set(key,value);
