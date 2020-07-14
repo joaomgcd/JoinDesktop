@@ -63,7 +63,17 @@ export class AppHelperDevices extends AppHelperBase{
 
     }
     async onKeyboardShortcutClicked(keyboardShortcutClicked){
-        alert(`This will allow you to create a shortcut for <b>${keyboardShortcutClicked.command.getText()}</b> when it's implemented :)`);
+        const command = keyboardShortcutClicked.command;
+        if(!command) return;
+
+        const {ControlKeyboardShortcut} = await import("../keyboard/keyboardshortcut.js");
+        const shortcut = await ControlKeyboardShortcut.setupNewShortcut();
+        if(!shortcut) return;
+
+        await EventBus.post(new ShortcutConfigured({shortcut,command}));
+
+        const {ControlDialogOk} = await import("../dialog/controldialog.js");
+        await ControlDialogOk.showAndWait({title:"Shortcut Configured!",text:`Press ${shortcut} to run the ${command.getText()} command on the last selected device!`});
     }
     updateUrl(){
         Util.changeUrl(`?devices`);
@@ -274,5 +284,10 @@ export class AppHelperDevices extends AppHelperBase{
 class WebSocketGCM{
     constructor(gcmRaw){
         this.gcmRaw = gcmRaw;
+    }
+}
+class ShortcutConfigured{
+    constructor(args = {shortcut,command}){
+        Object.assign(this,args);
     }
 }

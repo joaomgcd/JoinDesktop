@@ -11,6 +11,7 @@ import { DevicesServer } from "./serverdevices.js";
 import { AppContext } from "../v2/appcontext.js";
 import { SettingCompanionAppPortToReceive } from '../v2/settings/setting.js';
 import { Util } from '../v2/util.js';
+import { ServerKeyboardShortcuts } from './serverkeyboardshortcut.js';
 const path = require('path')
 
 
@@ -133,9 +134,14 @@ class Server{
             // console.log("Sending to eventbus from web page",data,className)
             await EventBus.post(data,className);
         });
-        const path = require('path');
+        await ServerKeyboardShortcuts.clearShortcuts();
         return this.window;
+        // const path = require('path');
         // ServerNotification.show({title:"Join Companion App",body:"Now running!",icon:path.join(__dirname, '../images/join.png'),actions:[{title:"Test Action"}]});
+    }
+    async onShortcutConfigured(shortcutConfigured){
+        const {ServerKeyboardShortcuts} = await import("./serverkeyboardshortcut.js");
+        await ServerKeyboardShortcuts.storeShortcut(shortcutConfigured);
     }
     async onRequestToggleDevOptions(){
         this.window.webContents.toggleDevTools()

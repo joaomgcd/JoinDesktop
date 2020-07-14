@@ -55,6 +55,9 @@ export class UtilDOM{
         element = UtilDOM.getElementOrRoot(element);
         UtilDOM.showOrHide(element,element.classList.contains("hidden"));
     }
+    static isEnabled(element){
+        return !element.classList.contains("disabled");
+    }
     static enable(element){
         element.disabled = false;
         UtilDOM.addOrRemoveClass(element,false,"disabled");
@@ -62,6 +65,13 @@ export class UtilDOM{
     static disable(element){
         element.disabled = true;
         UtilDOM.addOrRemoveClass(element,true,"disabled");
+    }
+    static enableDisable(element,enable){
+        if(enable){
+            UtilDOM.enable(element)
+        }else{
+            UtilDOM.disable(element);
+        }
     }
     /**
      * returns {top,left,right,bottom}
