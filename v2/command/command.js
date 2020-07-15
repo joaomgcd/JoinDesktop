@@ -24,10 +24,10 @@ export class Commands extends Array{
         this.push(new CommandSMS());
         this.push(new CommandPhoneCall());
         this.push(new CommandNotifications());
-        if(!extraArgs.hideSendTab){
+        if(!extraArgs.hideBookmarklets){
             this.push(new CommandSendTab());
+            this.push(new CommandPasteSelectedText());
         }
-        this.push(new CommandPasteSelectedText());
         this.push(new CommandUploadFiles());
         this.push(new CommandFiles());
         this.push(new CommandPushHistory());
@@ -43,13 +43,34 @@ export class Commands extends Array{
         this.push(new CommandDeleteDevice());
     }
 }
+const lastExecutedCommandKey = "lastExecutedCommandKey";
 class Command {
+    static get lastExecutedCommand(){
+        const commandName = AppContext.context.localStorage.get(lastExecutedCommandKey);
+        if(!commandName) return null;
+
+        const command = eval(`new ${commandName}()`);
+        return command;
+    }
+    static set lastExecutedCommand(command){
+        const commandName = Util.getType(command);
+        AppContext.context.localStorage.set(lastExecutedCommandKey,commandName);
+    }
+    get shouldSaveAsLastExecutedCommand(){
+        return true;
+    }
     //abstract
     getText(){}
     //abstract
     shouldEnable(device){}
+    async execute(device){ 
+        if(this.shouldSaveAsLastExecutedCommand){
+            Command.lastExecutedCommand = this;
+        } 
+        return this.executeSpecific(device);
+    }
     //abstract
-    async execute(device){}
+    async executeSpecific(device){}
     showToast(args){
         EventBus.post(new ShowToast(args));
     }
@@ -66,9 +87,18 @@ class Command {
         }
         return `javascript:(function(){ var img = new Image(1,1); img.src = '${document.location.origin.replace("8081","8080")}/_ah/api/messaging/v1/sendPush?deviceId=${device.deviceId}&apikey=${apiKey}${extraString}' ; })();`;
     }
+    get supportsKeyboardShortcut(){
+        return true;
+    }
+    get needsFocus(){
+        return true;
+    }
+    matches(other){
+        return Util.getType(this) == Util.getType(other);
+    }
 }
 export class CommandPush extends Command {
-    async execute(device){
+    async executeSpecific(device){
         const push = await this.customizePush({device,push:{}});
         if(!push) return;
         
@@ -168,6 +198,9 @@ export class CommandRing extends CommandPush{
     get icon(){
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24" id="devicebuttonimage" class=" replaced-svg"><path d="M16,17V10.5C16,8 14,6 11.5,6C9,6 7,8 7,10.5V17H16M18,16L20,18V19H3V18L5,16V10.5C5,7.43 7.13,4.86 10,4.18V3.5A1.5,1.5 0 0,1 11.5,2A1.5,1.5 0 0,1 13,3.5V4.18C15.86,4.86 18,7.43 18,10.5V16M11.5,22A2,2 0 0,1 9.5,20H13.5A2,2 0 0,1 11.5,22M19.97,10C19.82,7.35 18.46,5 16.42,3.58L17.85,2.15C20.24,3.97 21.82,6.79 21.97,10H19.97M6.58,3.58C4.54,5 3.18,7.35 3,10H1C1.18,6.79 2.76,3.97 5.15,2.15L6.58,3.58Z"></path></svg>`;
     }
+    get needsFocus(){
+        return false;
+    }
 }
 export class CommandLocate extends CommandPush{
     getText(){
@@ -185,6 +218,9 @@ export class CommandLocate extends CommandPush{
     }
     get icon(){
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24" id="devicebuttonimage" class=" replaced-svg"><path d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z"></path></svg>`;
+    }
+    get needsFocus(){
+        return false;
     }
 }
 export class CommandSay extends CommandPush{
@@ -242,6 +278,9 @@ export class CommandPaste extends CommandPush{
     get icon(){
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24" ><path d="M19,20H5V4H7V7H17V4H19M12,2A1,1 0 0,1 13,3A1,1 0 0,1 12,4A1,1 0 0,1 11,3A1,1 0 0,1 12,2M19,2H14.82C14.4,0.84 13.3,0 12,0C10.7,0 9.6,0.84 9.18,2H5A2,2 0 0,0 3,4V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V4A2,2 0 0,0 19,2Z"></path></svg>`;
     }
+    get needsFocus(){
+        return false;
+    }
 	
 }
 export class CommandWrite extends CommandPush{
@@ -274,7 +313,7 @@ export class CommandDeleteDevice extends Command{
 	shouldEnable(device){
 		return true;
 	}
-	async execute(device){
+	async executeSpecific(device){
         var confirm = window.confirm("Are you sure you want to delete " + device.deviceName + "?");
         if(!confirm) return;
 
@@ -302,7 +341,7 @@ export class CommandRenameDevice extends Command{
 	shouldEnable(device){
 		return true;
 	}
-	async execute(device){
+	async executeSpecific(device){
         var deviceName = await window.prompt(`What do you want to name ${device.deviceName}?`,device.deviceName);
         if(!deviceName) return;
         
@@ -330,7 +369,7 @@ export class CommandApi extends Command{
 	shouldEnable(device){
 		return true;
 	}
-	async execute(device){
+	async executeSpecific(device){
         EventBus.post(new RequestToggleShowApiBuilder());
 	}
     get icon(){
@@ -358,13 +397,16 @@ export class CommandScreenshot extends Command{
      * 
      * @param {Device} device 
      */
-	async execute(device){
+	async executeSpecific(device){
         await device.sendScreenshotRequest()
 	}
     get icon(){
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24" id="devicebuttonimage" class=" replaced-svg"><path d="M8.5,13.5L11,16.5L14.5,12L19,18H5M21,19V5C21,3.89 20.1,3 19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19Z"></path></svg>`;
     }
 	
+    get needsFocus(){
+        return false;
+    }
 }
 export class CommandScreenCapture extends Command{
 	getText(){
@@ -384,11 +426,14 @@ export class CommandScreenCapture extends Command{
      * 
      * @param {Device} device 
      */
-	async execute(device){
+	async executeSpecific(device){
        await device.sendScreenCaptureRequest();
 	}
     get icon(){
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24" id="devicebuttonimage" class=" replaced-svg"><path d="M4,2A1,1 0 0,0 3,3V4A1,1 0 0,0 4,5H5V14H11V16.59L6.79,20.79L8.21,22.21L11,19.41V22H13V19.41L15.79,22.21L17.21,20.79L13,16.59V14H19V5H20A1,1 0 0,0 21,4V3A1,1 0 0,0 20,2H4Z"></path></svg>`;
+    }
+    get needsFocus(){
+        return false;
     }
 	
 }
@@ -410,7 +455,7 @@ export class CommandSMS extends Command{
      * 
      * @param {Device} device 
      */
-	async execute(device){
+	async executeSpecific(device){
        await EventBus.post(new RequestOpenSms(device));
     }
     get icon(){
@@ -436,7 +481,7 @@ export class CommandPhoneCall extends Command{
      * 
      * @param {Device} device 
      */
-	async execute(device){
+	async executeSpecific(device){
         const phoneNumber = await prompt("What phone number do you want to call?");
         if(!phoneNumber) return;
 
@@ -465,7 +510,7 @@ export class CommandTestLocalNetwork extends Command{
      * 
      * @param {Device} device 
      */
-	async execute(device){
+	async executeSpecific(device){
         this.showToast({text:`Testing local network for ${device.deviceName} on ${device.deviceName}`});
         try{
             await device.requestLocalNetworkTestAndWaitForResponse();
@@ -535,7 +580,7 @@ export class CommandFiles extends Command{
 	shouldEnable(device){
 		return device.canBrowseFiles()
     }
-    async execute(device){
+    async executeSpecific(device){
         await EventBus.post(new RequestOpenFileBrowser(device));
         // await Util.openWindow(`${device.localNetworkServerAddress}files?token=${GoogleAccount.getToken()}`)
     }
@@ -553,7 +598,7 @@ export class CommandPushHistory extends Command{
 	shouldEnable(device){
 		return device.canShowPushHistory()
     }
-    async execute(device){
+    async executeSpecific(device){
         await EventBus.post(new RequestOpenPushHistory(device));
         // await Util.openWindow(`${device.localNetworkServerAddress}files?token=${GoogleAccount.getToken()}`)
     }
@@ -571,7 +616,7 @@ export class CommandNotifications extends Command{
 	shouldEnable(device){
 		return device.canSendNotifications()
     }
-    async execute(device){
+    async executeSpecific(device){
         await EventBus.post(new RequestOpenNotifications(device));
     }
     get icon(){
@@ -590,7 +635,7 @@ export class CommandSendTab extends Command{
     shouldEnable(device){
         return true;
     }
-    async execute(device){
+    async executeSpecific(device){
         await EventBus.post(new RequestGenerateButtonLink(this));
     }
     getLink({device,apiKey}){
@@ -598,6 +643,9 @@ export class CommandSendTab extends Command{
     }
     get icon(){
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24" id="devicebuttonimage" class=" replaced-svg"><path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg>`;
+    }    
+    get supportsKeyboardShortcut(){
+        return false;
     }
 }
 export class CommandPasteSelectedText extends Command{
@@ -610,7 +658,7 @@ export class CommandPasteSelectedText extends Command{
     shouldEnable(device){
         return true;
     }
-    async execute(device){
+    async executeSpecific(device){
         await EventBus.post(new RequestGenerateButtonLink(this));
     }
     getLink({device,apiKey}){
@@ -618,6 +666,46 @@ export class CommandPasteSelectedText extends Command{
     }
     get icon(){
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24" id="devicebuttonimage" class=" replaced-svg"><path d="M19,20H5V4H7V7H17V4H19M12,2A1,1 0 0,1 13,3A1,1 0 0,1 12,4A1,1 0 0,1 11,3A1,1 0 0,1 12,2M19,2H14.82C14.4,0.84 13.3,0 12,0C10.7,0 9.6,0.84 9.18,2H5A2,2 0 0,0 3,4V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V4A2,2 0 0,0 19,2Z"></path></svg>`;
+    }
+    get supportsKeyboardShortcut(){
+        return false;
+    }
+}
+export class CommandRepeatLastCommand extends Command{
+    getText(){
+		return "Repeat Last";
+    }
+    getTextExtended(device){
+        return `Repeat the last performed command`;
+    }
+    shouldEnable(device){
+        return true;
+    }
+    async executeSpecific(device){
+        const command = Command.lastExecutedCommand;
+        if(!command) return;
+
+        return command.execute(device);
+    }
+    get shouldSaveAsLastExecutedCommand(){
+        return false;
+    }
+}
+export class CommandShowAppWindow extends Command{
+    getText(){
+		return "Show Window";
+    }
+    getTextExtended(device){
+        return `Show the app window`;
+    }
+    shouldEnable(device){
+        return true;
+    }
+    async executeSpecific(device){
+        EventBus.post({},"RequestFocusWindow");
+    }
+    get shouldSaveAsLastExecutedCommand(){
+        return false;
     }
 }
 

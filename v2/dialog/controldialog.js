@@ -248,16 +248,16 @@ export class ControlDialogDialogProgress extends ControlDialog {
 }
 export class ControlDialogOk extends ControlDialog {
     static getDialogArgs(args){
-        return {args,dialogclass:DialogOk,controlclass:ControlDialogOk,waitForClass:ButtonOk};
+        return {args,dialogclass:DialogOk,controlclass:ControlDialogOk,waitForClass:DialogButtonClicked};
     }
-    static async show(args = {position,title,text}){
+    static async show(args = {position,title,text,showCancel,buttons,buttonsDisplayFunc}){
         return showDialog(ControlDialogOk.getDialogArgs(args));        
     }
-    static async showAndWait(args= {position,title,text}){      
+    static async showAndWait(args= {position,title,text,showCancel,buttons,buttonsDisplayFunc}){      
         const result = (await showDialogAndWait(ControlDialogOk.getDialogArgs(args)));
         if(!result) return;
         
-        return result.text;
+        return result.button;
     }
     constructor(args = {dialog}){
         super(args);
@@ -267,10 +267,7 @@ export class ControlDialogOk extends ControlDialog {
         <div class="dialogok">
             <div class="dialogoktitle"></div>
             <div class="dialogoktext"></div>
-            <div class="dialogbuttons">
-                <div class="dialogokbutton button">OK</div>
-                <div class="dialogbuttoncancel button hidden">Cancel</div>
-            </div>
+            <div class="dialogbuttons"></div>
         </div>
         `
     }
@@ -296,27 +293,49 @@ export class ControlDialogOk extends ControlDialog {
 
         this.titleElement = await this.$(".dialogoktitle");
         this.textElement = await this.$(".dialogoktext");
-        this.buttonElement = await this.$(".dialogokbutton");
-        this.buttonCancelElement = await this.$(".dialogbuttoncancel");
+        this.buttonsElement = await this.$(".dialogbuttons");
+        const hasCustomButtons = this.dialog.buttons && this.dialog.buttons.length > 0;
+        this.buttonsElement.innerHTML = "";
+        if(!hasCustomButtons){
+            this.buttonElement = await UtilDOM.createElement({type:"div",clazz:"button",content:"OK",parent:this.buttonsElement});
+            this.buttonCancelElement = await UtilDOM.createElement({type:"div",classes:"button hidden",content:"Cancel",parent:this.buttonsElement});
+            
+            this.buttonElement.onclick = async () => {
+                if(!UtilDOM.isEnabled(this.buttonElement)) return;
+
+                await EventBus.post(new DialogButtonClicked("ok"));
+            }
+            this.buttonCancelElement.onclick = async () => await EventBus.post(new DialogButtonClicked("cancel"));
+            UtilDOM.showOrHide(this.buttonCancelElement,this.dialog.showCancel);
+            this.enableDisableButton(true);
+        }else{            
+            let displayFunc = this.dialog.buttonsDisplayFunc;
+            if(!displayFunc){
+                displayFunc = item => item.toString();
+            }
+            this.dialog.buttons.forEach(async button=>{
+                const newButton = await UtilDOM.createElement({type:"div",clazz:"button",content:displayFunc(button),parent:this.buttonsElement});
+                newButton.onclick = async () => await EventBus.post(new DialogButtonClicked(button));
+            });
+        }
 
         this.titleElement.innerHTML = this.dialog.title;
         this.textElement.innerHTML = this.dialog.text;
-        this.buttonElement.onclick = async () => {
-            if(!UtilDOM.isEnabled(this.buttonElement)) return;
-
-            await EventBus.post(new ButtonOk());
-        }
-        this.buttonCancelElement.onclick = async () => await EventBus.post(new ButtonCancel());
-        UtilDOM.showOrHide(this.buttonCancelElement,this.dialog.showCancel);
-        this.enableDisableButton(true);
     }
     enableDisableButton(enable){
         UtilDOM.enableDisable(this.buttonElement,enable);
     }
 }
-export class ButtonOk{
-}
-export class ButtonCancel{
+export class DialogButtonClicked{
+    constructor(button){
+        this.button = button;
+    }
+    get isOk(){
+        return this.button == "ok";
+    }
+    get isCancel(){
+        return this.button == "cancel";
+    }
 }
 export class InputSubmitted{
     constructor(text){

@@ -2,6 +2,7 @@
 	--theme-accent-color: #FF9800;
 	--theme-accent-color-lowlight: #757575;
 	--theme-text-color: black;
+	--theme-text-color-on-accent: white;
 	--theme-background-color: white;
 	--theme-background-color-hover: #eeeeee;
 	--theme-background-color-panel: #F0F0F0;
@@ -57,6 +58,7 @@ body{
   z-index: 999999999999999;
   box-shadow: 0 1px 5px 0 rgba(60,64,67,.15), 0 4px 4px 0 rgba(60,64,67,.10), 0 -0.1px 3px 0 rgba(60,64,67,.08);
   -webkit-app-region: no-drag;
+  max-width: 500px;
 }
 .dialog *{
   -webkit-app-region: no-drag;
@@ -215,6 +217,7 @@ textarea{
     cursor: pointer;
     z-index: 0;
     padding: 0.7em 0.57em;
+    color: var(--theme-text-color-on-accent);
   }
   .disabled{
     cursor: not-allowed;

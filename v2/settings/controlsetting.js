@@ -1,5 +1,5 @@
 import { Control } from "../control.js";
-import { SettingTextInput, SettingSingleOption, SettingColor } from "./setting.js";
+import { SettingTextInput, SettingSingleOption, SettingColor, SettingKeyboardShortcut } from "./setting.js";
 import { UtilDOM } from "../utildom.js";
 import { EventBus } from "../eventbus.js";
 
@@ -87,6 +87,9 @@ export class ControlSetting extends Control{
         }
         if(Util.isSubTypeOf(setting,SettingColor)){
             return new ControlSettingContentColor(setting);
+        }
+        if(Util.isSubTypeOf(setting,SettingKeyboardShortcut)){
+            return new ControlSettingKeyboardShortcut(setting);
         }
         let type = Util.getType(setting);
         const typeFromSetting = (await import("./setting.js"))[type].controlType;
@@ -207,6 +210,62 @@ export class ControlSettingContentColor extends ControlSettingContent{
 
         this.settingElement.value = await this.setting.value;
         this.settingElement.onchange = async () => await EventBus.post(new SettingSaved(this.setting,this.settingElement.value));
+    }
+}
+export class ControlSettingKeyboardShortcut extends ControlSettingContent{
+    /**
+     * 
+     * @param {SettingKeyboardShortcut} setting
+     */
+    constructor(setting){
+        super(setting)
+    }
+    getHtml(){
+        return `
+        <div class="settingkeyboardshortcut">
+            <div class="settingkeyboardshortcutvalue"></div>
+            <div>
+                <div class="settingkeyboardshortcutset button">Set</div>
+                <div class="settingkeyboardshortcutdelete button">Delete</div>
+            </div>
+        </div>
+        `
+    }
+    getStyle(){
+        return `
+            .settingkeyboardshortcut{
+                display:flex;
+                flex-direction:column;
+            }
+            .settingkeyboardshortcut> *{
+                padding: 8px;
+            }
+            .settingkeyboardshortcutvalue{
+                color: var(--theme-accent-color-lowlight);
+            }
+            .settingkeyboardshortcutvalue.valueset{
+                font-weight:bold;
+                color: var(--theme-text-color);
+                background-color:var(--theme-background-color-panel)
+            }
+        `
+    }
+   
+    async renderSpecific({root}){
+        this.settingElement = root;   
+        this.valueElement = await this.$(".settingkeyboardshortcutvalue");
+        this.setElement = await this.$(".settingkeyboardshortcutset");
+        this.deleteElement = await this.$(".settingkeyboardshortcutdelete");
+
+        const value = await this.setting.value;
+        UtilDOM.addOrRemoveClass(this.valueElement,value?true:false,"valueset");
+        this.valueElement.innerHTML =  value || "Not Set";
+        this.setElement.onclick = async () => {
+            await EventBus.post(new SettingSaved(this.setting,"prompt"));
+        }
+        this.deleteElement.onclick = async () => {
+            await EventBus.post(new SettingSaved(this.setting,null));
+        }
     }
 }
 class SettingSaved{

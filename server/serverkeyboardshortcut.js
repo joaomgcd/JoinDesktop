@@ -18,6 +18,7 @@ export class ServerKeyboardShortcuts{
     static async clearShortcuts(){
         console.log("Cleared shortcuts");
         store.setData([]);
+        globalShortcut.unregisterAll()
     }
     static async storeShortcut(shortcut){
         console.log("Storing shortcut", shortcut);
