@@ -95,7 +95,7 @@ export class UtilDOM{
         script.async = false;
         document.head.insertBefore(script,document.head.firstChild);
     }
-    static async createElement({type,id,content,parent}){
+    static createElement({type,id,content,parent,clazz,classes}){
         const element = document.createElement(type);
         if(id){
             element.id = id;
@@ -105,6 +105,19 @@ export class UtilDOM{
         }
         if(parent){
             parent.appendChild(element);
+        }
+        if(clazz){
+            element.classList.add(clazz);
+        }
+        if(classes && classes.length > 0){
+            if(Util.isString(classes)){
+                if(classes.includes(",")){
+                    classes = classes.split(",")
+                }else{
+                    classes = classes.split(" ")
+                }
+            }
+            classes.forEach(clazz=>element.classList.add(clazz));
         }
         return element;
     }
@@ -292,5 +305,15 @@ export class UtilDOM{
     }
     static increaseBrightness(originalColor,percent){
         return Util.shadeBlendConvert(percent/100,originalColor);
+    }
+    static preventEventPropagation(event){
+        if(!event) return;
+
+        if (event.stopPropagation){
+            event.stopPropagation();
+        }
+        if (event.preventDefault){
+            event.preventDefault();
+        }
     }
 }

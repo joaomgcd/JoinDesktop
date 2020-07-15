@@ -2,7 +2,7 @@
   "name": "com.joaomgcd.join",
   "productName": "Join Desktop",
   "homepage": "https://joaoapps.com/join/desktop",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A companion app for the Join website",
   "main": "main_esm.js",
   "scripts": {

@@ -226,3 +226,49 @@ export class SettingThemeAccentColor extends SettingColor{
         })
     }
 }
+export class SettingKeyboardShortcut extends Setting{
+    constructor(args){
+        super(args)
+    }
+    get commands(){        
+        return import("../command/command.js");
+    }
+}
+export class SettingKeyboardShortcutLastCommand extends SettingKeyboardShortcut{
+    static get id(){
+        return "keyboardshortcutlastcommand";
+    }
+    isDbSetting(){
+        return true;
+    }
+    get command(){
+        return (async()=>{
+            return new (await this.commands)["CommandRepeatLastCommand"]()
+        })()
+    }
+    constructor(args){
+        super({
+            id:SettingKeyboardShortcutLastCommand.id,
+            label:"Keyboard Shortcut To Repeat Last Command"
+        })
+    }
+}
+export class SettingKeyboardShortcutShowWindow extends SettingKeyboardShortcut{
+    static get id(){
+        return "keyboardshortcutshowwindow";
+    }
+    isDbSetting(){
+        return true;
+    }
+    get command(){
+        return (async()=>{
+            return new (await this.commands)["CommandShowAppWindow"]()
+        })()
+    }
+    constructor(args){
+        super({
+            id:SettingKeyboardShortcutShowWindow.id,
+            label:"Keyboard Shortcut To Show the App Window"
+        })
+    }
+}

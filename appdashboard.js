@@ -6,7 +6,7 @@ import './v2/extensions.js';
 import { App,RequestLoadDevicesFromServer } from "./v2/app.js";
 import {AppHelperSettings} from "./v2/settings/apphelpersettings.js"
 import { ControlSettings } from "./v2/settings/controlsetting.js";
-import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive } from "./v2/settings/setting.js";
+import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow } from "./v2/settings/setting.js";
 import { AppGCMHandler } from "./v2/gcm/apphelpergcm.js";
 import { ControlDialogInput, ControlDialogOk } from "./v2/dialog/controldialog.js";
 import { AppContext } from "./v2/appcontext.js";
@@ -140,7 +140,9 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
             new SettingCompanionAppPortToReceive(),
             new SettingEncryptionPassword(),
             new SettingTheme(),
-            new SettingThemeAccentColor()
+            new SettingThemeAccentColor(),
+            new SettingKeyboardShortcutLastCommand(),
+            new SettingKeyboardShortcutShowWindow()
         ]);
     }
     async load(){
@@ -148,7 +150,7 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
         this.setOpenWebAppListener();
     }
     setOpenWebAppListener(){
-        document.querySelector("#linkopenwebapp").onclick = () => ServerCommands.openPage("https://joinjoaomgcd.appspot.com/?settings");
+        document.querySelector("#linkopenwebapp").onclick = () => ServerCommands.openPage(`${self.joinServer}?settings`);
     }
     async onSettingSaved(settingSaved){
         const setting = settingSaved.setting;
@@ -171,6 +173,7 @@ class RequestListenForShortcuts{
         this.shortcuts = shortcuts;
     }
 }
+class RequestFocusWindow{}
 export class AppDashboard extends App{
     constructor(contentElement){
         super(contentElement);
@@ -220,12 +223,27 @@ export class AppDashboard extends App{
         const configured = await dbShortcut.getAll();
         ServerEventBus.post(new RequestListenForShortcuts(configured.map(shortcutAndCommand=>shortcutAndCommand.shortcut)));
     }
+    async onShortcutPressed(shortcutPressed){         
+        try{
+            let shortcut = shortcutPressed.shortcut;
+            if(!shortcut) return;
+
+            const command = await this.getKeyboardShortcutCommand(shortcut);
+            if(!command) return;
+
+            if(!command.needsFocus) return;
+
+            ServerEventBus.post(new RequestFocusWindow());
+        }finally{
+            await super.onShortcutPressed(shortcutPressed);
+        }
+    }
     showCloseButton(){
         return true;
     }
     redirectToHttpsIfNeeded(){}
     
-    get hideSendTabCommand(){
+    get hideBookmarklets(){
         return true;
     }
     async onCompanionHostConnected(info){

@@ -12,6 +12,7 @@
     min-width: 300px;
     width: 70%;
     max-width: 70%;
+    overflow-y: auto;
 }
 .settings>*{
     padding: 24px;

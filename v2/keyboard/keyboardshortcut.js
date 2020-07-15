@@ -1,6 +1,7 @@
 import { ControlDialogOk } from "../dialog/controldialog.js";
 import { DialogOk } from "../dialog/dialog.js";
 import { EventBus } from "../eventbus.js";
+import { UtilDOM } from "../utildom.js";
 
 export class ControlKeyboardShortcut{
     static async setupNewShortcut(){
@@ -14,7 +15,7 @@ export class ControlKeyboardShortcut{
         }
         enableDisableButton();
         const keyListenerDown = async (e)=>{
-            e.stopPropagation();
+            UtilDOM.preventEventPropagation(e);
             try{   
                 const shortcut = new KeyboardShortcut(e);
                 if(!shortcut.hasSpecialKey) return;
@@ -32,21 +33,17 @@ export class ControlKeyboardShortcut{
             }
         }
         const keyListenerUp = e => {
-            e.stopPropagation();
+            UtilDOM.preventEventPropagation(e);
             enableDisableButton();
         }
         window.addEventListener("keydown",keyListenerDown,true);
         window.addEventListener("keyup",keyListenerUp,true);
-        const okOrCancel =  [EventBus.waitFor("ButtonOk",9999999999),EventBus.waitFor("ButtonCancel",9999999999)];
-        const button = await Promise.race(okOrCancel);
-        if(Util.isType(button,"ButtonCancel")){
+        const button = await EventBus.waitFor("DialogButtonClicked",9999999999);
+        if(button.isCancel){
             current = null;
-            EventBus.post({},"ButtonOk");
-        }else{
-            EventBus.post({},"ButtonCancel");
         }
-        window.removeEventListener("keydown",keyListenerDown);
-        window.removeEventListener("keyup",keyListenerUp);
+        window.removeEventListener("keydown",keyListenerDown,true);
+        window.removeEventListener("keyup",keyListenerUp,true);
         await controlDialog.dispose();
         return current;
     }
@@ -121,6 +118,20 @@ export class KeyboardShortcut{
         }
         return text;
     }
+    matches(keyEvent){
+        const other = new KeyboardShortcut(keyEvent);
+        if(!other.isValid) return;
+
+        if(
+            other.hasShift == this.hasShift
+            && other.hasAlt == this.hasAlt
+            && other.hasControl == this.hasControl
+            && other.keyName == this.keyName
+            ){
+                return true;
+            }
+        return false;
+    }
 }
 
 const convertFromDb = async fromDb => {
@@ -140,13 +151,28 @@ export class DBKeyboardShortcut{
         shortcutAndCommand.command = shortcutAndCommand.command.constructor.name;
         await this.db.shortcuts.put({key,json:JSON.stringify(shortcutAndCommand)});
     }
+    async removeSingle(shortcut){
+        const key = shortcut.toString();
+        await this.db.shortcuts.delete(key);
+    }
+    async removeSingleByCommand(command){
+        if(!command) return;
+
+        const all = await this.getAll();
+        const toRemove = all.find(shortcutAndCommand => shortcutAndCommand.command.matches(command));
+        if(!toRemove) return;
+
+        return await this.removeSingle(toRemove.shortcut);
+    }
     async getAll(){
-        const commandApi = await import("../command/command.js")
         const array = await this.db.shortcuts.toArray();
         const shortcutsAndcommands = Promise.all(array.map(convertFromDb));
         return shortcutsAndcommands;
     }
     async getCommand(shortcut){
+        if(!Util.isType(shortcut,"KeyboardShortcut")){
+            shortcut = new KeyboardShortcut(shortcut);
+        }
         const fromDb = await this.db.shortcuts.get(shortcut.toString());
         const shortcutAndCommand = await convertFromDb(fromDb);
         return shortcutAndCommand.command;

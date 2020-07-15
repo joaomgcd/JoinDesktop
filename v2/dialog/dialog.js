@@ -25,10 +25,13 @@ export class DialogProgress extends Dialog{
     }
 }
 export class DialogOk extends Dialog{
-    constructor({title,text,showCancel}){
+    
+    constructor({title,text,showCancel,buttons,buttonsDisplayFunc}){
         super()
         this.title = title;
         this.text = text;
         this.showCancel = showCancel;
+        this.buttons = buttons;
+        this.buttonsDisplayFunc = buttonsDisplayFunc;
     }
 }

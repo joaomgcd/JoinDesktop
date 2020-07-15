@@ -56,10 +56,38 @@ const createHelperWithDeviceArgs = async ({app,deviceId,deviceGetter,deviceSette
     }
     return {app,device};
 }
+let currentShortcuts = null;
+const handleKeyboardShortcutEvents = e =>{
+    const shortcutsAndCommands = currentShortcuts;
+    if(!shortcutsAndCommands) return;
+
+    const matching = shortcutsAndCommands.find(shortcutAndCommand => shortcutAndCommand.shortcut.matches(e));
+    if(!matching) return;
+
+    UtilDOM.preventEventPropagation(e);
+    EventBus.post(matching,"ShortcutPressed");
+}
+const lastSelectedDeviceKey = "lastSelectedDeviceIdKey";
 export class App{
     constructor(rootElement){
         this.rootElement = rootElement;
         this.rootElement.innerHTML = "";
+    }
+    get lastSelectedDevice(){
+        return (async () => {
+            const { AppContext } = await import("./appcontext.js");
+            const lastDeviceId = AppContext.context.localStorage.get(lastSelectedDeviceKey);
+            const device = await this.getDevice(lastDeviceId);
+            return device;
+        })();
+    }
+    set lastSelectedDevice(device){
+        (async () => {
+            if(!device) return;
+
+            const { AppContext } = await import("./appcontext.js");
+            AppContext.context.localStorage.set(lastSelectedDeviceKey,device.deviceId);
+        })();
     }
     get contentElement(){
         return this._contentElement;
@@ -141,17 +169,58 @@ export class App{
             
         }
     }
-    async loadShortcuts(){}
+    get configuredShortcutsAndCommands(){
+        return (async ()=>{            
+            const {DBKeyboardShortcut} = await import("./keyboard/keyboardshortcut.js");
+            const dbShortcuts = new DBKeyboardShortcut(this.db);
+            let shortcutsAndCommands = await dbShortcuts.getAll();
+            if(!shortcutsAndCommands){
+                shortcutsAndCommands = []
+            }
+            return shortcutsAndCommands;
+        })();
+    }
+    async addKeyboardShortcutAndCommand(shortcutAndCommand){
+        if(!shortcutAndCommand) return;
 
-    async onShortcutConfigured(shortcutAndCommand){
-        shortcutAndCommand.command = shortcutAndCommand.command.constructor.name;
-        console.log("Configured shortcut",shortcutAndCommand);
+        const {DBKeyboardShortcut} = await import("./keyboard/keyboardshortcut.js");
+        const dbShortcut = new DBKeyboardShortcut(this.db);
+        await dbShortcut.updateSingle(shortcutAndCommand);
         await this.loadShortcuts()
     }
+    async removeKeyboardShortcut(shortcut){
+        if(!shortcut) return;
+
+        const {DBKeyboardShortcut} = await import("./keyboard/keyboardshortcut.js");
+        const dbShortcut = new DBKeyboardShortcut(this.db);
+        await dbShortcut.removeSingle(shortcut);
+        await this.loadShortcuts()
+    }
+    async removeKeyboardShortcutByCommand(command){
+        if(!command) return;
+
+        const {DBKeyboardShortcut} = await import("./keyboard/keyboardshortcut.js");
+        const dbShortcut = new DBKeyboardShortcut(this.db);
+        await dbShortcut.removeSingleByCommand(command);
+        await this.loadShortcuts()
+    }
+    async getKeyboardShortcutCommand(shortcut){
+        const {DBKeyboardShortcut} = await import("./keyboard/keyboardshortcut.js");
+        const dbShortcut = new DBKeyboardShortcut(this.db);
+        return await dbShortcut.getCommand(shortcut);
+    }
+    async loadShortcuts(){ 
+        const shortcutsAndCommands = await this.configuredShortcutsAndCommands;
+        if(shortcutsAndCommands.length == 0) return;
+
+        currentShortcuts = shortcutsAndCommands;
+
+        window.addEventListener("keydown",handleKeyboardShortcutEvents);
+    }
+
     async onShortcutPressed(shortcutPressed){        
         let shortcut = shortcutPressed.shortcut;
-        const { AppHelperDevices } = await import("./device/apphelperdevices.js");
-        const device = await AppHelperDevices.lastSelectedDevice;
+        const device = await this.lastSelectedDevice;
         if(!device){
             alert("Please select a device before running a shortcut");
             return;
@@ -314,7 +383,7 @@ export class App{
         } 
   
     }
-    get hideSendTabCommand(){
+    get hideBookmarklets(){
         return false;
     }
     get gcmHandler(){

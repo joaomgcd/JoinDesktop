@@ -26,3 +26,4 @@ dist/win-unpacked
 .DS_Store
 dist/squirrel-windows/com.joaomgcd.join-0.0.1-full.nupkg
 dist/squirrel-windows/RELEASES
+**.nupkg

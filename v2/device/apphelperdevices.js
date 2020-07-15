@@ -13,24 +13,7 @@ import { Devices } from "./device.js";
 /** @type {App} */
 let app = null;
 
-const lastSelectedDeviceKey = "lastSelectedDeviceIdKey";
 export class AppHelperDevices extends AppHelperBase{
-    static get lastSelectedDevice(){
-        return (async () => {
-            const { AppContext } = await import("../appcontext.js");
-            const lastDeviceId = AppContext.context.localStorage.get(lastSelectedDeviceKey);
-            const device = await app.getDevice(lastDeviceId);
-            return device;
-        })();
-    }
-    static set lastSelectedDevice(device){
-        (async () => {
-            if(!device) return;
-
-            const { AppContext } = await import("../appcontext.js");
-            const lastDeviceId = AppContext.context.localStorage.set(lastSelectedDeviceKey,device.deviceId);
-        })();
-    }
     constructor(args = {app,allowUnsecureContent}){
         super(args.app);
         app = args.app;
@@ -71,7 +54,7 @@ export class AppHelperDevices extends AppHelperBase{
         await app.addElement(this.controlDevices,elementDevicesTabRoot);
         this.controlDevices.hideNoDevices();
 
-        this.controlCommands = new ControlCommands({hideSendTab:app.hideSendTabCommand});
+        this.controlCommands = new ControlCommands({hideBookmarklets:app.hideBookmarklets,shortcutsAndCommands:await app.configuredShortcutsAndCommands});
         await app.addElement(this.controlCommands,elementDevicesTabRoot);
         if(devices.length == 0){
             UtilDOM.hide(this.controlCommands);
@@ -84,18 +67,34 @@ export class AppHelperDevices extends AppHelperBase{
         const command = keyboardShortcutClicked.command;
         if(!command) return;
 
+        const {ControlDialogOk} = await import("../dialog/controldialog.js");
+        const existingShortcutForCommand = (await app.configuredShortcutsAndCommands).find(shortcutAndCommand => shortcutAndCommand.command.matches(command));
+        if(existingShortcutForCommand){
+            const buttons = [
+                {text:"Delete", shouldDelete:true},
+                {text:"Replace", shouldDelete:true, shouldConfigure:true},
+                {text:"Keep"}
+            ];
+            const button = (await ControlDialogOk.showAndWait({title:"Existing shortcut",text:"Command already has a shortcut. What do you want to do?",buttons,buttonsDisplayFunc:button => button.text})) || {};
+            if(button.shouldDelete){
+                await app.removeKeyboardShortcut(existingShortcutForCommand.shortcut);
+                await this.updateKeyboardShortcutsOnCommands();
+            }
+            if(!button.shouldConfigure) return;
+        }
         const {ControlKeyboardShortcut} = await import("../keyboard/keyboardshortcut.js");
         const shortcut = await ControlKeyboardShortcut.setupNewShortcut();
         if(!shortcut) return;
 
         const shortcutAndCommand = new ShortcutConfigured({shortcut,command});
-        const {DBKeyboardShortcut} = await import("../keyboard/keyboardshortcut.js");
-        const dbShortcut = new DBKeyboardShortcut(app.db);
-        await dbShortcut.updateSingle(shortcutAndCommand);
-        await EventBus.post(shortcutAndCommand);
+        await app.addKeyboardShortcutAndCommand(shortcutAndCommand);
 
-        const {ControlDialogOk} = await import("../dialog/controldialog.js");
+        await this.updateKeyboardShortcutsOnCommands();
         await ControlDialogOk.showAndWait({title:"Shortcut Configured!",text:`Press ${shortcut} to run the ${command.getText()} command on the last selected device!`});
+    }
+    async updateKeyboardShortcutsOnCommands(){
+        this.controlCommands.shortcutsAndCommands = await app.configuredShortcutsAndCommands;
+        await this.controlCommands.render();
     }
     updateUrl(){
         Util.changeUrl(`?devices`);
@@ -255,7 +254,7 @@ export class AppHelperDevices extends AppHelperBase{
 
         const device = controlDevice.device;
 
-        AppHelperDevices.lastSelectedDevice = device;
+        app.lastSelectedDevice = device;
         if(this.apiBuilder){
             this.apiBuilder.device = device;
         }

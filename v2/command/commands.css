@@ -81,6 +81,7 @@
         box-shadow: none;
         text-transform: none;
         color: unset;
+        position: relative;
     }
     .devicebutton:hover{
         background-color: var(--theme-background-color-hover);
@@ -120,6 +121,14 @@
         visibility: hidden;
         opacity: 0.25;
     }
+    .commandkeyboardshortcut.configured{
+        visibility:visible;
+        opacity: 1;
+    }
+    .commandkeyboardshortcut.configured:hover + .commandkeyboardshortcuttext{
+        display:block;
+        opacity: 1;
+    }
     .commandkeyboardshortcut:hover{
         opacity: 1;
     }
@@ -128,6 +137,15 @@
     }
     .devicebutton.disabled:hover .commandkeyboardshortcut{
         visibility:hidden;
+    }
+    .commandkeyboardshortcuttext{
+        display: none;
+    }
+    .commandkeyboardshortcuttext{
+        position: absolute;
+        display: none;
+        right: 0px;
+        top: -8px;
     }
 }
 @media only screen and (min-width: 1170px) {    
