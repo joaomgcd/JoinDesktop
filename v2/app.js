@@ -271,8 +271,8 @@ export class App{
         this.menuEntryDevices = new MenuEntry({
             id:"devices",
             label:"Devices",
-            js:'./device/apphelperdevices.js',
-            clazz:"AppHelperDevices",
+            js:this.deviceHelperSettingsFile,
+            clazz:this.deviceHelperSettingsClassName,
             load: async ()=>{
                 return {app:this,allowUnsecureContent:this.allowUnsecureContent};
             },
@@ -281,8 +281,8 @@ export class App{
         this.menuEntrySms = new MenuEntry({
             id:"sms",
             label:"SMS",
-            js:'./sms/apphelpersms.js',
-            clazz:"AppHelperSMS",
+            js:this.SMSHelperSettingsFile,
+            clazz:this.SMSHelperSettingsClassName,
             load: async (deviceId=null)=>{
                 return await createHelperWithDeviceArgs({app:this,deviceId,deviceGetter:async ()=>await this.smsDevice,deviceSetter:device=>{this.smsDevice = device},messageSufix:"send SMS messages"});
             },
@@ -291,8 +291,8 @@ export class App{
         this.menuEntryNotifications = new MenuEntry({
             id:"notifications",
             label:"Notifications",
-            js:'./notification/apphelpernotifications.js',
-            clazz:"AppHelperNotifications", 
+            js:this.notificationsHelperSettingsFile,
+            clazz:this.notificationsHelperSettingsClassName, 
             load: async (deviceId=null)=>{
                 return await createHelperWithDeviceArgs({app:this,deviceId,deviceGetter:async ()=>await this.notificationsDevice,deviceSetter:device=>{this.notificationsDevice = device},messageSufix:"sync notifications"});
             },
@@ -301,8 +301,8 @@ export class App{
         this.menuEntryMedia = new MenuEntry({
             id:"media",
             label:"Media",
-            js:'./media/apphelpermedia.js',
-            clazz:"AppHelperMedia", 
+            js:this.mediaHelperSettingsFile,
+            clazz:this.mediaHelperSettingsClassName, 
             load: async ()=>{
                 return {app:this};
             },
@@ -311,8 +311,8 @@ export class App{
         this.menuEntryFiles = new MenuEntry({
             id:"files",
             label:"Files",
-            js:'./files/apphelperfiles.js',
-            clazz:"AppHelperFiles", 
+            js:this.filesHelperSettingsFile,
+            clazz:this.filesHelperSettingsClassName, 
             load: async (deviceId=null)=>{
                 return await createHelperWithDeviceArgs({app:this,deviceId,deviceGetter:async ()=>await this.filesDevice,deviceSetter:device=>{this.filesDevice = device},messageSufix:"view files on"});
             },
@@ -321,8 +321,8 @@ export class App{
         this.menuEntryPushHistory = new MenuEntry({
             id:"pushhistory",
             label:"Push History",
-            js:'./pushhistory/apphelperpushhistory.js',
-            clazz:"AppHelperPushHistory", 
+            js:this.pushHistoryHelperSettingsFile,
+            clazz:this.pushHistoryHelperSettingsClassName, 
             load: async (deviceId=null)=>{
                 return await createHelperWithDeviceArgs({app:this,deviceId,deviceGetter:async ()=>await this.pushHistoryDevice,deviceSetter:device=>{this.pushHistoryDevice = device},messageSufix:"view push history of"});
             },
@@ -331,8 +331,8 @@ export class App{
         this.menuEntrySettings = new MenuEntry({
             id:"settings",
             label:"Settings",
-            js:this.helperSettingsFile,
-            clazz:this.helperSettingsClassName, 
+            js:this.settingsHelperFile,
+            clazz:this.settingsHelperClassName, 
             load: async (d)=>{
                 return {app:this};
             },
@@ -395,10 +395,46 @@ export class App{
             return this._gcmHandler;
         })();
     }
-    get helperSettingsFile(){
+    get deviceHelperSettingsFile(){
+        return './device/apphelperdevices.js';
+    }
+    get deviceHelperSettingsClassName(){
+        return 'AppHelperDevices';
+    }
+    get SMSHelperSettingsFile(){
+        return './sms/apphelpersms.js';
+    }
+    get SMSHelperSettingsClassName(){
+        return 'AppHelperSMS';
+    }
+    get notificationsHelperSettingsFile(){
+        return './notification/apphelpernotifications.js';
+    }
+    get notificationsHelperSettingsClassName(){
+        return 'AppHelperNotifications';
+    }
+    get mediaHelperSettingsFile(){
+        return './media/apphelpermedia.js';
+    }
+    get mediaHelperSettingsClassName(){
+        return 'AppHelperMedia';
+    }
+    get filesHelperSettingsFile(){
+        return './files/apphelperfiles.js';
+    }
+    get filesHelperSettingsClassName(){
+        return 'AppHelperFiles';
+    }
+    get pushHistoryHelperSettingsFile(){
+        return './pushhistory/apphelperpushhistory.js';
+    }
+    get pushHistoryHelperSettingsClassName(){
+        return 'AppHelperPushHistory';
+    }
+    get settingsHelperFile(){
         return './settings/apphelpersettings.js';
     }
-    get helperSettingsClassName(){
+    get settingsHelperClassName(){
         return 'AppHelperSettings';
     }
     async chooseHelperFromQueryParameters(menu){
