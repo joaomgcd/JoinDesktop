@@ -1,5 +1,5 @@
 import { Control } from "../control.js";
-import { SettingTextInput, SettingSingleOption, SettingColor, SettingKeyboardShortcut } from "./setting.js";
+import { SettingTextInput, SettingSingleOption, SettingColor, SettingKeyboardShortcut, SettingMultipleDevices } from "./setting.js";
 import { UtilDOM } from "../utildom.js";
 import { EventBus } from "../eventbus.js";
 
@@ -30,6 +30,9 @@ export class ControlSettings extends Control{
     async update(setting){
         const controlSetting = this.controlsSettings.find(controlSetting=>controlSetting.setting.id == setting.id);
         await controlSetting.render();
+    }
+    async getSetting(id){
+        return this.controlsSettings.find(controlSetting=>controlSetting.setting.id == id);
     }
 }
 export class ControlSetting extends Control{
@@ -73,8 +76,8 @@ export class ControlSetting extends Control{
         
 
         this.settingContentElement.innerHTML = "";
-        const controlSettingContent = await ControlSetting.getControlSettingContent(this.setting);
-        const render = await controlSettingContent.render();
+        this.content = await ControlSetting.getControlSettingContent(this.setting);
+        const render = await this.content.render();
         this.settingContentElement.appendChild(render);
         
     }
@@ -90,6 +93,9 @@ export class ControlSetting extends Control{
         }
         if(Util.isSubTypeOf(setting,SettingKeyboardShortcut)){
             return new ControlSettingKeyboardShortcut(setting);
+        }
+        if(Util.isSubTypeOf(setting,SettingMultipleDevices)){
+            return new ControlSettingMultipleDevices(setting);
         }
         let type = Util.getType(setting);
         const typeFromSetting = (await import("./setting.js"))[type].controlType;
@@ -266,6 +272,37 @@ export class ControlSettingKeyboardShortcut extends ControlSettingContent{
         this.deleteElement.onclick = async () => {
             await EventBus.post(new SettingSaved(this.setting,null));
         }
+    }
+}
+export class ControlSettingMultipleDevices extends ControlSettingContent{
+    /**
+     * 
+     * @param {SettingMultipleDevices} setting
+     */
+    constructor(setting){
+        super(setting)
+    }
+    getHtml(){
+        return `
+        <div class="settingdevices">
+        </div>
+        `
+    }
+    getStyle(){
+        return `
+           
+        `
+    }
+   
+    async renderSpecific({root}){
+        this.settingElement = root;
+        
+        this.settingElement.innerHTML = "";
+        const {ControlDevices} = await import("../device/controldevice.js");
+        const selectedIds = await this.setting.value;
+        this.controlDevices = new ControlDevices({devices:this.setting.devices,selectedIdOrIds:selectedIds});
+        const devicesElement = await this.controlDevices.render();
+        this.settingElement.appendChild(devicesElement);
     }
 }
 class SettingSaved{

@@ -144,7 +144,7 @@ export class AppHelperSettings extends AppHelperBase{
         app.controlTop.loading = false;      
         app.controlTop.shouldAlwaysShowImageRefresh = false;  
 
-        this.controlSettings = this.settingsList;
+        this.controlSettings = await this.settingsList;
         await app.addElement(this.controlSettings);
 
         if(this.connectoport){

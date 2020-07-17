@@ -272,3 +272,31 @@ export class SettingKeyboardShortcutShowWindow extends SettingKeyboardShortcut{
         })
     }
 }
+export class SettingMultipleDevices extends Setting{
+    constructor(args){
+        super(args)
+    }
+}
+export class SettingClipboardSync extends SettingMultipleDevices{
+    static get id(){
+        return "clipboardSync";
+    }
+    get value(){
+        return (async () => {
+            let stringValue = await super.value
+            if(!stringValue) return [];
+
+            return stringValue.split(",");
+        })();
+    }
+    set value(toSet){
+        super.value = toSet.join(",");
+    }
+    constructor(args = {devices}){
+        super({
+            id:SettingClipboardSync.id,
+            label:"Automatically Send Clipboard To",
+            devices: args.devices.filter(device=>device.canSyncClipboardTo())
+        })
+    }
+}

@@ -184,6 +184,13 @@ class Server{
     }
     async onGCMAutoClipboard(gcm){
         this.clipboardChecker.setClipboardText(gcm.text);
+        const notification = new ServerNotification({
+            id:"autoclipboard",
+            title:"Clipboard Automatically Set",
+            text:gcm.text
+        });
+        notification.show().catch(error=>console.log("onGCMAutoClipboard Notification error",error));
+
     }
     async onCloseAppClicked(){
         app.quit();

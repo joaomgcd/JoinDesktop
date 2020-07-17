@@ -6,7 +6,7 @@ import './v2/extensions.js';
 import { App,RequestLoadDevicesFromServer } from "./v2/app.js";
 import {AppHelperSettings} from "./v2/settings/apphelpersettings.js"
 import { ControlSettings } from "./v2/settings/controlsetting.js";
-import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort } from "./v2/settings/setting.js";
+import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync } from "./v2/settings/setting.js";
 import { AppGCMHandler } from "./v2/gcm/apphelpergcm.js";
 import { ControlDialogInput, ControlDialogOk } from "./v2/dialog/controldialog.js";
 import { AppContext } from "./v2/appcontext.js";
@@ -134,17 +134,21 @@ class ServerEventBus{
 export class AppHelperSettingsDashboard extends AppHelperSettings{
     constructor(args = {app}){
         super(args);
+        this.app = args.app;
     }
     get settingsList(){
-        return  new ControlSettings([
-            new SettingCompanionAppPortToReceive(),
-            new SettingEventGhostNodeRedPort(),
-            new SettingEncryptionPassword(),
-            new SettingTheme(),
-            new SettingThemeAccentColor(),
-            new SettingKeyboardShortcutLastCommand(),
-            new SettingKeyboardShortcutShowWindow()
-        ]);
+        return (async () => {
+            return new ControlSettings([
+                new SettingCompanionAppPortToReceive(),
+                new SettingEventGhostNodeRedPort(),
+                new SettingEncryptionPassword(),
+                new SettingTheme(),
+                new SettingThemeAccentColor(),
+                new SettingKeyboardShortcutLastCommand(),
+                new SettingKeyboardShortcutShowWindow(),
+                new SettingClipboardSync({devices:(await this.app.devicesFromDb)})
+            ]);
+        })();
     }
     async load(){
         await super.load();
@@ -164,6 +168,18 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
         }
         await super.onSettingSaved(settingSaved);
         this.setOpenWebAppListener();
+    }
+    async manageSelectedDevices(wasClick){
+        if(!wasClick) return;
+
+        const controlsetting = await this.controlSettings.getSetting(SettingClipboardSync.id);
+        controlsetting.setting.value = controlsetting.content.controlDevices.currentSelectedDeviceIds
+    }
+    async onSelectedDevice({controlDevice,wasClick}){
+        await this.manageSelectedDevices(wasClick);
+    }
+    async onUnselectedDevice({controlDevice,wasClick}){
+        await this.manageSelectedDevices(wasClick);
     }
 }
 class RequestToggleDevOptions{}
@@ -307,7 +323,16 @@ export class AppDashboard extends App{
         ServerEventBus.post(gcm);
     }
     async onClipboardChanged(clipboardChanged){
-        console.log("Sending auto clipboard", clipboardChanged.text);
+        const setting = new SettingClipboardSync({devices:(await this.devicesFromDb)});
+        const deviceIdsToSendTo = await setting.value;
+        if(deviceIdsToSendTo.length == 0) return;
+
+        const { GCMAutoClipboard } = await import("./v2/gcm/gcmapp.js");
+        const gcm = new GCMAutoClipboard();
+        gcm.text = await Encryption.encrypt(clipboardChanged.text);
+        const devices = await this.getDevices(deviceIdsToSendTo);
+        console.log("Sending auto clipboard", gcm, devices);
+        await devices.send(gcm);
     }
     get isBrowserRegistered(){
         return true;

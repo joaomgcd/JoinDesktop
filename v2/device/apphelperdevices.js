@@ -50,7 +50,13 @@ export class AppHelperDevices extends AppHelperBase{
                 }
             }
         `);
-        this.controlDevices = new ControlDevices(devices);
+        let selectedId = null;
+        const lastSelected = await app.lastSelectedDevice;
+        if(lastSelected){
+            selectedId = lastSelected.deviceId;
+        }
+        this.controlDevices = new ControlDevices({devices,selectedIdOrIds:selectedId,hasToHaveSelection:true});
+        
         await app.addElement(this.controlDevices,elementDevicesTabRoot);
         this.controlDevices.hideNoDevices();
 

@@ -3,19 +3,24 @@ import { UtilDOM } from '../utildom.js';
 import { AppContext } from '../appcontext.js';
 import { EventBus } from '../eventbus.js';
 
-const selectedDeviceKey = "selectedDeviceId"
 export class ControlDevices extends Control {
-    constructor(devices){
+    constructor({devices,selectedIdOrIds,hasToHaveSelection}){
         super();
+        this.selectedDeviceIdOrIds = selectedIdOrIds;
         this.devices = devices;
+        this.hasToHaveSelection = hasToHaveSelection;
+    }
+    
+    get isMultiple(){
+        return Util.isArray(this.selectedDeviceIdOrIds);
     }
     set devices(devices){
         this._devices = devices;
-        const selectedDeviceId = AppContext.context.localStorage.get(selectedDeviceKey);
+        const selectedDeviceIdOrIds = this.selectedDeviceIdOrIds;
         var anySelected = false;
         this.deviceControls = devices.map(device=>{
             const controlDevice = new ControlDevice(device);
-            const isSelected = device.deviceId == selectedDeviceId;
+            const isSelected = this.isMultiple ? selectedDeviceIdOrIds.includes(device.deviceId) : device.deviceId == selectedDeviceIdOrIds;
             controlDevice.setIsSelected(isSelected);
             if(isSelected){
                 anySelected = true;
@@ -26,7 +31,7 @@ export class ControlDevices extends Control {
             this.setSelectedDevice(null);
             return;
         }
-        if(!anySelected){
+        if(!anySelected && this.hasToHaveSelection){
             this.setSelectedDevice(this.deviceControls[0]);
         }
     }
@@ -54,14 +59,30 @@ export class ControlDevices extends Control {
         return "./v2/device/devices.css";
     }
     setSelectedDevice(deviceControl,wasClick){
-        this.deviceControls.forEach(deviceControl=>deviceControl.setIsSelected(false));
+        if(!this.isMultiple || !deviceControl){
+            this.deviceControls.forEach(deviceControl=>deviceControl.setIsSelected(false));
+        }
         if(!deviceControl){
-            AppContext.context.localStorage.delete(selectedDeviceKey);
             EventBus.postSticky(new SelectedDevice(null));
+            this.selectedDeviceIdOrIds = this.isMultiple ? [] : null;
             return;
         }
-        deviceControl.setIsSelected(true,wasClick);
-        AppContext.context.localStorage.set(selectedDeviceKey,deviceControl.device.deviceId);
+        const isSelected = this.isMultiple ? !deviceControl.isSelected : true;
+        deviceControl.setIsSelected(isSelected,wasClick);
+        this.selectedDeviceIdOrIds = this.isMultiple ? this.currentSelectedDeviceIds : deviceControl.device.deviceId;
+    }
+    set currentSelectedDeviceIds(value){
+        this.selectedDeviceIdOrIds = value;
+    }
+    get currentSelectedDeviceIds(){
+        if(!this.deviceControls) return [];
+
+        const selectedDeviceControls = this.deviceControls.filter(deviceControl=>deviceControl.isSelected);
+        const selectedIds = [];
+        for(const deviceControl of selectedDeviceControls){
+            selectedIds.push(deviceControl.device.deviceId);
+        }
+        return selectedIds;
     }
     async renderSpecific({root}){
         this.devicesControl = await this.$("#devices");
@@ -126,7 +147,7 @@ export class ControlDevice extends Control{
         this.deviceLocalNetworkElement = await this.$(".devicelocalnetworkcontainer");
         this.deviceWarningElement = await this.$(".devicewarningcontainer");
 
-        this.deviceNameElement.innerHTML = this.device.deviceName;
+        this.deviceNameElement.innerHTML = this.device.isMyDevice ? `This Device (${this.device.deviceName})` : this.device.deviceName;
         this.deviceIconElement.src = this.device.getIcon();
         await this.setIsSelected(this.isSelected);
         this.updateLocalNetwork();
@@ -153,11 +174,18 @@ export class ControlDevice extends Control{
             await EventBus.postSticky(new SelectedDevice(this,wasClick));
             this.root.classList.add("selecteddevice");
         }else{            
+            await EventBus.postSticky(new UnselectedDevice(this,wasClick));
             this.root.classList.remove("selecteddevice");
         }
     }
 }
 class SelectedDevice {
+	constructor(controlDevice,wasClick){
+        this.controlDevice = controlDevice;
+        this.wasClick = wasClick;
+	}
+}
+class UnselectedDevice {
 	constructor(controlDevice,wasClick){
         this.controlDevice = controlDevice;
         this.wasClick = wasClick;

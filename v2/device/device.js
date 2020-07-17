@@ -627,9 +627,6 @@ export class Device{
 			for(const prop in deviceRaw){
 				device[prop] = deviceRaw[prop];
 			}
-			if(device.isMyDevice){
-				device.deviceName = "This Device";
-			}
 		}
 		return device;
 	}
@@ -674,6 +671,9 @@ export class Device{
 	}
 	canTakeScreenshot(){
 		return false;
+	}
+	canSyncClipboardTo(){
+		return !this.isMyDevice && !this.isShared;
 	}
 	canTakeScreenCapture(){
 		return this.canTakeScreenshot();
@@ -917,7 +917,11 @@ export class DeviceAndroidPhone extends Device{
 export class DeviceIPhone extends Device{
 	getIcon(){
 		return "./images/iphone.png";
- 	}
+	 }
+	 
+	canSyncClipboardTo(){
+		return false;
+	}
 }
 
 export class DeviceAndroidTablet extends Device{
@@ -934,6 +938,10 @@ export class DeviceAndroidTablet extends Device{
 export class DeviceIPad extends Device{
 	getIcon(){
 		return "./images/ipad.png";
+	}
+	 
+	canSyncClipboardTo(){
+		return false;
 	}
 }
 export class DeviceChrome extends Device{
@@ -964,6 +972,10 @@ export class DeviceWindows10 extends Device{
 	canShowPushHistory(){
 		return !this.isShared;
 	}
+	 
+	canSyncClipboardTo(){
+		return false;
+	}
 }
 
 export class DeviceIFTTT extends Device{
@@ -987,6 +999,10 @@ export class DeviceIFTTT extends Device{
 	}
 	getTaskerCommandText(device){
 		return "Maker Event";
+	}	
+	 
+	canSyncClipboardTo(){
+		return false;
 	}
 }
 export class DeviceIP extends Device {
@@ -1010,6 +1026,10 @@ export class DeviceIP extends Device {
 	}
 	getTaskerCommandText(device){
 		return "Command";
+	}
+	 
+	canSyncClipboardTo(){
+		return false;
 	}
 }
 
@@ -1035,12 +1055,20 @@ export class DeviceMqtt extends Device{
 	getTaskerCommandText(device){
 		return "Command";
 	}
+	 
+	canSyncClipboardTo(){
+		return false;
+	}
 }
 export class DeviceBrowser extends Device{
 	getIcon(){
 		return "./images/firefox.png";
 	}
 	canBeFound(){
+		return false;
+	}
+	 
+	canSyncClipboardTo(){
 		return false;
 	}
 }

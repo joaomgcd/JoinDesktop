@@ -64,20 +64,24 @@
 }
 .filedragover{
     padding: 8px;
+    display: none;
+}
+#devicestabroot .filedragover{
+    display: block;
 }
 
 @media only screen and (min-width: 600px) {
-    #devices{
+    #devicestabroot #devices{
         width: 220px;
     }
 }
 @media only screen and (min-width: 1300px) {    
-    #devices{
+    #devicestabroot #devices{
         width: 400px;
     }
 }
 @media only screen and (min-width: 1500px) {    
-    #devices{
+    #devicestabroot #devices{
         width: 600px;
     }
 }

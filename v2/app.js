@@ -611,6 +611,12 @@ export class App{
         const devices = await this.devicesFromDb;
         return devices.getDevice(deviceId);
     }
+    async getDevices(deviceIds){
+        const {Devices} = await import("./device/device.js");
+        if(!deviceIds || !deviceIds.length) return new Devices([]);
+        const array = await Promise.all(deviceIds.map(async deviceId => await this.getDevice(deviceId)));
+        return new Devices(array);
+    }
     
     get db(){ 
         return DB.get();
