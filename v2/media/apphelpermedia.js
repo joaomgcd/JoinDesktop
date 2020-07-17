@@ -135,6 +135,7 @@ export class AppHelperMedia extends AppHelperBase{
         await this.updateMediaInfo(mediaInfo);
     }
     async updateMediaInfos(mediaInfos){
+        if(!mediaInfos) return;
         if(!this.controlMediaInfos) return;
         
         // const device = mediaInfos.device;
@@ -171,6 +172,8 @@ export class AppHelperMedia extends AppHelperBase{
         await mediaInfos.convertArtToBase64(await app.getAuthToken());
         await this.dbMedia.updateAll(device.deviceId,mediaInfos);
         const latest = mediaInfos.latest;
+        if(!latest) return;
+
         await this.updateMediaInfo(latest);
     }
     async onMediaAppNamePressed(mediaAppNamePressed){
