@@ -80,8 +80,7 @@ export class ServerNotification{
             this.icon = await UtilServer.getServerFilePath("../images/join.png");
         }
         return await new Promise((resolve,reject)=>{
-            console.log("Showing notification",this);
-            notifier.notify(this,(err, action, metadata) => { 
+            const callback = (err, action, metadata) => { 
                 try{
                 if(!action || action == "timeout" || action == "dismissed") {
                     console.log("Ignoring Notification action",action,metadata);  
@@ -110,7 +109,11 @@ export class ServerNotification{
                         UtilServer.deleteFile(this.icon);
                     }
                 }
-            });
+            };
+            console.log("Showing notification",this);
+            // const Growl = require('node-notifier/notifiers/growl');
+            // new Growl().notify(this,callback);
+            notifier.notify(this,callback);
         })
     }
     static show(args){

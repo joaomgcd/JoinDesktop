@@ -145,3 +145,4 @@ class GCMMediaInfo extends GCMServer{
 }
 class GCMNotification extends GCMServer{}
 class GCMDeviceNotOnLocalNetwork extends GCMServer{}
+class GCMRespondFile extends GCMServer{}

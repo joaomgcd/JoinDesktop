@@ -89,7 +89,9 @@ export class Control {
         return (await this.getElement()).querySelector(query);
     }
     
-    $ = this.querySelector;
+    $(query){
+        return this.querySelector(query);
+    }
     async getElement(){
         if(this.element) return this.element;
 

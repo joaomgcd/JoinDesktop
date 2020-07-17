@@ -843,11 +843,11 @@ export class Device{
 					EventBus.post(new WebSocketGCM(gcmRaw));
 				}
 				this.socket.onclose = e => {
-					console.log("Socket closed",e);
+					console.log("Socket closed",e,this);
 					socketDisconnected();
 				}
 				this.socket.onerror = e => {
-					console.log("Socket error",e);
+					console.log("Socket error",e,this);
 					socketDisconnected();
 				}
 				const gcmSocketTest = new GCMWebSocketRequest();
