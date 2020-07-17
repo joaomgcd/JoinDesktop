@@ -3,6 +3,15 @@ import { UtilServer } from './serverutil.js';
 
 const { nativeImage , Notification } = require('electron')
 const notifier = require('node-notifier');
+const stringHash = str => {
+    var hash = 0, i, chr;
+    for (i = 0; i < str.length; i++) {
+      chr   = str.charCodeAt(i);
+      hash  = ((hash << 5) - hash) + chr;
+      hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
+  }
 export class ServerNotification{
     // constructor(args){
     //     Object.assign(this,args);
@@ -64,13 +73,14 @@ export class ServerNotification{
         delete this.appName;
         // this.appName = "Join";      
         if(this.icon){
-            this.icon = await UtilServer.imageToFilePath(this.id||"tempfile.png",this.icon,this.authToken);
+            const fileName = this.id ? `${stringHash(this.id)}.png` : "tempfile.png";
+            this.icon = await UtilServer.imageToFilePath(fileName,this.icon,this.authToken);
             this.deleteIcon = true;
         }else{
             this.icon = await UtilServer.getServerFilePath("../images/join.png");
         }
         return await new Promise((resolve,reject)=>{
-            // console.log("Showing notification",this);
+            console.log("Showing notification",this);
             notifier.notify(this,(err, action, metadata) => { 
                 try{
                 if(!action || action == "timeout" || action == "dismissed") {

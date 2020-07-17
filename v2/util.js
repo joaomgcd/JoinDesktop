@@ -126,6 +126,9 @@ class Util{
             return null;
         }
     }
+    static getCurrentUrl(){
+        return self.location.href;
+    }
     static redirectToHttpsIfNeeded(){        
         const currentUrl = window.location.href;
         if(currentUrl.startsWith("https") || currentUrl.includes("localhost")) return;

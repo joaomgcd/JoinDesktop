@@ -143,3 +143,5 @@ class GCMMediaInfo extends GCMServer{
 		return await GCMMediaInfoBase.handleNotificationClick(this,action,url=>console.log("Opening window",url));
 	}
 }
+class GCMNotification extends GCMServer{}
+class GCMDeviceNotOnLocalNetwork extends GCMServer{}

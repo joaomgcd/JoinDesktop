@@ -88,12 +88,13 @@ const handleConnectingToDesktopApp = async (setting,value) => {
     }finally{                
         await dialog.dispose();
     }
+    return value;
 }
 const handleSavingKeyboardShortcut = async (setting,value) => {
     const isLastCommand = setting.id == SettingKeyboardShortcutLastCommand.id;
     const isShowWindow = setting.id == SettingKeyboardShortcutShowWindow.id;
     if(!isLastCommand && !isShowWindow) return value;
-    
+
     let shortcutAndCommand = null;
     const command = await setting.command;
     const remove = async () => await app.removeKeyboardShortcutByCommand(command);

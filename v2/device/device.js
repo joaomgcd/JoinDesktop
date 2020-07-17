@@ -736,7 +736,9 @@ export class Device{
 	}
 	async setToRemoteNetwork(requestUpdate){
 		this.canContactViaLocalNetwork = false;
-		this.tentativeLocalNetworkServerAddress = null;
+		if(!Util.getCurrentUrl().startsWith("http")){
+			this.tentativeLocalNetworkServerAddress = null;
+		}
 		this.socket = null;
 		if(!requestUpdate) return;
 
