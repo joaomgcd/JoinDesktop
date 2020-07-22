@@ -20,7 +20,7 @@ export class DevicesServer{
         if(!deviceId) return;
 
         const device = await DevicesServer.devices.getDevice(deviceId);
-        console.log("Found device",device);
+        // console.log("Found device",device);
         return device;
     }
 }

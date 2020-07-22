@@ -151,6 +151,13 @@ export class SenderLocal extends Sender {
 		return new SendResults(allResults);
 	}
 }
+export class SenderMyself extends Sender {
+	async send(options){
+		const gcmRaw = await options.gcmRaw;
+		await GCMBase.executeGcmFromJson(gcmRaw.type,gcmRaw.json);
+		return new SendResults([Sender.newSuccessResult]);
+	}
+}
 export class SenderWebSocket extends Sender {
 	async send(options){
 		const body = JSON.stringify(await options.gcmRaw);

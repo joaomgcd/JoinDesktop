@@ -3,10 +3,10 @@
     z-index: 10000;
     box-shadow: 0 1px 5px 0 rgba(60,64,67,.15), 0 4px 4px 0 rgba(60,64,67,.10), 0 -0.1px 3px 0 rgba(60,64,67,.08);
 	background-color: var(--theme-accent-color);
-	color: white;
+	color: var(--theme-text-color-on-accent);
 }
 #top svg{
-    fill: white;
+    fill: var(--theme-text-color-on-accent);
 }
 #header {
 	display: flex;
@@ -32,11 +32,7 @@
     display: flex;
 }
 #toptabs .selected {
-    box-shadow: white 0px -4px 0px inset;
-    opacity: 1;
-}
-#toptabs .selected {
-    box-shadow: white 0px -4px 0px inset;
+    box-shadow: var(--theme-text-color-on-accent) 0px -4px 0px inset;
     opacity: 1;
 }
 #toptabs>*{

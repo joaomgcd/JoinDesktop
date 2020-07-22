@@ -1,4 +1,4 @@
-import { Sender,SenderServer,SenderGCM,SenderIP,SenderIFTTT,SenderLocal,SendResults,SenderWebSocket } from '../api/sender.js';
+import { Sender,SenderServer,SenderGCM,SenderIP,SenderIFTTT,SenderLocal,SendResults,SenderWebSocket,SenderMyself } from '../api/sender.js';
 import {GCMLocalNetworkTestRequest, GCMPush, GCMRequestFile, GCMRespondFile, GCMSmsSentResult, GCMLocalNetworkTest,GCMLocalNetworkRequest,GCMFolderRequest, GCMFolder, GCMWebSocketRequest} from '../gcm/gcmapp.js'
 import { AppContext } from '../appcontext.js'
 import '../extensions.js';
@@ -57,48 +57,13 @@ export class Devices extends Array{
 
 		return this.find(device=>device.deviceId == deviceId);
 	}
-	async testLocalNetworkDevices({allowUnsecureContent,token}){
+	async testLocalNetworkDevices(){
 
 		const devicesToCheckLastKnown = this.filter(device=>device.hasLocalNetworkCapabilities);
 		
 		const lastKnownChecks = devicesToCheckLastKnown.map(async device=>{
-			if(device.socket) return {device,success:true};
-
-			let serverAddress = device.lastKnownLocalNetworkAddress;
-			let webSocketServerAddress = device.lastKnownSocketAddress;
-			let addressesFile = null;
-			const setAddressesFromGoogleDrive = async () => {
-				if(!addressesFile){
-					try{
-						addressesFile = await new GoogleDrive(()=>token).downloadContent({fileName: "serveraddresses=:=" + device.deviceId});
-					}catch{
-						addressesFile = {};
-					}
-				}
-				let serverAddressGD = allowUnsecureContent ? addressesFile.serverAddress : addressesFile.secureServerAddress;
-				let webSocketServerAddressGD = addressesFile.webSocketServerAddress;
-				if(serverAddressGD != serverAddress || webSocketServerAddress != webSocketServerAddressGD){
-					serverAddress = serverAddressGD;
-					webSocketServerAddress = webSocketServerAddressGD;
-					return true;
-				}
-
-				return false;
-			}
-			if(!serverAddress || !webSocketServerAddress) {
-				await setAddressesFromGoogleDrive();
-			}
-			if(!serverAddress || !webSocketServerAddress) return {device,success:false};
-
-			let success = await device.testIfLocalNetworkIsAvailable({serverAddress,webSocketServerAddress,allowUnsecureContent});
-			if(!success){					
-				const shouldTestAgain = await setAddressesFromGoogleDrive();
-				if(shouldTestAgain){
-					success = await device.testIfLocalNetworkIsAvailable({serverAddress,webSocketServerAddress,allowUnsecureContent});
-				}
-			}
-			device.canContactViaLocalNetwork = serverAddress;
-			return {device, success};
+			const success = await device.testLocalNetworkLastKnownAndGoogleDrive();
+			return {device,success};
 		})
 		const lastKnownResults = await Promise.all(lastKnownChecks);
 		console.log("Last Known Checks Results.", lastKnownResults);
@@ -260,6 +225,7 @@ export class Device{
 		await this.asDevices.pushFiles(args);
 	}
 	get senderClass(){
+		if(this.isMyDevice) return SenderMyself;
 		if(this.socket) return SenderWebSocket;
 		if(this.canContactViaLocalNetwork) return SenderLocal;
 		if(this.isGCM) return SenderGCM;
@@ -780,12 +746,21 @@ export class Device{
 	async delete(){
         return await ((await this.api).unregisterDevice({"deviceId":this.deviceId}));
 	}
-	
+	get allowUnsecureContent(){
+		return AppContext.context.allowUnsecureContent;
+	}
+	get token(){
+		return self.getAuthTokenPromise();
+	}
 	async testLocalNetwork(){
 		if(this.socket) return;
 
+		const viaLastKnown = await this.testLocalNetworkLastKnownAndGoogleDrive();
+		if(viaLastKnown) return true;
+
 		const gcm = new GCMLocalNetworkTestRequest();
-		return await this.send(gcm);
+		await this.send(gcm);
+		return false;
 	}
 
 	async requestLocalNetworkTestAndWaitForResponse(){
@@ -793,12 +768,64 @@ export class Device{
 
 		if(!this.hasLocalNetworkCapabilities) throw "Can't contact via local network";
 
+		const resultPromise = EventBus.waitFor(ConnectViaLocalNetworkSuccess, 10000);
+
 		await this.setToRemoteNetwork(true);
-		const gcm = new GCMLocalNetworkTestRequest();
-		await this.send(gcm);
-		const response = await EventBus.waitFor(ConnectViaLocalNetworkSuccess, 10000);
+		const workedRightAway = await this.testLocalNetwork();
+		if(workedRightAway) return new ConnectViaLocalNetworkSuccess(this);
+
+		const response = await resultPromise;
 		console.log("Result test local network",response);
 		return response;
+	}
+	async testLocalNetworkLastKnownAndGoogleDrive(){
+		if(this.socket) return true;
+
+		const allowUnsecureContent = this.allowUnsecureContent;
+		const token = await this.token;
+		let serverAddress = this.lastKnownLocalNetworkAddress;
+		let webSocketServerAddress = this.lastKnownSocketAddress;
+		let addressesFile = null;
+		const setAddressesFromGoogleDrive = async () => {
+			if(!addressesFile){
+				try{
+					addressesFile = await new GoogleDrive(()=>token).downloadContent({fileName: "serveraddresses=:=" + this.deviceId});
+				}catch{
+					addressesFile = {};
+				}
+			}
+			let serverAddressGD = allowUnsecureContent ? addressesFile.serverAddress : addressesFile.secureServerAddress;
+			let webSocketServerAddressGD = addressesFile.webSocketServerAddress;
+			if(serverAddressGD != serverAddress || webSocketServerAddress != webSocketServerAddressGD){
+				serverAddress = serverAddressGD;
+				webSocketServerAddress = webSocketServerAddressGD;
+				return true;
+			}
+
+			return false;
+		}
+		if(!serverAddress || !webSocketServerAddress) {
+			await setAddressesFromGoogleDrive();
+		}
+		if(!serverAddress || !webSocketServerAddress) return false;
+
+		const testIfAvailable = async () => {
+			try{
+				await Util.withTimeout(this.testIfLocalNetworkIsAvailable({serverAddress,webSocketServerAddress,allowUnsecureContent}),5000);
+				return true;
+			}catch{
+				return false;
+			}
+		}
+		let success = await testIfAvailable();
+		if(!success){					
+			const shouldTestAgain = await setAddressesFromGoogleDrive();
+			if(shouldTestAgain){
+				success = await testIfAvailable();
+			}
+		}
+		this.canContactViaLocalNetwork = serverAddress;
+		return success;
 	}
 
 	async testIfLocalNetworkIsAvailable({serverAddress,webSocketServerAddress,allowUnsecureContent}){
@@ -1069,6 +1096,9 @@ export class DeviceBrowser extends Device{
 	}
 	 
 	canSyncClipboardTo(){
+		return false;
+	}
+	canShowPushHistory(){
 		return false;
 	}
 }

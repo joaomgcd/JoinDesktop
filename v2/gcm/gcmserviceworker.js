@@ -195,7 +195,7 @@ class GCMNotification extends GCMBaseServiceWorker{
 	async modifyNotification(notification,index){
 		const notificationfromGcm = this.notifications[index];
 		this.notificationId = notificationfromGcm.id;
-		const options = await GCMNotificationBase.getNotificationOptions(notificationfromGcm);
+		const options = await GCMNotificationBase.getNotificationOptions(notificationfromGcm,Util,GoogleDrive);
 		Object.assign(notification,options);
 	}
 	async handleNotificationClick(serviceWorker,action,data){

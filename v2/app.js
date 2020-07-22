@@ -95,14 +95,13 @@ export class App{
     redirectToHttpsIfNeeded(){
         Util.redirectToHttpsIfNeeded();
     }
-    async load(){
+    async loadEssentials(){
         this.redirectToHttpsIfNeeded();
         this.applyTheme();
         if(!Util.areCookiesEnabled){
             await alert("Cookies are disabled. Please enable them and refresh the page to continue.");
             return;
         }
-        const queryObject = Util.getQueryObject();
         UtilDOM.addScriptFile("./v2/encryption/encryption.js");
         UtilDOM.setCssVhVariableAndListenToWindowChanges();
         self.getAuthTokenPromise = async () => await this.getAuthToken();
@@ -123,6 +122,11 @@ export class App{
             
 
 
+    }
+    async load(){
+        
+        await this.loadEssentials();
+        const queryObject = Util.getQueryObject();
         this.controlDebug = new ControlDebug();
         await this.addElement(this.controlDebug,this.rootElement); 
         
@@ -139,7 +143,11 @@ export class App{
         this.rootElement.appendChild(this._contentElement);
 
 
-        await this.loadApiLoader();
+        const couldLoad = await this.loadApiLoader();
+        if(!couldLoad){ 
+            this.controlTop.loading = false;
+            return;
+        }
 
         await this.loadShortcuts();
         if(queryObject.connectoport){
@@ -253,7 +261,14 @@ export class App{
         const {ApiLoader} = await import('./apiloader.js');
         this.apiLoader = new ApiLoader(CLIENT_ID);        
         this.apiLoader.addApi({"name":'oauth2',"version":'v2' });
-        await this.apiLoader.load(); 
+        try{
+            await this.apiLoader.load();
+            return true;
+        }catch(error){
+            const {ControlDialogOk} = await import("./dialog/controldialog.js");
+            await ControlDialogOk.showAndWait({title:"Third Part Cookies Error",text:`You need to enable third-party cookies on your browser to be able to sign-in with Google.<br/><br/>Please enable them and then refresh the page to try again.<br/><br/>Error details: ${JSON.stringify(error)}`});
+            return false;
+        }
     }
     get allowUnsecureContent(){
         return false;
@@ -528,7 +543,7 @@ export class App{
 
         return new Promise(resolve=>{
             this.fcmClient = new FCMClientImplementation();
-            
+            this.fcmClient.setEventBusCallback(async ({data,clazz})=> await EventBus.post(data,clazz));
             this.fcmClient.initPage(
                 async token => {
                     console.log("Got token!",token);
@@ -569,6 +584,9 @@ export class App{
     }
     get myDeviceId(){
         return AppContext.context.getMyDeviceId();
+    }
+    get myDevice(){
+        return this.getDevice(this.myDeviceId);
     }
     set myDeviceId(value){
         AppContext.context.setMyDeviceId(value);
@@ -630,13 +648,20 @@ export class App{
             return this._dbDevices;
         })();
     }
-    /** @type {DBGCM} */
     get dbGCM(){
         if(this._dbGCM) return this._dbGCM;
         return (async ()=>{
             const DBGCM = (await import('./gcm/dbgcm.js')).DBGCM
             this._dbGCM = new DBGCM(this.db);
             return this._dbGCM;
+        })();
+    }
+    get dbNotifications(){
+        if(this._dbNotifications) return this._dbNotifications;
+        return (async ()=>{
+            const {DBNotifications} = await import('./notification/dbnotifications.js');
+            this._dbNotifications = new DBNotifications(this.db);
+            return this._dbNotifications;
         })();
     }
     
@@ -650,6 +675,32 @@ export class App{
             this._devices = fromDb;
             return fromDb
         })();
+    }
+    
+    async onRequestStoredNotifications(request){
+        const dbNotifications = await this.dbNotifications;
+        const options = await dbNotifications.getAll();
+        EventBus.post({options},"StoredNotifications");
+    }
+    async onRequestNotificationAction({notificationButton,notification}){
+
+        let device = notification.device;
+        if(!device){            
+            const {NotificationInfo} = await import("./notification/notificationinfo.js");
+            notification = new NotificationInfo(notification);            
+            device = await notification.getDeviceFromInfo(async deviceId => await this.getDevice(deviceId));
+        }
+        if(device){
+            await this.doNotificationAction({device,notificationButton,notification});
+        }
+
+        if(GCMNotificationBase.notificationDismissAction.action != notificationButton.action) return;
+        const dbNotifications = await this.dbNotifications;
+        await dbNotifications.remove(notification.id || notification.tag);
+    }
+    async onNotificationsCleared(){
+        const dbNotifications = await this.dbNotifications;
+        await dbNotifications.clear();
     }
     async setDevices(devices){        
         const dbDevices = (await this.dbDevices);
@@ -671,8 +722,12 @@ export class App{
         })()
     }
     async showToast(args){
-        const toast = (await this.toast);
-        await toast.show(args);
+        try{
+            const toast = (await this.toast);
+            await toast.show(args);
+        }catch(error){
+            console.log(error);
+        }
     }
     /** EventBus Methods */
     async onShowToast(args){
@@ -690,17 +745,20 @@ export class App{
     async onRegisterBrowserRequest(){
         await this.registerBrowser({force:true});
     }
-    async onAppNameClicked(appNameClicked){
-        const event = appNameClicked.event;
-        const x = event.clientX;
-        const y = event.clientY;
-        const choices = (await this.devicesFromDb).filter(device=>device.canBrowseFiles());
+    async showDeviceChoice({filter,x,y}){
+        const choices = (await this.devicesFromDb).filter(filter);
         const choiceToLabelFunc = device => device.deviceName;
         const ControlDialogSingleChoice = (await import("./dialog/controldialog.js")).ControlDialogSingleChoice
         const device = await ControlDialogSingleChoice.showAndWait({position:{x,y},choices,choiceToLabelFunc});
         if(!device) return;
         
         EventBus.post(new AppDeviceSelected(device));
+    }
+    async showDeviceChoiceOnAppNameClicked(appNameClicked,filter){ 
+        const event = appNameClicked.event;
+        const x = event.clientX;
+        const y = event.clientY;
+        await this.showDeviceChoice({filter,x,y});
     }
     async getAuthToken(){
         const account = await this.googleAccount;
@@ -726,12 +784,25 @@ export class App{
         await fcmClient.showNotification(options,gcm);
     }
 
+    async onRequestReplyMessage({text,notification}){
+        let device = notification.device;
+        if(!device){
+            device = await this.getDevice(notification.senderId);
+        }
+        if(!device){
+            const {NotificationInfo} = await import("./notification/notificationinfo.js");
+            notification = new NotificationInfo(notification);
+            device = notification.device;
+        }
+        await this.replyToMessage({device,text,notification});
+    }
     async replyToMessage({device,text,notification}){
         if(!device){
             await this.showToast({text:"No device to reply to.",isError:true});
             return;
         } 
 
+        device = await this.getDevice(device.deviceId);
         this.showToast({text:"Sending reply..."});
         await this.googleAccount;
 
@@ -740,11 +811,26 @@ export class App{
         await this.showToast({text:"Reply sent!"});
     }
     
+    async onRequestSendGCM({gcmRaw,deviceId}){
+        const device = await this.getDevice(deviceId);
+        if(!device) return;
+
+        const gcm = await GCMBase.getGCMFromJson(gcmRaw.type,gcmRaw.json);
+        await device.send(gcm);
+    }
     async doNotificationAction({device,notificationButton,notification}){
         if(!device){
             await this.showToast({text:"No device for action.",isError:true});
             return;
         } 
+
+        const {NotificationInfo} = await import("./notification/notificationinfo.js");
+        notification = new NotificationInfo(notification);
+        const gcm = await notification.gcmFromInfo
+        if(gcm && gcm.handleNotificationClick){
+            await gcm.handleNotificationClick(notificationButton.action);
+            return;
+        }
 
         const gcmForAction = await GCMNotificationBase.getNotificationActionGcm({action:notificationButton.actionId,notification,deviceId:device.deviceId})
        
@@ -795,15 +881,22 @@ export class App{
         if(!theme){
             theme = new SettingTheme().theme;
         }
+        if(!accent){
+            accent = new SettingThemeAccentColor().value;
+        }
         if(theme){
+            if(accent){
+                let textColorOnAccent = "white";
+                if(Util.isColorLight(accent)){
+                    textColorOnAccent = "black";
+                }                   
+                UtilDOM.setCssVariable("theme-text-color-on-accent",textColorOnAccent)
+            }
             UtilDOM.setCssVariable("theme-background-color",theme.backgroundColor)
             UtilDOM.setCssVariable("theme-background-color-panel",theme.backgroundColorPanel)
             UtilDOM.setCssVariable("theme-background-color-hover",theme.backgroundHover)
             UtilDOM.setCssVariable("theme-text-color",theme.textColor)
             UtilDOM.setCssVariable("theme-accent-color-lowlight",theme.accentColorLowlight)                
-        }
-        if(!accent){
-            accent = new SettingThemeAccentColor().value;
         }
         if(accent){
             UtilDOM.setCssVariable("theme-accent-color",accent)

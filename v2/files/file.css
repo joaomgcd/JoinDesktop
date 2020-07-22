@@ -14,7 +14,7 @@
     background-color: var(--theme-accent-color-light);
 }
 .file svg{
-    fill: var(--theme-background-color);
+    fill: var(--theme-text-color-on-accent);
 }
 .fileright{
     display: flex;

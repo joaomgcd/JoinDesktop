@@ -45,7 +45,7 @@
     bottom: 0px;
     left: 0px;
     opacity: 1;
-    fill: var(--theme-text-color);
+    fill: var(--theme-text-color-on-accent);
 }
 
 .devicewarning{

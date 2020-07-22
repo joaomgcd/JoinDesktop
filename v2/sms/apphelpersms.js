@@ -188,6 +188,9 @@ export class AppHelperSMS extends AppHelperBase{
     async onRequestGoBack(request){
         this.setMode({});
     }
+    async onAppNameClicked(appNameClicked){
+        await app.showDeviceChoiceOnAppNameClicked(appNameClicked,device => device.canReceiveSms())
+    }
     async onRequestOpenSmsThreads(request){
         this.setMode({});
     }

@@ -11,6 +11,11 @@ import { AppGCMHandler } from "./v2/gcm/apphelpergcm.js";
 import { ControlDialogInput, ControlDialogOk } from "./v2/dialog/controldialog.js";
 import { AppContext } from "./v2/appcontext.js";
 
+class ResultNotificationAction{
+    constructor(success){
+        this.success = success;
+    }
+}
 class AuthToken{
     constructor(authToken){
         this.authToken = authToken;
@@ -112,8 +117,9 @@ class FCMClientDashboard{
         //delete notification.data;
         // delete notification.icon;
         // delete notification.badge;
-		// Object.assign(notification.data,await gcm.gcmRaw);
-		return window.api.send("notification",notification);
+        // Object.assign(notification.data,await gcm.gcmRaw);
+        const gcmRaw = await gcm.gcmRaw;
+		return window.api.send("notification",{notification,gcmRaw});
 	}
 }
 class ServerCommands{
@@ -126,9 +132,14 @@ class ServerSetting{
         await window.api.send("setting",{key,value})
     }
 }
-class ServerEventBus{
+export class ServerEventBus{
     static async post(object){
         await window.api.send('eventbus', {data:object,className:object.constructor.name});
+    }
+    static async postAndWaitForResponse(object,repsonseClzz,timeout){
+        const responsePromise = EventBus.waitFor(repsonseClzz,timeout);
+        ServerEventBus.post(object);
+        return responsePromise;
     }
 }
 export class AppHelperSettingsDashboard extends AppHelperSettings{
@@ -184,6 +195,11 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
 }
 class RequestToggleDevOptions{}
 class RequestClipboard{}
+class RequestSetClipboard{
+    constructor(text){
+        this.text = text;
+    }
+}
 class ResponseClipboard{}
 class RequestListenForShortcuts{
     constructor(shortcuts){
@@ -191,11 +207,20 @@ class RequestListenForShortcuts{
     }
 }
 class RequestFocusWindow{}
+class RequestAppVersion{}
+class ResponseAppVersion{}
+class RequestDownloadAndOpenFile{
+    constructor(url){
+        this.url = url;
+    }
+}
+class RequestInstallLatestUpdate{}
 export class AppDashboard extends App{
     constructor(contentElement){
         super(contentElement);
     }
     async load(){
+        AppContext.context.allowUnsecureContent = true;
         window.oncontextmenu = () => ServerEventBus.post(new RequestToggleDevOptions())
         // AppGCMHandler.handlePushUrl = (push)=> {
         //     const url = push.url;
@@ -211,6 +236,9 @@ export class AppDashboard extends App{
             const result = EventBus.waitFor(ResponseClipboard,3000);
             ServerEventBus.post(new RequestClipboard());
             return result.then(response=>response.text);
+        }
+        Util.setClipboardText = async text => {
+            await ServerEventBus.post(new RequestSetClipboard(text));
         }
         self["prompt"] = async (title,initialText) => await ControlDialogInput.showAndWait({title,initialText: (initialText ? initialText : ""),placeholder:""});
         self["alert"] = async text => await ControlDialogOk.showAndWait({text,title:"Join"});
@@ -231,7 +259,27 @@ export class AppDashboard extends App{
         UtilDOM.addScriptFile("./v2/db.js");
         UtilDOM.addScriptFile("./v2/google/drive/googledrive.js");
         await this.loadAppContext();
-        await super.load();
+        const query = Util.getQueryObject();
+        if(!query.notificationpopup){
+            await super.load();
+        }else{
+            await this.loadEssentials();
+
+            this.onRequestReplyMessage = null;
+            const {AppDashboardNotifications} = await import("./appdashboardhelpernotifications.js");
+            const helperNotifications = new AppDashboardNotifications(this);
+            await helperNotifications.load();
+        }
+    }
+    get appInfo(){
+        return ServerEventBus.postAndWaitForResponse(new RequestAppVersion(),ResponseAppVersion,5000);
+    }
+    async onUpdateAvailable(request){
+        const result = await ControlDialogOk.showAndWaitOkCancel({title:"New Version Available",text:`Version ${request.version} of the app is available. Download now?`})
+        if(!result.isOk) return;
+
+        await ControlDialogOk.showAndWait({title:"Downloading now!",text:`Ok will now download the new version!<br/><br/> Will automatically update the app once downloaded.`,timeout:30000})
+        await ServerEventBus.post(new RequestInstallLatestUpdate());
     }
     async loadShortcuts(){
 
@@ -239,6 +287,15 @@ export class AppDashboard extends App{
         const dbShortcut = new DBKeyboardShortcut(this.db);
         const configured = await dbShortcut.getAll();
         ServerEventBus.post(new RequestListenForShortcuts(configured.map(shortcutAndCommand=>shortcutAndCommand.shortcut)));
+    }
+    async onRequestExecuteGCMOnPage({gcmRaw}){
+        await GCMBase.executeGcmFromJson(gcmRaw.type,gcmRaw.json);
+    }
+    async onRequestHandleNotificationClickGCMOnPage({gcmRaw,action}){
+        const gcm = await GCMBase.getGCMFromJson(gcmRaw.type,gcmRaw.json);
+        if(!gcm || !gcm.handleNotificationClick) return;
+
+        await gcm.handleNotificationClick(action);
     }
     async onShortcutPressed(shortcutPressed){         
         try{
@@ -254,6 +311,27 @@ export class AppDashboard extends App{
         }finally{
             await super.onShortcutPressed(shortcutPressed);
         }
+    }
+    async onRequestReplyMessageFromServer(request){
+        EventBus.post(request,"RequestReplyMessage");
+    }
+    async onRequestNotificationAction(request){
+        let success = false;
+        try{
+            const resultPromise = EventBus.waitFor(ResultNotificationAction,3000);
+            ServerEventBus.post(request);
+            const result = await resultPromise;
+            success = result.success;
+        }catch{}
+        if(success) return;
+
+        await super.onRequestNotificationAction(request);
+    }
+    async onNotificationsCleared(notificationsCleared){
+        await ServerEventBus.post(notificationsCleared);
+    }
+    onRequestStoredNotifications(request){
+        ServerEventBus.post(request);
     }
     showCloseButton(){
         return true;
@@ -286,6 +364,7 @@ export class AppDashboard extends App{
     async loadApiLoader(){
         const googleAccount = await this.googleAccount;
         console.log("Loaded user",await googleAccount.getCurrentUser())
+        return true;
     }
     get googleAccount(){
         if(this._googleAccount) return this._googleAccount;

@@ -1,13 +1,32 @@
 const {GCMBase,GCMMediaInfoBase} = require("../v2/gcm/gcmbase.js");
 const {Util} = require("../v2/util.js")
+const {GoogleDrive} = require("../v2/google/drive/googledrive.js")
 import {EventBus} from "../v2/eventbus.js"
 import { Devices } from "../v2/device/device.js";
 import { DevicesServer } from "./serverdevices.js";
+import { GCMNotificationBase } from "../v2/gcm/gcmbase.js";
 GCMBase.getGCMFromType = type => eval(`new ${type}()`);
 const {clipboard,shell} = require('electron')
 class RequestSendPush{
     constructor(push){
         this.push = push;
+    }
+}
+class RequestSendGCM{
+    constructor(gcmRaw,deviceId){
+        this.gcmRaw = gcmRaw;
+        this.deviceId = deviceId;
+    }
+}
+class RequestExecuteGCMOnPage{
+    constructor(gcmRaw){
+        this.gcmRaw = gcmRaw;
+    }
+}
+class RequestHandleNotificationClickGCMOnPage{
+    constructor(gcmRaw,action){
+        this.gcmRaw = gcmRaw;
+        this.action = action;
     }
 }
 export class GCMServer extends GCMBase{
@@ -20,6 +39,18 @@ export class GCMServer extends GCMBase{
 	async sendPush(push){
 		await EventBus.post(new RequestSendPush(push))
 	}
+	async send(deviceId){
+        const gcmRaw = await this.gcmRaw;
+		await EventBus.post(new RequestSendGCM(gcmRaw,deviceId))
+    }
+    async executeOnPage(){
+        const gcmRaw = await this.gcmRaw;
+		await EventBus.post(new RequestExecuteGCMOnPage(gcmRaw))
+    }
+    async handleNotificationClickOnPage(action){
+        const gcmRaw = await this.gcmRaw;
+		await EventBus.post(new RequestHandleNotificationClickGCMOnPage(gcmRaw,action))
+    }
 	async getDevice(deviceId){
 		return await DevicesServer.getDevice(deviceId)
 	}
@@ -117,10 +148,20 @@ class GCMPush extends GCMServer{
 		const notification = {
 			"appName":"Join",
 			"title":title,
-            "text":text
-		};
+            "text":text,
+            actions:[]
+        };
+        if(push.url){
+            notification.actions.push(GCMPushBase.notificationActionCopyUrl);
+        }
 		Object.assign(notification, push);
 		return notification;
+	}
+	async handleNotificationClick(serviceWorker,action,data){
+        if(action == GCMNotificationBase.notificationDismissAction.action) return;
+        
+        console.log("Push action",action)
+		await this.handleNotificationClickOnPage(action);
 	}
 }
 
@@ -143,7 +184,28 @@ class GCMMediaInfo extends GCMServer{
 		return await GCMMediaInfoBase.handleNotificationClick(this,action,url=>console.log("Opening window",url));
 	}
 }
-class GCMNotification extends GCMServer{}
+class GCMNotification extends GCMServer{    
+	async modifyNotification(notification,index){
+		const notificationfromGcm = this.requestNotification.notifications[index];
+        this.notificationId = notificationfromGcm.id;
+		const options = await GCMNotificationBase.getNotificationOptions(notificationfromGcm,Util,GoogleDrive);
+		Object.assign(notification,options);
+    }
+    
+	async handleNotificationClick(serviceWorker,action,data){
+        const notification  = this.requestNotification.notifications[0];
+        const deviceId = this.senderId;
+        // console.log("Handling action for",notification);
+        const actionGcm = await GCMNotificationBase.getNotificationActionGcm({action,notification,deviceId});
+        console.log("Handling GCMNotification click",action,actionGcm);
+        if(!actionGcm) return;
+
+        await actionGcm.send(deviceId);
+	}
+}
 class GCMDeviceNotOnLocalNetwork extends GCMServer{}
 class GCMRespondFile extends GCMServer{}
 class GCMAutoClipboard extends GCMServer{}
+class GCMNotificationAction extends GCMServer{}
+class GCMNotificationClear extends GCMServer{}
+class GCMNewSmsReceived extends GCMServer{}

@@ -107,6 +107,13 @@ export class ControlDevices extends Control {
                 this.setSelectedDevice(deviceControl,true);
             }
             this.devicesControl.appendChild(deviceRender);
+            UtilDOM.handleDroppedFiles(deviceRender, async files => {
+                // UtilDOM.hide(this.fileDragOverElement);
+                await deviceControl.requestPushFiles(files);
+            },async ()=>{
+                await this.setSelectedDevice(deviceControl,true,false);
+                // UtilDOM.show(this.fileDragOverElement);
+            });
         }
         return root;
     }
@@ -151,12 +158,6 @@ export class ControlDevice extends Control{
         this.deviceIconElement.src = this.device.getIcon();
         await this.setIsSelected(this.isSelected);
         this.updateLocalNetwork();
-        UtilDOM.handleDroppedFiles(root, async files => {
-            // UtilDOM.hide(this.fileDragOverElement);
-            await this.requestPushFiles(files);
-        },()=>{
-            // UtilDOM.show(this.fileDragOverElement);
-        });
         return root;
     }
     async requestPushFiles(files){

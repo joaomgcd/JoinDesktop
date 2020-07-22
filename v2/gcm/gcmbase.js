@@ -161,7 +161,7 @@ class GCMNotificationBase{
 	static get notificationReplyAction(){
 		return {action: "reply",title: 'Reply Directly'}
 	}
-	static async getNotificationOptions(notificationfromGcm){
+	static async getNotificationOptions(notificationfromGcm,Util,GoogleDrive){
 		const icon = Util.getBase64ImageUrl(notificationfromGcm.iconData);
 		var badge = notificationfromGcm.statusBarIcon;
 		badge =  badge ? Util.getBase64ImageUrl(badge) : icon;
@@ -250,6 +250,9 @@ class GCMPushBase{
 		await fetch(`http://${server}:${port}/?message=${encodeURIComponent(gcmPush.push.text)}`,options)
 	
 	}
+	static get notificationActionCopyUrl(){
+		return {action: "copyurl",title: 'Copy URL'}
+	}
 }
 
 class GCMMediaInfoBase{
@@ -279,9 +282,15 @@ class GCMMediaInfoBase{
 			gcm.playing ? GCMMediaInfoBase.notificationActionPause : GCMMediaInfoBase.notificationActionPlay,
 			GCMMediaInfoBase.notificationActionSkip
 		]
+		notification.timeout = 10000;
+		notification.discardAfterTimeout = true;
 		// console.log("Modified media notification",notification)
 	}
 	static async handleNotificationClick(gcm,action,openWindow){
+		const push = await this.getNotificationClickPush(gcm,action,openWindow);
+		await gcm.sendPush(push);
+	}
+	static async getNotificationClickPush(gcm,action,openWindow){
 		if(!action){
 			openWindow("?media");
 			return;
@@ -297,10 +306,11 @@ class GCMMediaInfoBase{
 			push.back = true;
 		}
 		push.mediaAppPackage = gcm.packageName;
-		await gcm.sendPush(push);
+		return push;
 	}
 }
 try{
 	exports.GCMBase = GCMBase;
 	exports.GCMMediaInfoBase = GCMMediaInfoBase;
+	exports.GCMNotificationBase = GCMNotificationBase;
 }catch{}

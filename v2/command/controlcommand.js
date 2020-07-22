@@ -42,6 +42,11 @@ export class ControlCommands extends Control {
                     console.log("Clicked disabled command",commandControl.command.getText());
                     return;
                 }
+                const selectedControlDevice = this.selectedControlDevice;
+                if(!selectedControlDevice){
+                    alert("Please select a device first");
+                    return;
+                }
                 //console.log("Clicked command",commandControl.command.getText());
                 await commandControl.command.execute(this.selectedControlDevice.device);
             }
@@ -86,6 +91,7 @@ export class ControlCommand extends Control {
 
         this.commandTextElement.innerHTML = this.command.getText();
         this.commandButton.setAttribute("aria-label",this.command.getText());
+        this.setExtendedText();
 
         UtilDOM.setInnerHTMLOrHide(this.commandIconWrapperElement,this.command.icon);
         UtilDOM.showOrHide(this.keyboardShortcutElement,this.command.supportsKeyboardShortcut);
@@ -111,6 +117,9 @@ export class ControlCommand extends Control {
         }else{            
             this.commandButton.classList.add("disabled");
         }
+        this.setExtendedText(device);
+    }
+    setExtendedText(device){
         const extendedText = this.command.getTextExtended(device);
         this.commandTextExtendedElement.innerHTML = extendedText || this.command.getText();
     }

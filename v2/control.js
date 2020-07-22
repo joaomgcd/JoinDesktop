@@ -38,7 +38,7 @@ export class Control {
                     if(!element) return true;               
 
                     const tagName = element.tagName;
-                    if(tagName == "IMG"){  
+                    if(tagName == "IMG" && value){
                         if(Util.isString(value) && value.startsWith("icons")){
                             value = `/${value}`;
                         }else{

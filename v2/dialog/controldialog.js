@@ -254,10 +254,17 @@ export class ControlDialogOk extends ControlDialog {
         return showDialog(ControlDialogOk.getDialogArgs(args));        
     }
     static async showAndWait(args= {position,title,text,showCancel,buttons,buttonsDisplayFunc}){      
-        const result = (await showDialogAndWait(ControlDialogOk.getDialogArgs(args)));
+        let result = (await showDialogAndWait(ControlDialogOk.getDialogArgs(args)));
         if(!result) return;
         
-        return result.button;
+        if(!Util.isString(result.button)){
+            result = result.button;
+        }
+        return result;
+    }
+    static async showAndWaitOkCancel(args= {position,title,text}){  
+        args.showCancel = true;    
+        return await showDialogAndWait(ControlDialogOk.getDialogArgs(args));
     }
     constructor(args = {dialog}){
         super(args);

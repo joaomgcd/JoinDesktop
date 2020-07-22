@@ -19,6 +19,9 @@ export class DBDevices{
         return new Devices(devices);
     }
     async getById(deviceId){
-        return await this.db.devices.get(deviceId);
+        const {json} = await this.db.devices.get(deviceId);
+        if(!json) return null;
+
+        return JSON.parse(json);
     }
 }

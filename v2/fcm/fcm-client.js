@@ -25,7 +25,7 @@ class FCMClientImplementation extends FCMClient{
 	
 			const title = notification.title ? notification.title : "Join";
 			const text = notification.text ? notification.text : `Done something in the background (${gcm.type.replace("GCM","")})`;
-			const tag = notification.id ? notification.id : "unknown";
+			const tag = notification.id ? notification.id : (notification.tag || "unknown");
 			var options = {
 				"tag":tag,
 				"body":text,
@@ -38,6 +38,8 @@ class FCMClientImplementation extends FCMClient{
 			options.data.type = gcm.type;
 			options.data.json = gcm.json;
 			serviceWorker.registration.showNotification(title,options);
+			const dbNotifications = DB.get().notifications;
+			await dbNotifications.put({key:options.tag,json:JSON.stringify(options)});
 			// setTimeout(()=>serviceWorker.registration.showNotification(title,options),100);
 		}
 	}
@@ -46,7 +48,10 @@ class FCMClientImplementation extends FCMClient{
 		const action = event.action;
 		console.log("Notification action",action);
 		const data = notification.data;
-		const {type,json} = notification.data;
+		let {type,json} = notification.data;
+		if(!json){
+			json = JSON.stringify(notification.data);
+		}
 		return await GCMBase.handleClickGcmFromJson(serviceWorker, type,json,action,data);
 	}
 	async handleMessage(message){

@@ -37,7 +37,9 @@ export class ControlNotification extends Control{
         this.sendElement = await this.$("#send");
         this.imageWrapElement = await this.$("#notificationimagewrap");
         this.imageElement = await this.$("#image");
+        this.notificationCloseElement = await this.$(".notificationclosebutton");
 
+        this.iconDataElement.src = "./images/join.png";
         if(!this.notification.appName){
             this.notification.appName = "Join";
         }
@@ -50,6 +52,9 @@ export class ControlNotification extends Control{
         this.setDismissEverywhereButton();
         this.data = this.notification;
         
+        // if(!this.notification.iconData){
+        //     this.iconDataElement.src = "../join.png";
+        // }
         const sendReply = async () =>{            
             const options = {text:this.values.replyText,notification:this.notification};
             this.replyTextElement.value = "";
@@ -61,6 +66,8 @@ export class ControlNotification extends Control{
         UtilDOM.showOrHide(this.replyElement,this.notification.replyId);
         UtilDOM.showOrHide(this.statusBarIconElement,this.notification.statusBarIcon);
         UtilDOM.showOrHide(this.imageWrapElement,this.notification.image);
+        UtilDOM.showOrHide(this.notificationCloseElement,this.notification.canClose);
+        this.notificationCloseElement.onclick = async () => await EventBus.post(new RequestNotificationClose(this.notification));
         if(this.controlsButtons){
             this.buttonsElement.innerHTML = "";
             UtilDOM.show(this.buttonsElement);
@@ -74,7 +81,7 @@ export class ControlNotification extends Control{
         const deviceName = this.notification.device ? this.notification.device.deviceName : "Uknown Device";
         this.deviceElement.innerHTML = deviceName;
 
-        this.bodyElement.onclick = async e => await EventBus.post(new RequestNotificationAction(this.notification,this.notification));
+        this.bodyElement.onclick = async e => await EventBus.post(new RequestNotificationAction({},this.notification));
 
     }
     setDismissEverywhereButton(){
@@ -85,7 +92,11 @@ export class ControlNotification extends Control{
     }
     set buttons(value){
         this.setDismissEverywhereButton();
+
         value.forEach(button=>{
+            if(button.text == GCMNotificationBase.notificationDismissAction.title) return;
+            if(button.text == GCMNotificationBase.notificationReplyAction.title) return;
+
             const controlButton = new ControlNotificationButton(button,this.notification);
             this.controlsButtons.push(controlButton);
         })
@@ -108,6 +119,11 @@ class RequestReplyMessage{
 export class RequestNotificationAction{
     constructor(notificationButton,notification){
         this.notificationButton = notificationButton;
+        this.notification = notification;
+    }
+}
+export class RequestNotificationClose{
+    constructor(notification){
         this.notification = notification;
     }
 }

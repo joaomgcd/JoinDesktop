@@ -49,6 +49,9 @@ export class AppHelperFiles extends AppHelperBase{
             app.store(hasMentionedDragAndDropKey,true);
         }
     }
+    async onAppNameClicked(appNameClicked){
+        await app.showDeviceChoiceOnAppNameClicked(appNameClicked,device => device.canBrowseFiles())
+    }
     async setDevice(device,subFolder = "/"){
         if(!device) return;
 

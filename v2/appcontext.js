@@ -70,5 +70,6 @@ var _context = {
     "isThisDevice":device => _context.getMyDeviceId() == device.deviceId,
     "getMyDeviceId":() => _context.localStorage.get("myDeviceId"),
     "setMyDeviceId":deviceId => _context.localStorage.set("myDeviceId",deviceId),
-    "serverStorePath":""
+    "serverStorePath":"",
+    "allowUnsecureContent":false
 };

@@ -110,10 +110,20 @@
 	font-size: small;
 }
 .notificationTop{
-	color: gray;
 	display: flex;
 	font-family: 'Roboto', sans-serif;
+}
+.notificationtopleft{
+	flex-grow: 1;
+	display: flex;
+	color: gray;
 	align-items: center;
+}
+.notificationclosebutton{
+	cursor: pointer;
+}
+.notificationclosebutton:hover{
+	background-color: var(--theme-accent-color-light);
 }
 #textanddate{
 	display: flex;

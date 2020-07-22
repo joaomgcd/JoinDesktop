@@ -514,3 +514,7 @@ class GoogleDrive {
 		return url.indexOf("drive.google") > 0 || url.indexOf("docs.google")>0 || url.indexOf("googleapis.com")>0 ;
 	}
 }
+
+try{
+	exports.GoogleDrive = GoogleDrive;
+}catch{}

@@ -45,6 +45,9 @@ export class AppHelperPushHistory extends AppHelperBase{
             app.controlTop.loading = false;
         }
     }
+    async onAppNameClicked(appNameClicked){
+        await app.showDeviceChoiceOnAppNameClicked(appNameClicked,device => device.canShowPushHistory())
+    }
     async onAppDeviceSelected(appDeviceSelected){
         await this.refresh(appDeviceSelected.device);
     }

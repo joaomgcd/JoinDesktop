@@ -48,7 +48,39 @@ export class NotificationInfo{
 	constructor(args,device){
 		if(!args) return;
 		
+		if(args.data && args.data.notificationForClick){
+			Object.assign(this, args.data.notificationForClick);
+		}
 		this.device = device;
+		if(!args.text){
+			args.text = args.body;
+		}
+		delete args.body;
+		if(args.icon){
+			args.iconData = args.icon;
+		}else{
+			args.iconData = null;
+		}
+		if(!args.buttons || args.buttons.length == 0){
+			if(args.originalActions && args.originalActions.length > 0){
+				args.buttons = args.originalActions.map(action=>{return {action:action.action,text:action.text||action.title}});
+			}else if(args.actions && args.actions.length > 0){
+				args.buttons = args.actions.map(action=>{
+					let text = action;
+					if(text.text){
+						text = text.text;
+					}
+					let actionFinal = action;
+					if(actionFinal.action){
+						actionFinal = actionFinal.action;
+					}
+					if(!Util.isString(text) && action.title){
+						text = action.title;
+					}
+					return {action:actionFinal,text}
+				});
+			}
+		}
 		Object.assign(this, args);
 	}
 	callCallback(event, callback){
@@ -74,5 +106,39 @@ export class NotificationInfo{
 	}
 	set device(value){
 		this._device = value;
+	}
+	async getDeviceFromInfo(deviceGetterById){
+		let device = this.device;
+		if(device){
+			device = await deviceGetterById(device.deviceId);
+		}
+		if(!device && this.senderId){
+			device = await deviceGetterById(this.senderId);
+		}
+		if(!device){
+			const gcm = await this.gcmFromInfo;
+			if(gcm){
+				device = await deviceGetterById(gcm.senderId);
+			}
+		}
+		if(device){
+			this.device = device;
+		}
+		return device;
+	}
+	get gcmFromInfo(){
+		return (async () => {
+			if(!this.data || !this.data.type) return null;
+			
+			let json = this.data;
+			if(this.data.json){
+				json = this.data.json;
+			}
+			if(!Util.isString(json)){
+				json = JSON.stringify(json);
+			}
+			const gcm = await GCMBase.getGCMFromJson(this.data.type,json);
+			return gcm;
+		})();
 	}
 }

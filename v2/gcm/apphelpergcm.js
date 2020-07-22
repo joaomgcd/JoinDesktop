@@ -25,7 +25,7 @@ export class AppGCMHandler{
         gcm.senderId = gcm.requestNotification.senderId;
         notifications.forEach(async notification=>{
             gcm.notificationId = notification.id;
-            const options = await GCMNotificationBase.getNotificationOptions(notification);
+            const options = await GCMNotificationBase.getNotificationOptions(notification,Util,GoogleDrive);
             Object.assign(options.data,await gcm.gcmRaw);
             options.data.notificationForClick = notification;
             const notificationJoin = new NotificationInfo(options);
@@ -33,6 +33,11 @@ export class AppGCMHandler{
             await app.showNotification(options,gcm);
             //notificationJoin.notify();
         });
+    }
+    async onGCMMediaInfo(gcm){
+        const notification = {};
+        await GCMMediaInfoBase.modifyNotification(gcm,notification,Util);
+        await app.showNotification(notification,gcm);
     }
     /**
      * 
@@ -124,7 +129,7 @@ export class AppGCMHandler{
         
         await app.showNotification(notification,gcm);     
 
-        (await app.dbGCM).addGcm(gcm);
+        // (await app.dbGCM).addGcm(gcm);
            
     }
     

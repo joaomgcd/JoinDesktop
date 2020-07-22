@@ -229,5 +229,5 @@ textarea{
       color: red;
   }
   svg{
-    fill: var(--theme-text-color);
+    fill: var(--theme-text-color-on-accent);
   }

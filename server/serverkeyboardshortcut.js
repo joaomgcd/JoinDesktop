@@ -16,12 +16,12 @@ export class ServerKeyboardShortcuts{
         }
     }
     static async clearShortcuts(){
-        console.log("Cleared shortcuts");
+        // console.log("Cleared shortcuts");
         store.setData([]);
         globalShortcut.unregisterAll()
     }
     static async storeShortcut(shortcut){
-        console.log("Storing shortcut", shortcut);
+        // console.log("Storing shortcut", shortcut);
         const shortcuts = await ServerKeyboardShortcuts.configured;
         const toInsert = new KeyboardShortcut(shortcut);
         const existingIndex = shortcuts.findIndex(shortcut => new KeyboardShortcut(shortcut).toString() == toInsert.toString())
@@ -53,7 +53,7 @@ export class ServerKeyboardShortcuts{
             if(shortcut.hasAlt){
                 shortcutText = `Alt+${shortcutText}`;
             }
-            console.log("Registering shortcut",shortcutText);
+            // console.log("Registering shortcut",shortcutText);
             globalShortcut.register(shortcutText, async () => {
                 await EventBus.post(new ShortcutPressed(shortcut));
                 console.log("Shortcut pressed",shortcutText,shortcut)

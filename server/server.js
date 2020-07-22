@@ -3,7 +3,7 @@ import {createHttpTerminator} from 'http-terminator';
 var url = require('url');
 const {GCMServer} = require("./gcmserver.js");
 const {ClipboardChecker} = require("./clipboardchecker.js");
-const { globalShortcut,ipcMain ,shell,app,nativeImage,BrowserWindow,Tray } = require('electron')
+const { globalShortcut,ipcMain ,app,nativeImage,BrowserWindow,Tray } = require('electron')
 const {GoogleAuth} = require('./googleauth.js');
 const {ServerNotification} = require('./servernotification.js');
 const {EventBus} = require("../v2/eventbus.js")
@@ -12,6 +12,8 @@ import { AppContext } from "../v2/appcontext.js";
 import { SettingCompanionAppPortToReceive } from '../v2/settings/setting.js';
 import { Util } from '../v2/util.js';
 import { ServerKeyboardShortcuts } from './serverkeyboardshortcut.js';
+import { AutoUpdater } from './autoupdater.js';
+import { UtilServer } from './serverutil.js';
 const path = require('path')
 const Store = require('./store.js');
 const storeWindowBounds = new Store({
@@ -19,6 +21,12 @@ const storeWindowBounds = new Store({
     defaults: {}
 });
 
+class ResponseAppVersion{
+    constructor(platform,version){
+        this.platform = platform;
+        this.version = version;
+    }
+}
 
 const getRequestBody = request=>{
     return new Promise(resolve=>{
@@ -34,6 +42,7 @@ const getRequestBody = request=>{
       });
     });
   }
+let tray = null;
 class Server{
     constructor(){
     }
@@ -104,12 +113,16 @@ class Server{
         this.window.setAlwaysOnTop(false);
     }
     get isWindowsSystem(){
-        const os = require('os');
-        return os.platform() == "win32";
+        return this.autoUpdater.isWindowsSystem;
     }
-    async load(){        
+    get isMacSystem(){
+        return this.autoUpdater.isMacSystem;
+    }
+    async load(){   
+        this.autoUpdater = new AutoUpdater(app);     
         if(this.isWindowsSystem){
-            const tray = new Tray(appIcon);
+            console.log("Is Windows. Will create tray icon!");
+            tray = new Tray(appIcon);
             tray.on("click",async()=>{
                 await this.bringWindowToFront();
             });
@@ -132,19 +145,30 @@ class Server{
             // console.log("Responsing with Token",authToken);
             this.window.webContents.send('authToken', authToken);
         });
-        ipcMain.on("notification",async (event,args)=>{
-            // console.log("Received request for Notification", args);
-            args.authToken = await GoogleAuth.accessToken;
-            const notification = new ServerNotification(args);
-            notification.show().catch(error=>console.log("ipcMain Notification error",error));
+        ipcMain.on("notification",async (event,args={notification,gcmRaw})=>{
+            const {type,json} = args.gcmRaw;
+            const gcm = await GCMServer.getGCMFromJson(type,json);
+            // console.log("Received request for Notification", gcm);
+            if(gcm.modifyNotification){
+                gcm.modifyNotification(args.notification,0);
+            }
+            args.notification.senderId = gcm.senderId;
+            args.notification.authToken = await GoogleAuth.accessToken;
+            const notification = new ServerNotification(args.notification);
+            notification.show(async action=>{
+                console.log("Performing action!",action,type);
+                if(gcm.handleNotificationClick){
+                    gcm.handleNotificationClick(null,action);
+                }
+            }).catch(error=>console.log("ipcMain Notification error",error));
         });
         ipcMain.on("gcm", async (event,{type,json}) => {
             const gcmRaw = {type,json};
-            console.log("Received gcmraw from page",gcmRaw)
+            // console.log("Received gcmraw from page",gcmRaw)
             await this.sendToPage(gcmRaw);
         });
         ipcMain.on("openurl",async (event,url)=>{
-            shell.openExternal(url);
+            UtilServer.openUrlOrFile(url);
         });
         ipcMain.on("devices",async (event,raw)=>{
             DevicesServer.devices = raw;
@@ -161,9 +185,23 @@ class Server{
         });
         // await ServerKeyboardShortcuts.clearShortcuts();
         
+        // ServerNotification.show({title:"Join Companion App1",body:"Now running1!"});
+        this.autoUpdater.checkForUpdate();
         return this.window;
         // const path = require('path');
-        // ServerNotification.show({title:"Join Companion App",body:"Now running!",icon:path.join(__dirname, '../images/join.png'),actions:[{title:"Test Action"}]});
+    }
+    async onResultNotificationAction(request){
+        await this.sendToPageEventBus(request)
+    }
+    async onRequestReplyMessageFromServer(request){
+        // console.log("Received reply request in server",request);
+        await this.sendToPageEventBus(request)
+    }
+    async onNotificationInfos(notificationInfos){
+        await this.sendToPageEventBus(notificationInfos)
+    }
+    async onStoredNotifications(storedNotifications){
+        await this.sendToPageEventBus(storedNotifications)
     }
     async onRequestListenForShortcuts(request){
         const shortcuts = request.shortcuts;
@@ -178,6 +216,9 @@ class Server{
     }
     async onRequestClipboard(){
         this.sendToPageEventBus(new ResponseClipboard(this.clipboardChecker.get()))
+    }
+    async onRequestSetClipboard(request){
+        this.clipboardChecker.setClipboardText(request.text);
     }
     async onRequestToggleDevOptions(){
         this.window.webContents.toggleDevTools()
@@ -203,6 +244,38 @@ class Server{
     }
     async onRequestSendPush(request){
         await this.window.webContents.send('sendpush', request.push);
+    }
+    async onRequestSendGCM(request){
+        await this.sendToPageEventBus(request);
+    }
+    async onRequestDownloadAndOpenFile(request){
+        const path = require("path");
+        
+        const downloadLink = request.url;
+        const parsed = url.parse(downloadLink);
+        let fileName = decodeURIComponent(path.basename(parsed.pathname));
+        console.log("Downloading file", downloadLink, fileName);
+        
+        const file = await UtilServer.downloadFile(downloadLink,fileName)
+        console.log("Downloaded file", file.path);
+        UtilServer.openUrlOrFile(file);
+    }
+    get appInfo(){
+        const response = new ResponseAppVersion();
+        Object.assign(response,this.autoUpdater.appInfo);
+        return response;
+    }
+    async onRequestAppVersion(){
+        await this.sendToPageEventBus(this.appInfo);
+    }
+    async onRequestExecuteGCMOnPage(request){
+        await this.sendToPageEventBus(request);
+    }
+    async onUpdateAvailable(request){
+        await this.sendToPageEventBus(request);
+    }
+    async onRequestHandleNotificationClickGCMOnPage(request){
+        await this.sendToPageEventBus(request);
     }
     async onCompanionHostConnected(info){
         await this.sendToPageEventBus(info);
@@ -270,11 +343,15 @@ class Server{
                 await gcm.execute();
             }
             delete gcm.execute;
-            if(gcm.modifyNotification){
-                const notification = {authToken: await GoogleAuth.accessToken};
-                await gcm.modifyNotification(notification,0);
-                ServerNotification.show(notification).then(action=>gcm.handleNotificationClick(null,action)).catch(error=>console.log("Notification error",error));
-            }
+            // if(gcm.modifyNotification){
+            //     // console.log("Modifying notification and handling click");
+            //     const notification = {authToken: await GoogleAuth.accessToken};
+            //     await gcm.modifyNotification(notification,0);
+            //     ServerNotification.show(notification).then(action=>{
+            //         console.log("Got Notification action!",action)
+            //         gcm.handleNotificationClick(null,action);
+            //     }).catch(error=>console.log("Notification error",error));
+            // }
             // console.log("Sending to page",content);
             await this.window.webContents.send('gcm', content);
             return;

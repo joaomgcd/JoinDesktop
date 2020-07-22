@@ -22,6 +22,7 @@ export class ControlNotificationClickHandler extends Control{
     async onFAB(){
         this.notifications = [];
         await this.render()
+        EventBus.post(new NotificationsCleared());
     }
     async renderSpecific({root}){        
         this.contentElement = root;
@@ -42,11 +43,38 @@ export class ControlNotificationClickHandler extends Control{
         const hasElements = this.controlsNotifications.length > 0;
         UtilDOM.showOrHide(this.notificationsElement,hasElements);
         UtilDOM.showOrHide(this.noNotificationsElement,!hasElements);
-        UtilDOM.showOrHide(this.fabElement,hasElements);
+        UtilDOM.showOrHide(this.fabElement,hasElements && !this.hideFAB);
+        const backgroundColor = this.backgroundColor;
+        if(backgroundColor){
+            this.contentElement.style["background-color"] = backgroundColor;
+            this.notificationsElement.style["background-color"] = backgroundColor;
+        }
         for(const controlNotification of this.controlsNotifications){
             const notificationRender = await controlNotification.render();
             this.notificationsElement.appendChild(notificationRender);
         }
+    }
+    get hideFAB(){
+        return this._hideFAB;
+    }
+    set hideFAB(value){
+        this._hideFAB = value;
+    }
+    get notificationsListSize(){
+        let firstNotificationWidth = 0;
+        if(this.notificationsElement.length > 0){
+            firstNotificationWidth = this.notificationsElement.firstElementChild.clientWidth;
+        }
+        if(firstNotificationWidth == 0){
+            firstNotificationWidth = 500;
+        }
+        return {width:firstNotificationWidth,height:this.notificationsElement.clientHeight+10};
+    }
+    get backgroundColor(){
+        return this._backgroundColor;
+    }
+    set backgroundColor(value){
+        this._backgroundColor = value;
     }
     set notifications(values){
         const notifications  = values || [];
@@ -85,7 +113,7 @@ export class ControlNotificationClickHandler extends Control{
         if(!controlNotification) return;
 
         const notification = controlNotification.notification;
-        if(notification.replyId) return;
+        // if(notification.replyId) return;
 
         await this.removeNotificationByCriteria(criteriaFunc);
     }
@@ -104,7 +132,8 @@ export class ControlNotificationClickHandler extends Control{
             this.controlsNotifications.splice(0,0,controlNotification);
         }
         this.controlsNotifications.sortByMultiple(false,controlNotification=>controlNotification.notification.gcmId)
-        await this.render();
+        return await this.render();
     }
 
 }
+class NotificationsCleared{}

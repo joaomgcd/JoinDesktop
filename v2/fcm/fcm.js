@@ -117,7 +117,7 @@ class FCM {
 
 	}
 }
-
+class DBNotificationsUpdated{}
 const CACHE_NAME = 'static-cache-v1';
 const FILES_TO_CACHE = [
 	'/offline.html',
@@ -153,6 +153,9 @@ class FCMClient{
 		const token = await this.registerServiceWorker(firebaseConfig);
 		this.fcm.broadcastChannel.reportToken(firebaseConfig,token);
 		return token;
+	}
+	async setEventBusCallback(callback){
+		this.fcm.broadcastChannel.onEventBusEvent(callback);
 	}
 	initServiceWorker(serviceWorker, messageCallback){
 	//	try{
@@ -214,6 +217,10 @@ class FCMClient{
 					notification.body = notification.text;
 				}
 				setTimeout(()=>serviceWorker.registration.showNotification(title,notification),100);
+				const dbNotifications = DB.get().notifications;
+				notification.tag = notification.id || notification.tag || new Date().getTime().toString();
+				await dbNotifications.put({key:notification.tag,json:JSON.stringify(notification)});
+				await this.fcm.broadcastChannel.reportEventBusEvent(new DBNotificationsUpdated());
 			});
 			this.fcm.broadcastChannel.onRequestCheckConnectedClients(async ({myDeviceId,authToken})=>{
 				await Util.sleep(1000);
@@ -278,7 +285,9 @@ class FCMClient{
 		if(!notification.data){
 			notification.data = {};
 		}
-		Object.assign(notification.data,await gcm.gcmRaw);
+		if(!notification.data.json){
+			Object.assign(notification.data,await gcm.gcmRaw);
+		}
 		return await this.fcm.broadcastChannel.requestShowNotification(notification);
 	}
 	async reportWindowUnloaded(args = {myDeviceId,authToken}){
@@ -409,11 +418,15 @@ class BroadcastChannelFCM extends parent{
 
 		BroadcastChannelFCM.ACTION_REQUEST_SHOW_NOTIFICATION = 'request-show-notification';
 		BroadcastChannelFCM.ACTION_CHECK_CONNECTED_CLIENTS = 'check-connected-clients';
+		BroadcastChannelFCM.ACTION_EVENTBUS_EVENT = 'eventbus-event';
 
 		BroadcastChannelFCM.EXTRA_SENDER_ID = 'sender-id';
 		BroadcastChannelFCM.EXTRA_TOKEN = 'token';
 		BroadcastChannelFCM.EXTRA_MESSAGE = 'message';
 		BroadcastChannelFCM.EXTRA_NOTIFICATION = 'notification';
+
+		BroadcastChannelFCM.EXTRA_EVENTBUS_DATA = 'data';
+		BroadcastChannelFCM.EXTRA_EVENTBUS_CLASS = 'clazz';
 
 		this.addEventListener('message',async event => {
 			const data = event.data;
@@ -431,6 +444,8 @@ class BroadcastChannelFCM extends parent{
 				this.doCallback(this.showNotificationCallback, data[BroadcastChannelFCM.EXTRA_NOTIFICATION]);
 			}else if(data[BroadcastChannelFCM.ACTION_CHECK_CONNECTED_CLIENTS]){
 				this.doCallback(this.checkConnectedClientsCallback, data[BroadcastChannelFCM.EXTRA_MESSAGE]);
+			}else if(data[BroadcastChannelFCM.ACTION_EVENTBUS_EVENT]){
+				this.doCallback(this.eventBusEventCallback, {data:data[BroadcastChannelFCM.EXTRA_EVENTBUS_DATA], clazz:data[BroadcastChannelFCM.EXTRA_EVENTBUS_CLASS]});
 			}
 		});
 	}
@@ -509,5 +524,15 @@ class BroadcastChannelFCM extends parent{
 	}
 	onRequestCheckConnectedClients(callback){
 		this.checkConnectedClientsCallback = callback;
+	}
+	reportEventBusEvent(event){
+		this.postFcmMessage(message=>{
+			message[BroadcastChannelFCM.ACTION_EVENTBUS_EVENT] = true;
+			message[BroadcastChannelFCM.EXTRA_EVENTBUS_DATA] = event;
+			message[BroadcastChannelFCM.EXTRA_EVENTBUS_CLASS] = event.constructor.name;
+		});
+	}
+	onEventBusEvent(callback){
+		this.eventBusEventCallback = callback;
 	}
 }

@@ -23,6 +23,22 @@ class GCMBaseApp extends GCMBaseFinal{
 	}
 	//open
 	async encrypt(){}
+	async getDevice(deviceId){
+		const {DBDevices} = await import("../device/dbdevice.js");
+		const db = new DBDevices(DB.get());
+		const device = await db.getById(deviceId);
+		return device;
+	}
+	
+	async send(deviceId){
+        const gcmRaw = await this.gcmRaw;
+		await EventBus.post(new RequestSendGCM(gcmRaw,deviceId))
+    }
+	async sendPush(push){
+		const gcmPush = new GCMPush();
+		gcmPush.push = push;
+		await gcmPush.send(push.deviceId);
+	}
 }
 class GCMGenericPush extends GCMBaseApp{
 	get json(){
@@ -69,6 +85,8 @@ export class GCMPush extends GCMBaseApp{
             setText(`Click to copy: ${clipboard}`);
         }
         const handleUrl = async push => {
+			if(push.title) return;
+			
             const url = push.url;
             if(!url) return;
 
@@ -107,8 +125,14 @@ export class GCMPush extends GCMBaseApp{
 		const notification = {
 			"appName":"Join",
 			"title":title,
-            "text":text
-		};
+			"text":text,
+			"requireInteraction":true,
+			data:this,
+            actions:[]
+        };
+        if(push.url){
+            notification.actions.push(GCMPushBase.notificationActionCopyUrl);
+        }
 		Object.assign(notification, push);
 		return notification;
 	}
@@ -127,6 +151,20 @@ export class GCMPush extends GCMBaseApp{
 	async sendTextToLocalPort({port}){
 		return await GCMPushBase.sendTextToLocalPort({gcmPush:this,port});
 	
+	}
+	async handleNotificationClick(notificationAction){
+		const push = this.push;
+		if(!push) return;
+
+		if(!notificationAction){
+			if(push.url){
+				await Util.openWindow(push.url);
+			}
+			return;
+		}
+		if(notificationAction == GCMPushBase.notificationActionCopyUrl.action){
+			Util.setClipboardText(push.url);
+		}
 	}
 }
 class GCMNotification extends GCMBaseApp{}
@@ -188,10 +226,21 @@ export class GCMRespondFile extends GCMGenericPush{
 }
 export class GCMNewSmsReceived extends GCMGenericPush{}
 export class GCMSmsSentResult extends GCMGenericPush{}
-export class GCMMediaInfo extends GCMGenericPush{}
+export class GCMMediaInfo extends GCMGenericPush{	
+	async handleNotificationClick(action){
+		return await GCMMediaInfoBase.handleNotificationClick(this,action,Util.openWindow);
+	}
+}
 export class GCMDeviceNotOnLocalNetwork extends GCMGenericPush{}
 export class GCMStatus extends GCMGenericPush{}
 export class GCMFolderRequest extends GCMGenericPush{}
 export class GCMFolder extends GCMGenericPush{}
 export class GCMFile extends GCMGenericPush{}
 export class GCMAutoClipboard extends GCMGenericPush{}
+
+class RequestSendGCM{
+    constructor(gcmRaw,deviceId){
+        this.gcmRaw = gcmRaw;
+        this.deviceId = deviceId;
+    }
+}

@@ -5,8 +5,6 @@ import { AppHelperBase } from "../apphelperbase.js";
 import { Device } from "../device/device.js";
 import { NotificationInfo } from "./notificationinfo.js";
 import { GCMRequestFile,GCMNotificationClear } from "../gcm/gcmapp.js";
-import { DBGCM } from "../gcm/dbgcm.js";
-import { AppGCMHandler } from "../gcm/apphelpergcm.js";
 
 const eventBusLocal = new EventBus();
 /** @type {App} */
@@ -26,6 +24,7 @@ export class AppHelperNotifications extends AppHelperBase{
         EventBus.register(this);
         eventBusLocal.register(this);
 
+        this.device = await app.myDevice;
         app.controlTop.appName = `Join Notifications`;
         app.controlTop.appNameClickable = true;
         app.controlTop.shouldAlwaysShowImageRefresh = true;
@@ -35,25 +34,52 @@ export class AppHelperNotifications extends AppHelperBase{
         await app.loadFcmClient();
         await this.refreshNotifications();
         
+    }    
+    async onAppNameClicked(appNameClicked){
+        await app.showDeviceChoiceOnAppNameClicked(appNameClicked,device=> device.isMyDevice || device.canSendNotifications())
     }
     async onAppDeviceSelected(appDeviceSelected){
         this.device = appDeviceSelected.device;
+        await this.refreshNotifications();
+    }
+    async onNotificationInfos(notificationInfos){
+        if(!this.device || !this.device.isMyDevice) return;
+
         await this.refreshNotifications();
     }
     async refreshNotifications(){
         let stillLoading = false;
         try{
             this.notifications = [];
-            const dbGCM = (await this.dbGCM);
-            const notificationsFromDb = await dbGCM.getAll();
-            for(const fromDb of notificationsFromDb){
-                if(fromDb.done) continue;
+            // const dbGCM = (await this.dbGCM);
+            // const notificationsFromDb = await dbGCM.getAll();
+            // for(const fromDb of notificationsFromDb){
+            //     if(fromDb.done) continue;
 
-                await eventBusLocal.post(fromDb);
-                //await dbGCM.remove(fromDb.gcmId);
-                // await dbGCM.setDone(fromDb.gcmId);
+            //     await eventBusLocal.post(fromDb);
+            //     //await dbGCM.remove(fromDb.gcmId);
+            //     // await dbGCM.setDone(fromDb.gcmId);
+            // }
+            // await dbGCM.clear();
+            if(this.device && this.device.isMyDevice){
+                try{
+                    const ownNotificationsPromise = EventBus.waitFor(StoredNotifications,5000);
+                    EventBus.post(new RequestStoredNotifications());
+                    const ownNotifications = await ownNotificationsPromise;                    
+                    const options = ownNotifications.options;
+                    const {NotificationInfo} = await import("./notificationinfo.js");
+                    let notifications = options.map(async option => {
+                        const notification = new NotificationInfo(option);
+                        await notification.getDeviceFromInfo(async deviceId => await app.getDevice(deviceId));
+                        return notification;
+                    });
+                    notifications = await Promise.all(notifications);
+                    await this.addNotifications(notifications);
+                    return;
+                }catch(error){
+                    console.error("Couldn't get own notifications",error);
+                }
             }
-            await dbGCM.clear();
             const token = await app.getAuthToken();
             const devices = this.device ? [this.device] : (await app.devicesFromDb).filter(device=>device.canSendNotifications());
             if(devices.length == 0){
@@ -78,10 +104,10 @@ export class AppHelperNotifications extends AppHelperBase{
             }
         }
     }
-    /** @type {DBGCM} */
-    get dbGCM(){
-        return app.dbGCM;
-    }
+    // /** @type {DBGCM} */
+    // get dbGCM(){
+    //     return app.dbGCM;
+    // }
     async onRequestRefresh(){
         await this.refreshNotifications();
     }
@@ -93,21 +119,22 @@ export class AppHelperNotifications extends AppHelperBase{
         this.controlNotificationClickHandler.render();
     }
     
-    async onRequestReplyMessage({text,notification}){
-        const device = notification.device;
-        await app.replyToMessage({device,text,notification});
+    async onDBNotificationsUpdated(){
+        if(!this.device || !this.device.isMyDevice) return;
+
+        await this.refreshNotifications();
     }
     async onRequestNotificationAction({notificationButton,notification}){
-        const device = notification.device;
-        app.controlTop.loading = true;
-        if(device && !notification.gcmId){
-            await app.doNotificationAction({device,notificationButton,notification});
-        }
+        // if(!this.device) return;
+        // if(this.device.isMyDevice) return;
+
+        // const device = this.device;
+        // app.controlTop.loading = true;
+        // await app.doNotificationAction({device,notificationButton,notification});
         if(notificationButton.action == GCMNotificationBase.notificationDismissAction.action){
             await this.controlNotificationClickHandler.removeNotification(notification);
-            await this.dbGCM.remove(notification.gcmId);
         }
-        app.controlTop.loading = false;
+        // app.controlTop.loading = false;
     }
     updateUrl(){
         Util.changeUrl(`?notifications`);
@@ -116,7 +143,7 @@ export class AppHelperNotifications extends AppHelperBase{
         app.controlTop.loading = true;
         const notifications = this.controlNotificationClickHandler.notifications;
         const gcmNotificationClear = new GCMNotificationClear();
-        const uniqueDevices = [...new Set(notifications.map(notification=>notification.device))];
+        const uniqueDevices = [...new Set(notifications.map(notification=>notification.device))].filter(device=>device!=null);
         const Devices = (await import("../device/device.js")).Devices;
 		const devices = new Devices(uniqueDevices);
 		gcmNotificationClear.senderId = app.myDeviceId;
@@ -173,25 +200,27 @@ export class AppHelperNotifications extends AppHelperBase{
         app.controlTop.loading = false;  
     }
     
-    async onGCMPush(gcm){
-        var {push,notification} = await AppGCMHandler.handleGCMPush(app,gcm,gcm.done);
-        if(!notification || !push) return;
+    // async onGCMPush(gcm){
+    //     var {push,notification} = await AppGCMHandler.handleGCMPush(app,gcm,gcm.done);
+    //     if(!notification || !push) return;
 
-        if(!gcm.done){
-            if(push.clipboard){
-                try{
-                    await Util.setClipboardText(push.clipboard);
-                    notification.title = "Clipboard Set"
-                }catch(error){
-                    const title = "Couldn't set clipboard. Please copy manually.";
-                    app.showToast({text:title,isError:true,time:5000});
-                    notification.title = title;
-                }
-            }
-        }
-        notification.device = await app.getDevice(notification.senderId);
-        notification.gcmId = gcm.gcmId;
-        notification = new NotificationInfo(notification);
-        this.addNotifications(notification);
-    }
+    //     if(!gcm.done){
+    //         if(push.clipboard){
+    //             try{
+    //                 await Util.setClipboardText(push.clipboard);
+    //                 notification.title = "Clipboard Set"
+    //             }catch(error){
+    //                 const title = "Couldn't set clipboard. Please copy manually.";
+    //                 app.showToast({text:title,isError:true,time:5000});
+    //                 notification.title = title;
+    //             }
+    //         }
+    //     }
+    //     notification.device = await app.getDevice(notification.senderId);
+    //     notification.gcmId = gcm.gcmId;
+    //     notification = new NotificationInfo(notification);
+    //     this.addNotifications(notification);
+    // }
 }
+class RequestStoredNotifications{}
+class StoredNotifications{}

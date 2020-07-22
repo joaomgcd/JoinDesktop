@@ -47,7 +47,46 @@ export class UtilServer{
     }
     static async getServerFilePath(relativePath){
         const result =  path.join(__dirname, relativePath);
-        console.log("Getting file path", result)
+        // console.log("Getting file path", result)
         return result;
+    }
+    static async getUserDataFilePath(relativePath){        
+        const userDataPath = (electron.app || electron.remote.app).getPath('userData');
+        const result =  path.join(userDataPath, relativePath);
+        return result;
+    }
+        
+    static async downloadFile(url,relativeLocalPath){
+        return new Promise(async (resolve,reject)=>{
+            const http = url.startsWith("https") ? require('https') : require('http');
+            const fs = require('fs');
+
+            const dest = await UtilServer.getUserDataFilePath(relativeLocalPath);
+            console.log("Downloading file",url, dest);
+            let downloaded = 0;
+            const file = fs.createWriteStream(dest);
+            http.get(url, (response)=>{
+                response.pipe(file);
+                file.on('finish', ()=>{
+                    file.close(()=>resolve(file));
+                });
+                response.on("data",chunk=>{
+                    downloaded += chunk.length;
+                    let toDisplay = downloaded / 1024 / 1024;
+                    toDisplay = Math.round((toDisplay + Number.EPSILON) * 100) / 100;
+                    process.stdout.write(`Downloaded ${toDisplay}MB\r`);
+                });
+            }).on('error', (err)=>{ 
+                fs.unlink(dest);
+                reject(err);
+            });
+        })
+    }
+    static openUrlOrFile(urlOrFile){        
+        const { shell } = require('electron')
+        if(urlOrFile.path){
+            urlOrFile = urlOrFile.path;
+        }
+        shell.openExternal(urlOrFile);
     }
 }

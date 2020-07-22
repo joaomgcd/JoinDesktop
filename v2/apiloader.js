@@ -55,6 +55,9 @@ export class ApiLoader{
                 }).then(()=>{
                     console.log("Done loading APIs!");
                     resolve();
+                },e=>{
+                    console.error(e);
+                    reject(e);
                 });
             };
             if(gapi.client && gapi.client.oauth2){
