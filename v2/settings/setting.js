@@ -144,6 +144,12 @@ export class SettingTheme extends SettingSingleOption{
     static get id(){
         return "settingtheme";
     }
+    static get themeIdAuto(){
+        return "auto"
+    }
+    static get themeIdAutoBlack(){
+        return "autoblack"
+    }
     static get themeIdLight(){
         return "light"
     }
@@ -161,6 +167,18 @@ export class SettingTheme extends SettingSingleOption{
     }
     static get themeOptions(){
         return [
+            {
+                id:SettingTheme.themeIdAuto,
+                label:"Auto (Dark)",
+                light:SettingTheme.themeIdLight,
+                dark:SettingTheme.themeIdDark
+            },
+            {
+                id:SettingTheme.themeIdAutoBlack,
+                label:"Auto (Black)",
+                light:SettingTheme.themeIdLight,
+                dark:SettingTheme.themeIdBlack
+            },
             {
                 id:SettingTheme.themeIdLight,
                 label:"Light",
@@ -189,10 +207,19 @@ export class SettingTheme extends SettingSingleOption{
         ]
     }
     static getThemeOption(themeId){
-        return SettingTheme.themeOptions.find(option=>option.id == themeId);
+        let selected = SettingTheme.themeOptions.find(option=>option.id == themeId);
+        if(selected.light && selected.dark){ 
+            if(Util.darkModeEnabled){
+                selected = SettingTheme.getThemeOption(selected.dark);
+            }else{
+                selected = SettingTheme.getThemeOption(selected.light);
+            }
+        }
+        return selected;
     }
     get theme(){
-        return SettingTheme.getThemeOption(this.value);
+        let selected = SettingTheme.getThemeOption(this.value);
+        return selected;
     }
     constructor(){
         super({

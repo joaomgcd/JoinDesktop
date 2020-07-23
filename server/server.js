@@ -3,7 +3,7 @@ import {createHttpTerminator} from 'http-terminator';
 var url = require('url');
 const {GCMServer} = require("./gcmserver.js");
 const {ClipboardChecker} = require("./clipboardchecker.js");
-const { globalShortcut,ipcMain ,app,nativeImage,BrowserWindow,Tray } = require('electron')
+const { globalShortcut,ipcMain ,app,nativeImage,BrowserWindow,Tray,Menu, MenuItem,nativeTheme } = require('electron')
 const {GoogleAuth} = require('./googleauth.js');
 const {ServerNotification} = require('./servernotification.js');
 const {EventBus} = require("../v2/eventbus.js")
@@ -14,6 +14,7 @@ import { Util } from '../v2/util.js';
 import { ServerKeyboardShortcuts } from './serverkeyboardshortcut.js';
 import { AutoUpdater } from './autoupdater.js';
 import { UtilServer } from './serverutil.js';
+
 const path = require('path')
 const Store = require('./store.js');
 const storeWindowBounds = new Store({
@@ -42,6 +43,7 @@ const getRequestBody = request=>{
       });
     });
   }
+  /** @type {Tray} */
 let tray = null;
 class Server{
     constructor(){
@@ -126,6 +128,9 @@ class Server{
             tray.on("click",async()=>{
                 await this.bringWindowToFront();
             });
+            tray.setContextMenu(Menu.buildFromTemplate([
+                new MenuItem({ label: 'Exit', type: 'normal', click:()=>this.onCloseAppClicked() })
+            ]))
         }
         app.on('second-instance',async ()=> await this.bringWindowToFront());
         await this.createWindow();
@@ -237,16 +242,25 @@ class Server{
         app.quit();
     }
     async onMinimizeAppClicked(){
-        this.window.minimize();
         if(this.isWindowsSystem){
+            this.window.minimize();
             this.window.hide();
+            // tray.displayBalloon({title:"Still Running",content:"To close Join right click this icon."})
+        }else{
+            this.onCloseAppClicked();
         }
+    }
+    async onMinimizeToTaskBarAppClicked(){
+        this.window.minimize();
     }
     async onRequestSendPush(request){
         await this.window.webContents.send('sendpush', request.push);
     }
     async onRequestSendGCM(request){
         await this.sendToPageEventBus(request);
+    }
+    async onRequestSystemTheme(request){
+        await this.sendToPageEventBus(new ResponseSystemTheme(nativeTheme.shouldUseDarkColors));
     }
     async onRequestDownloadAndOpenFile(request){
         const path = require("path");
@@ -366,6 +380,11 @@ class ClipboardChanged{
 class ResponseClipboard{
     constructor(text){
         this.text = text;
+    }
+}
+class ResponseSystemTheme{
+    constructor(isDark){
+        this.isDark = isDark;
     }
 }
 exports.Server = Server;

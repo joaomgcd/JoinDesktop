@@ -71,7 +71,7 @@
       "target": "squirrel",
       "icon": "build/icon.ico"
     },
-    "squirrelWindows":{
+    "squirrelWindows": {
       "loadingGif": "joinloading.png"
     }
   },

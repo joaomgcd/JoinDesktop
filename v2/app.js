@@ -98,6 +98,7 @@ export class App{
     async loadEssentials(){
         this.redirectToHttpsIfNeeded();
         this.applyTheme();
+        Util.watchDarkModeChanges(enabled=>this.applyTheme());
         if(!Util.areCookiesEnabled){
             await alert("Cookies are disabled. Please enable them and refresh the page to continue.");
             return;

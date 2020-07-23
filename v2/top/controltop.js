@@ -41,8 +41,8 @@ export class ControlTop extends Control{
         this.imageBackElement.onclick = () => EventBus.post(new RequestGoBack());
         this.imageMenuElement.onclick = () => EventBus.post(new RequestOpenMenu());
         this.elementRightImage.onclick = () => EventBus.post(new RightImageClicked());
-        this.closeAppElement.onclick = () => EventBus.post(new CloseAppClicked());
-        this.minimizeAppElement.onclick = () => EventBus.post(new MinimizeAppClicked());
+        this.closeAppElement.onclick = () => EventBus.post(new MinimizeAppClicked());
+        this.minimizeAppElement.onclick = () => EventBus.post(new MinimizeToTaskBarAppClicked());
         return root;
     }
     hideNavigation(){
@@ -144,3 +144,4 @@ class AppNameClicked{
 class RightImageClicked{}
 class CloseAppClicked{}
 class MinimizeAppClicked{}
+class MinimizeToTaskBarAppClicked{}

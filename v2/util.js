@@ -433,7 +433,23 @@ class Util{
         // notInCondition.forEach(item=>array.push(item));
         // return array;
     }
+    static get darkModeEnabled(){
+        const result = darkModeMediaQuery();
+        if(!result) return false;
+        return result.matches
+    }
+    /**
+     * 
+     * @param {Function} callback Will receive true if dark enabled, false if light
+     */
+    static watchDarkModeChanges(callback){        
+        darkModeMediaQuery().addListener((e) => {
+            const darkModeOn = e.matches;
+            callback(darkModeOn);
+        });
+    }
 }
+const darkModeMediaQuery = () => window.matchMedia('(prefers-color-scheme: dark)');
 try{
 	exports.Util = Util;
 }catch{}
