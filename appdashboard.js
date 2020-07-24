@@ -236,7 +236,9 @@ export class AppGCMHandlerDashboard extends AppGCMHandler{
                     await sender.sendPush({text:command});
                 }
             }
+            return false;
         }
+        return true;
     }
     
 }

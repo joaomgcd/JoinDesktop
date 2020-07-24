@@ -123,7 +123,9 @@ export class AppGCMHandler{
         var {push,notification} = await AppGCMHandler.handleGCMPush(app,gcm);
         if(!notification || !push) return;
 
-        await this.handleGCMPush({gcm,push,notification});
+        const shouldNotify = await this.handleGCMPush({gcm,push,notification});
+        if(!shouldNotify) return;
+        
         notification = new NotificationInfo(notification);
         
         await app.showNotification(notification,gcm);     
@@ -131,10 +133,15 @@ export class AppGCMHandler{
         // (await app.dbGCM).addGcm(gcm);
            
     }
+    /**
+     * 
+     * @returns {Boolean} true if notification should be created, false otherwise 
+     */
     async handleGCMPush({gcm, push, notification}){
         if(push.clipboard){
             notification.text = `Click to set to "${push.clipboard}"`;
         }
+        return true;
     }
     
     async onGCMNotificationClear(gcm){
