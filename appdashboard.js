@@ -6,7 +6,7 @@ import './v2/extensions.js';
 import { App,RequestLoadDevicesFromServer } from "./v2/app.js";
 import {AppHelperSettings} from "./v2/settings/apphelpersettings.js"
 import { ControlSettings } from "./v2/settings/controlsetting.js";
-import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync, SettingCustomActions } from "./v2/settings/setting.js";
+import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync, SettingCustomActions, SettingUseNativeNotifications } from "./v2/settings/setting.js";
 import { AppGCMHandler } from "./v2/gcm/apphelpergcm.js";
 import { ControlDialogInput, ControlDialogOk } from "./v2/dialog/controldialog.js";
 import { AppContext } from "./v2/appcontext.js";
@@ -120,6 +120,8 @@ class FCMClientDashboard{
         // delete notification.badge;
         // Object.assign(notification.data,await gcm.gcmRaw);
         const gcmRaw = await gcm.gcmRaw;
+        const {SettingUseNativeNotifications} = await import("./v2/settings/setting.js");
+        notification.native = await new SettingUseNativeNotifications().value;
 		return window.api.send("notification",{notification,gcmRaw});
 	}
 }
@@ -172,6 +174,7 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
                 new Tab({title:"General",controlContent:new ControlSettings([
                     new SettingCompanionAppPortToReceive(),
                     new SettingEncryptionPassword(),
+                    new SettingUseNativeNotifications(),
                 ])}),
             ]);
             // return new ControlSettings([

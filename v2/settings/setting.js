@@ -135,6 +135,35 @@ export class SettingAutomationPortFullPush extends SettingTextInput{
         })
     }
 }
+export class SettingBoolean extends Setting{
+    constructor(args = {placeholder,isSecret}){
+        super(args)
+    }
+}
+export class SettingUseNativeNotifications extends SettingBoolean{  
+    static get id(){
+        return "SettingUseNativeNotifications";
+    } 
+    constructor(){
+        super({
+            id:SettingUseNativeNotifications.id,
+            label:"Use Native Notifications",
+            subtext:`If set, will use your OS' native notification system which is more restricted than Join's internal one.`
+        })
+    }
+    get isDbSetting(){
+        return false;
+    }
+    get value(){
+        return (async ()=>{
+            const value = await super.value;
+            return value == true || value == "true";
+        })()
+    }
+    set value(v){
+        super.value = v
+    }
+}
 export class SettingSingleOption extends Setting{
     //options is {id,label}
     constructor(args = {options}){
@@ -345,6 +374,9 @@ export class SettingCustomActions extends Setting{
             const array = JSON.parse(stringValue);
             return new CustomActions(array);
         })();
+    }
+    get isDbSetting(){
+        return true;
     }
     set value(toSet){
         super.value = JSON.stringify(toSet);

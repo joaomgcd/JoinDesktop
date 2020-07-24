@@ -1,5 +1,5 @@
 import { Control } from "../control.js";
-import { SettingTextInput, SettingSingleOption, SettingColor, SettingKeyboardShortcut, SettingMultipleDevices, SettingCustomActions, SettingClipboardSync } from "./setting.js";
+import { SettingTextInput, SettingSingleOption, SettingColor, SettingKeyboardShortcut, SettingMultipleDevices, SettingCustomActions, SettingClipboardSync, SettingBoolean } from "./setting.js";
 import { UtilDOM } from "../utildom.js";
 import { EventBus } from "../eventbus.js";
 
@@ -103,6 +103,9 @@ export class ControlSetting extends Control{
         }
         if(Util.isSubTypeOf(setting,SettingSingleOption)){
             return new ControlSettingContentSingleOption(setting);
+        }
+        if(Util.isSubTypeOf(setting,SettingBoolean)){
+            return new ControlSettingContentColorBoolean(setting);
         }
         if(Util.isSubTypeOf(setting,SettingColor)){
             return new ControlSettingContentColor(setting);
@@ -240,6 +243,33 @@ export class ControlSettingContentColor extends ControlSettingContent{
 
         this.settingElement.value = await this.setting.value;
         this.settingElement.onchange = async () => await EventBus.post(new SettingSaved(this.setting,this.settingElement.value));
+    }
+}
+export class ControlSettingContentColorBoolean extends ControlSettingContent{
+    /**
+     * 
+     * @param {SettingBoolean} setting
+     */
+    constructor(setting){
+        super(setting)
+    }
+    getHtml(){
+        return `
+            <div class="settingboolean">
+                <input type="checkbox" name="check" />
+                <label for="check"></label>
+            </div>
+        `
+    }
+   
+    async renderSpecific({root}){
+        this.settingElement = root;  
+        this.valueElement = await this.$("input"); 
+        this.labelElement = await this.$("label"); 
+
+        this.labelElement.innerHTML = this.setting.label;
+        this.valueElement.checked = await this.setting.value;
+        this.settingElement.onchange = async () => await EventBus.post(new SettingSaved(this.setting,this.valueElement.checked));
     }
 }
 export class ControlSettingKeyboardShortcut extends ControlSettingContent{

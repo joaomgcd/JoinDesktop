@@ -312,7 +312,7 @@ export class ServerNotification{
     constructor(args){
         Object.assign(this,args);
     }
-    show(onClickCallback = null){  
+    async show(onClickCallback = null){  
         if(!this.title){
             this.title = "Join";
         }
@@ -333,14 +333,16 @@ export class ServerNotification{
         // delete this.icon;
         // delete this.badge;
         delete this.appName;
-        // this.appName = "Join";      
-        // if(this.icon){
-        //     const fileName = this.id ? `${stringHash(this.id)}.png` : "tempfile.png";
-        //     this.icon = await UtilServer.imageToFilePath(fileName,this.icon,this.authToken);
-        //     this.deleteIcon = true;
-        // }else{
-        //     this.icon = await UtilServer.getServerFilePath("../images/join.png");
-        // }
+        // this.appName = "Join"; 
+        if(this.native){  
+            if(this.icon){
+                const fileName = this.id ? `${stringHash(this.id)}.png` : "tempfile.png";
+                this.icon = await UtilServer.imageToFilePath(fileName,this.icon,this.authToken);
+                this.deleteIcon = true;
+            }else{
+                this.icon = await UtilServer.getServerFilePath("../images/join.png");
+            }
+        }   
         return new Promise((resolve,reject)=>{
             const callback = (err, action, metadata,originalAction) => { 
                 try{
@@ -386,11 +388,14 @@ export class ServerNotification{
                 }
             };
             console.log("Showing notification with text",this.body);
-            const notificationWindow = new WindowNotification(this);
-            notificationWindow.notify(callback)
+            if(!this.native){
+                const notificationWindow = new WindowNotification(this);
+                notificationWindow.notify(callback)
+            }else{
+                notifier.notify(this,callback);
+            }
             // const Growl = require('node-notifier/notifiers/growl');
             // new Growl().notify(this,callback);
-            // notifier.notify(this,callback);
             // resolve();
         })
     }
