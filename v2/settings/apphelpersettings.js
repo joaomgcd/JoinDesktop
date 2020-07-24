@@ -60,6 +60,13 @@ const handleConnectingToDesktopApp = async (setting,value) => {
         return value;
     }
 
+    const notificationsAllowed = Notification.permission == "granted";
+    if(!notificationsAllowed){
+        await ControlDialogOk.showAndWait({title:"Must Allow Notifications", text:"To make the desktop app work correctly you need to enable notifications.<br/><br/>To allow your browser to receive pushes, notifications must be enabled for this website otherwise pushes won't be received and the desktop app won't work."});
+        value = null;
+        return value;
+    }
+
     value = parseInt(value);
     const dialog = await ControlDialogDialogProgress.show({title:"Testing",text:"Checking if companion app is available..."})
     const {GCMPush} = await import("../gcm/gcmapp.js");
