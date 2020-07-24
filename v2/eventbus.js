@@ -14,6 +14,9 @@ export class EventBus{
 	static async post(obj, className){
 		return await (EventBus.get().post(obj,className));
 	}
+	static async postAndWaitForResponse(data, classResponse, timeout, className){  
+		return await (EventBus.get().postAndWaitForResponse(data, classResponse, timeout, className));
+	}
 	static postSticky(obj){
 		return EventBus.get().postSticky(obj)
 	}
@@ -82,6 +85,11 @@ export class EventBus{
 			}
 		}
     }
+	async postAndWaitForResponse(data, classResponse, timeout, className){  
+		const resultPromise = this.waitFor(classResponse,timeout);
+		await this.post(data,className);
+		return await resultPromise;
+	}
 	async post(data, className){  
       await this.sendToRegistered(data,this.registered,className);
 	}

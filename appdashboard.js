@@ -212,6 +212,7 @@ class RequestRunCommandLineCommand{
         Object.assign(this,args);
     }
 }
+class ResponseRunCommandLineCommand{}
 export class AppGCMHandlerDashboard extends AppGCMHandler{    
     async handleGCMPush({gcm, push, notification}){
         if(push.clipboard){
@@ -220,9 +221,17 @@ export class AppGCMHandlerDashboard extends AppGCMHandler{
         if(push.commandLine){
             const {CustomAction} = await import("./v2/customactions/customactions.js")
             const {command,args} = CustomAction.getCommandToExecuteFromCommandText(push.text);
-            EventBus.post(new RequestRunCommandLineCommand({command,args}));
+            const response = await EventBus.postAndWaitForResponse(new RequestRunCommandLineCommand({command,args}),ResponseRunCommandLineCommand,10000);
             if(push.commandName){
                 notification.text = push.commandName;
+            }
+            if(push.commandResponse){
+                const sender = await this.app.getDevice(push.senderId);
+                if(sender){
+                    const command = `${push.commandResponse}=:=${response.out.trim()}`
+                    console.log("Sending command response",command,sender)
+                    await sender.sendPush({text:command});
+                }
             }
         }
     }

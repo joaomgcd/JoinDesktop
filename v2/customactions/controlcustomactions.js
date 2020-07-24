@@ -117,7 +117,13 @@ export class ControlCustomAction extends Control {
             <div class="customactionoptions">
                 <div class="optioncommandline">
                     <input type="checkbox" name="commandline" >
-                    <label for="commandline">Run in Command Line</label>
+                    <label for="commandline">Run in Command Line</label>                        
+                    <div class="materialinput customactioninput">      
+                        <input type="text" class="commandlineresponse" required >
+                        <span class="highlight"></span>
+                        <span class="bar"></span>
+                        <label>Respose Command Prefix</label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -192,14 +198,17 @@ export class ControlCustomAction extends Control {
         this.deleteElement = await this.$(".customactiondelete");
         this.optionCommandLineElement = await this.$(".optioncommandline");
         this.commandLineElement = await this.$("[name=commandline]");
+        this.commandLineResponseElement = await this.$(".commandlineresponse");
 
         this.nameElement.value = this.customAction.name || "";
         this.longNameElement.value = this.customAction.longName || "";
         this.commandElement.value = this.customAction.command || "";
+        this.commandLineResponseElement.value = this.customAction.commandResponse || "";
         this.iconElement.innerHTML = await UtilDOM.getUsableImgOrSvgElementSrc({src:this.customAction.icon,defaultImage:"./images/join.png"});
         this.setInputChangeListener(this.nameElement,(customAction,value)=>customAction.name = value);
         this.setInputChangeListener(this.longNameElement,(customAction,value)=>customAction.longName = value);
         this.setInputChangeListener(this.commandElement,(customAction,value)=>customAction.command = value);
+        this.setInputChangeListener(this.commandLineResponseElement,(customAction,value)=>customAction.commandResponse = value);
         this.commandLineElement.checked = this.customAction.commandLine;
         this.commandLineElement.onchange  = async () => {
             this.customAction.commandLine = this.commandLineElement.checked;

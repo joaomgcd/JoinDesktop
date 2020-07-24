@@ -39,7 +39,7 @@ export class CustomActions extends Array{
     }
 }
 export class CustomAction{
-	constructor(args= { id, icon, name, longName, command, parameters, deviceIds, commandLine }){
+	constructor(args= { id, icon, name, longName, command, parameters, deviceIds, commandLine, commandResponse }){
         Object.assign(this,args);
         if(!args.parameters){
             args.parameters = [];
@@ -53,12 +53,13 @@ export class CustomAction{
         const {text,args,command} = await this.commandToExecute;
         const commandLine = this.commandLine;
         const commandName = this.name;
+        const commandResponse = this.commandResponse;
         console.log("Executing custom action",{text,args,command},device);
         // if(this.commandLine){
         //     await EventBus.post(new RequestRunCommandLineCommand({command,args}));
         //     return;
         // }
-        await device.sendPush({text,commandLine,commandName});
+        await device.sendPush({text,commandLine,commandName,commandResponse});
     }
     /**
      * 

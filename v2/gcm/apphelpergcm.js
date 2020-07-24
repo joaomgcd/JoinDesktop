@@ -14,6 +14,7 @@ export class AppGCMHandler{
  */
     constructor(_app){
         app = _app;
+        this.app = app;
         EventBus.register(this);  
     }
     async onGCMNotification(gcm){

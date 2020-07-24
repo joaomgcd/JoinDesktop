@@ -304,8 +304,12 @@ class Server{
         try{
             const result = await CommandLine.run(command,args);
             console.log("Command line result",result);
+            await this.sendToPageEventBus(new ResponseRunCommandLineCommand(result));
         }catch(error){
             console.log("Command line error",error);
+            error = JSON.stringify(error);
+            error = JSON.parse(error);
+            await this.sendToPageEventBus(new ResponseRunCommandLineCommand(error));
         }
     }
     async sendToPageEventBus(object){
@@ -399,6 +403,11 @@ class ResponseClipboard{
 class ResponseSystemTheme{
     constructor(isDark){
         this.isDark = isDark;
+    }
+}
+class ResponseRunCommandLineCommand{
+    constructor(result){
+        Object.assign(this,result);
     }
 }
 exports.Server = Server;
