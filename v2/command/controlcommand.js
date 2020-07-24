@@ -5,9 +5,12 @@ import { EventBus } from '../eventbus.js';
 import { UtilDOM } from '../utildom.js';
 
 export class ControlCommands extends Control {
-    constructor(args = {hideBookmarklets,shortcutsAndCommands}){
+    constructor(args = {initial,hideBookmarklets,shortcutsAndCommands}){
         super();
-        this.commands = new Commands([],args);
+        if(!args.initial){
+            args.initial = [];
+        }
+        this.commands = new Commands(args.initial,args);
         this.shortcutsAndCommands = args.shortcutsAndCommands;
         this.onSelectedDevice = selectedDevice => {
             this.selectedControlDevice = selectedDevice.controlDevice;
@@ -93,7 +96,8 @@ export class ControlCommand extends Control {
         this.commandButton.setAttribute("aria-label",this.command.getText());
         this.setExtendedText();
 
-        UtilDOM.setInnerHTMLOrHide(this.commandIconWrapperElement,this.command.icon);
+        const icon = await UtilDOM.getUsableImgOrSvgElementSrc({src:this.command.icon,defaultImage:"./images/join.png"});
+        UtilDOM.setInnerHTMLOrHide(this.commandIconWrapperElement,icon);
         UtilDOM.showOrHide(this.keyboardShortcutElement,this.command.supportsKeyboardShortcut);
         UtilDOM.addOrRemoveClass(this.keyboardShortcutElement,this.shortcut?true:false,"configured");
         const shortcutText = this.shortcut ? this.shortcut.toString() : null;
@@ -112,11 +116,9 @@ export class ControlCommand extends Control {
         if(!this.commandButton || !deviceControl) return;
 
         const device = deviceControl.device;
-        if(deviceControl && deviceControl.device && this.command.shouldEnable(deviceControl.device)){
-            this.commandButton.classList.remove("disabled");
-        }else{            
-            this.commandButton.classList.add("disabled");
-        }
+        const enabled = deviceControl && deviceControl.device && this.command.shouldEnable(deviceControl.device);
+        UtilDOM.showOrHide(this.commandButton,enabled);
+        // UtilDOM.addOrRemoveClass(this.commandButton,!enabled,"disabled")
         this.setExtendedText(device);
     }
     setExtendedText(device){

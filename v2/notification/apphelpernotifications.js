@@ -6,7 +6,6 @@ import { Device } from "../device/device.js";
 import { NotificationInfo } from "./notificationinfo.js";
 import { GCMRequestFile,GCMNotificationClear } from "../gcm/gcmapp.js";
 
-const eventBusLocal = new EventBus();
 /** @type {App} */
 let app = null;
 export class AppHelperNotifications extends AppHelperBase{
@@ -22,7 +21,6 @@ export class AppHelperNotifications extends AppHelperBase{
     }
     async load(){
         EventBus.register(this);
-        eventBusLocal.register(this);
 
         this.device = await app.myDevice;
         app.controlTop.appName = `Join Notifications`;
@@ -149,7 +147,7 @@ export class AppHelperNotifications extends AppHelperBase{
 		gcmNotificationClear.senderId = app.myDeviceId;
         gcmNotificationClear.authToken = this.authToken;
         gcmNotificationClear.requestNotification = {notificationIds:notifications.map(notification => notification.id)}
-        await devices.send(gcmNotificationClear)
+        devices.send(gcmNotificationClear)
         app.controlTop.loading = false;
     }
     async onGCMNotification(gcm){

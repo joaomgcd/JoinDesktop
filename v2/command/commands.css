@@ -112,9 +112,10 @@
     .commandiconwrapper{
         display: block;
     }
-    .commandiconwrapper svg{
+    .commandiconwrapper svg, .commandiconwrapper img{
         height: 24px;
         width: 24px;
+        object-fit: cover;
     }
     .commandkeyboardshortcut{
         display: inline;

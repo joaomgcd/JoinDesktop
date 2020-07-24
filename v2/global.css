@@ -81,6 +81,12 @@ a:hover{
   overflow-x: hidden;
 }
 
+svg.delete{
+  cursor:pointer;
+}
+svg.delete:hover{
+  fill: var(--theme-accent-color);
+}
 .buttontext{
 	align-self: center;
 	flex-grow: 1;
@@ -114,7 +120,7 @@ a:hover{
     position:relative;    
     width:100%;
   }
-input 				{
+input:not([type=checkbox]){
   font-size:18px;
   padding:10px 10px 10px 5px;
   display:block;
@@ -130,7 +136,7 @@ textarea{
   input:focus 		{ outline:none; }
   
   /* LABEL ======================================= */
-  label 				 {
+  input:not([type=checkbox]) ~ label 				 {
     color:#999; 
     font-size:18px;
     font-weight:normal;
@@ -140,9 +146,12 @@ textarea{
     top:10px;
     transition:0.2s ease all; 
   }
+  label{
+    color: var(--theme-accent-color);
+  }
   
   /* active state */
-  input:focus ~ label, input:valid ~ label ,#generatedUrl label		{
+  input:focus ~ label, input:not([type=checkbox]):valid ~ label ,#generatedUrl label		{
     top:-20px;
     font-size:14px;
     color:var(--theme-accent-color);

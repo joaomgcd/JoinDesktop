@@ -4,11 +4,12 @@ import { AppContext } from '../appcontext.js';
 import { EventBus } from '../eventbus.js';
 
 export class ControlDevices extends Control {
-    constructor({devices,selectedIdOrIds,hasToHaveSelection}){
+    constructor({devices,selectedIdOrIds,hasToHaveSelection,controlId}){
         super();
         this.selectedDeviceIdOrIds = selectedIdOrIds;
         this.devices = devices;
         this.hasToHaveSelection = hasToHaveSelection;
+        this.id = controlId;
     }
     
     get isMultiple(){
@@ -19,7 +20,7 @@ export class ControlDevices extends Control {
         const selectedDeviceIdOrIds = this.selectedDeviceIdOrIds;
         var anySelected = false;
         this.deviceControls = devices.map(device=>{
-            const controlDevice = new ControlDevice(device);
+            const controlDevice = new ControlDevice(device,this);
             const isSelected = this.isMultiple ? selectedDeviceIdOrIds.includes(device.deviceId) : device.deviceId == selectedDeviceIdOrIds;
             controlDevice.setIsSelected(isSelected);
             if(isSelected){
@@ -137,9 +138,10 @@ const deviceHtml = `<div class='device'>
                         <div colspan='2' class='devicename'>DEVICE_NAME</div>
                     </div>`
 export class ControlDevice extends Control{
-    constructor(device){
+    constructor(device,controlDevices){
         super();
         this.device = device;
+        this.controlDevices = controlDevices;
     }
     // getHtmlFile(){
     //     return "./v2/device/device.html";

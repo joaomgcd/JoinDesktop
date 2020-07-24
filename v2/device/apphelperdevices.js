@@ -60,7 +60,16 @@ export class AppHelperDevices extends AppHelperBase{
         await app.addElement(this.controlDevices,elementDevicesTabRoot);
         this.controlDevices.hideNoDevices();
 
-        this.controlCommands = new ControlCommands({hideBookmarklets:app.hideBookmarklets,shortcutsAndCommands:await app.configuredShortcutsAndCommands});
+        const {SettingCustomActions} = await import("../settings/setting.js")
+        const customActions = await (new SettingCustomActions({devices}).value);
+        const {CommandCustom} = await import("../command/command.js");
+        const customCommands = customActions
+            .filter(customAction=>customAction.name && customAction.command)
+            .map(customAction => {
+                const args = customAction.commandArgs;
+                return new CommandCustom(args);
+            })
+        this.controlCommands = new ControlCommands({initial: customCommands, hideBookmarklets:app.hideBookmarklets,shortcutsAndCommands:await app.configuredShortcutsAndCommands});
         await app.addElement(this.controlCommands,elementDevicesTabRoot);
         if(devices.length == 0){
             UtilDOM.hide(this.controlCommands);

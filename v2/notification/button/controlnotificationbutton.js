@@ -11,11 +11,21 @@ export class ControlNotificationButton extends Control{
     get dynamicElements(){
         return true;
     }
-    getHtmlFile(){
-        return "./v2/notification/button/notificationbutton.html";
+    getHtml(){
+        return `
+        <div class="buttontextwrapper">
+            <div class="buttontext" id="text">Do stuff</div>
+        </div>
+        `
     }
-    getStyleFile(){
-        return "./v2/notification/button/notificationbutton.css";
+    getStyle(){
+        return `
+        .buttonicon{
+            height:24px;
+            opacity: 0.5;
+            width:24px;
+        }
+        `
     }
     
     async renderSpecific({root}){ 

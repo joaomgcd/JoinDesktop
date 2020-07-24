@@ -406,9 +406,14 @@ export class App{
         if(this._gcmHandler) return this._gcmHandler;
 
         return (async()=>{
-            const {AppGCMHandler} = await import('./gcm/apphelpergcm.js');
-            this._gcmHandler = new AppGCMHandler(this);
+            this._gcmHandler = await this.newGcmHandlerInstance;
             return this._gcmHandler;
+        })();
+    }
+    get newGcmHandlerInstance(){
+        return (async()=>{
+            const {AppGCMHandler} = await import('./gcm/apphelpergcm.js');
+            return new AppGCMHandler(this);
         })();
     }
     get helperSettingsFile(){
@@ -444,6 +449,12 @@ export class App{
         const args = menuEntry.args;
         this.selectMenuEntry({menuEntry,args});
         
+    }
+    async onCommandCustomExecuted({commandCustom,device}){
+        const {SettingCustomActions} = await import("./settings/setting.js")
+        const customActions = await (new SettingCustomActions().value);
+        const customAction = customActions.getCustomAction(commandCustom.id);
+        await customAction.execute(device);
     }
     async selectMenuEntry({menuEntry,args = null}){
         if(!args){

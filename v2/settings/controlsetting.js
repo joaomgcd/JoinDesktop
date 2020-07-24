@@ -1,5 +1,5 @@
 import { Control } from "../control.js";
-import { SettingTextInput, SettingSingleOption, SettingColor, SettingKeyboardShortcut, SettingMultipleDevices } from "./setting.js";
+import { SettingTextInput, SettingSingleOption, SettingColor, SettingKeyboardShortcut, SettingMultipleDevices, SettingCustomActions, SettingClipboardSync } from "./setting.js";
 import { UtilDOM } from "../utildom.js";
 import { EventBus } from "../eventbus.js";
 
@@ -29,10 +29,21 @@ export class ControlSettings extends Control{
     }
     async update(setting){
         const controlSetting = this.controlsSettings.find(controlSetting=>controlSetting.setting.id == setting.id);
+        if(!controlSetting) return;
+
         await controlSetting.render();
     }
     async getSetting(id){
-        return this.controlsSettings.find(controlSetting=>controlSetting.setting.id == id);
+        for(const controlSetting of this.controlsSettings){
+            const result = await controlSetting.matches(id);
+            if(result) return controlSetting;
+        }
+        return null;
+    }
+    async unload(){
+        for(const controlSetting of this.controlsSettings){
+            await controlSetting.unload();
+        }
     }
 }
 export class ControlSetting extends Control{
@@ -43,6 +54,11 @@ export class ControlSetting extends Control{
     constructor(setting){
         super()
         this.setting = setting;
+    }
+    async matches(id){
+        if(this.content.matches) return  this.content.matches(id);
+
+        return this.setting.id == id;
     }
     getHtmlFile(){
         return "./v2/settings/setting.html";
@@ -97,6 +113,9 @@ export class ControlSetting extends Control{
         if(Util.isSubTypeOf(setting,SettingMultipleDevices)){
             return new ControlSettingMultipleDevices(setting);
         }
+        if(Util.isType(setting,"SettingCustomActions")){
+            return new ControlSettingCustomActions(setting);
+        }
         let type = Util.getType(setting);
         const typeFromSetting = (await import("./setting.js"))[type].controlType;
         if(typeFromSetting){
@@ -108,6 +127,11 @@ export class ControlSetting extends Control{
         const controlType = eval(type);
         return new controlType(setting);
     }
+    // async unload(){
+    //     await super.unload();
+        
+    //     await this.content.unload()
+    // }
 }
 export class ControlSettingContent extends Control{
     
@@ -300,9 +324,59 @@ export class ControlSettingMultipleDevices extends ControlSettingContent{
         this.settingElement.innerHTML = "";
         const {ControlDevices} = await import("../device/controldevice.js");
         const selectedIds = await this.setting.value;
-        this.controlDevices = new ControlDevices({devices:this.setting.devices,selectedIdOrIds:selectedIds});
+        this.controlDevices = new ControlDevices({controlId:SettingClipboardSync.id,devices:this.setting.devices,selectedIdOrIds:selectedIds});
         const devicesElement = await this.controlDevices.render();
         this.settingElement.appendChild(devicesElement);
+    }
+    getCurrentSelectedDeviceIds(){
+        return this.controlDevices.currentSelectedDeviceIds;
+    }
+}
+export class ControlSettingCustomActions extends ControlSettingContent{
+    /**
+     * 
+     * @param {SettingCustomActions} setting
+     */
+    constructor(setting){
+        super(setting)
+        EventBus.register(this);
+        this.onCustomActionChanged = Util.debounce(async ({customAction})=>{
+            await this.setting.updateCustomAction(customAction);
+        },1000)
+    }
+    getHtml(){
+        return `
+        <div class="settingcustomactions">
+        </div>
+        `
+    }
+    getStyle(){
+        return `
+           
+        `
+    }
+   
+    async onCustomActionDeleted({customAction}){
+        await this.setting.deleteCustomAction(customAction);
+        await this.render();
+    }
+    async matches(id){
+        const customActions = await this.setting.value;
+        const customAction = customActions.getCustomAction(id);
+        return customAction ? true : false;
+    }
+    async renderSpecific({root}){
+        this.settingElement = root;
+        
+        this.settingElement.innerHTML = "";
+        const {ControlCustomActions} = await import("../customactions/controlcustomactions.js");
+        const customActions = await this.setting.value;
+        this.controlCustomActions = new ControlCustomActions(customActions,{devices:this.setting.devices});
+        const render = await this.controlCustomActions.render();
+        this.settingElement.appendChild(render);
+    }
+    getCurrentSelectedDeviceIds(settingId){
+        return this.controlCustomActions.getCurrentSelectedDeviceIds(settingId);
     }
 }
 class SettingSaved{

@@ -137,8 +137,22 @@ export class KeyboardShortcut{
 const convertFromDb = async fromDb => {
     const shortcutAndCommand = JSON.parse(fromDb.json);
     const commandApi = await import("../command/command.js");
+    const commandType = shortcutAndCommand.command;
+    let args = null;
+    if(commandType == "CommandCustom"){        
+        const {SettingCustomActions} = await import("../settings/setting.js")
+        const customActions = await (new SettingCustomActions({}).value);
+        const customAction = await customActions.getCustomAction(shortcutAndCommand.id)
+        if(!customAction){
+            return {
+                shortcut:new KeyboardShortcut(shortcutAndCommand.shortcut)
+            };
+        }else{
+            args = customAction.commandArgs;
+        }
+    }
     return {
-        command:new commandApi[shortcutAndCommand.command](),
+        command:new commandApi[shortcutAndCommand.command](args),
         shortcut:new KeyboardShortcut(shortcutAndCommand.shortcut)
     }
 }
@@ -148,6 +162,7 @@ export class DBKeyboardShortcut{
     }
     async updateSingle(shortcutAndCommand){
         const key = shortcutAndCommand.shortcut.toString();
+        shortcutAndCommand.id = shortcutAndCommand.command.id;
         shortcutAndCommand.command = shortcutAndCommand.command.constructor.name;
         await this.db.shortcuts.put({key,json:JSON.stringify(shortcutAndCommand)});
     }
@@ -166,8 +181,10 @@ export class DBKeyboardShortcut{
     }
     async getAll(){
         const array = await this.db.shortcuts.toArray();
-        const shortcutsAndcommands = Promise.all(array.map(convertFromDb));
-        return shortcutsAndcommands;
+        const shortcutsAndcommands = await Promise.all(array.map(convertFromDb));
+        const empty = shortcutsAndcommands.filter(shortcutAndCommand=>!shortcutAndCommand.command);
+        await Promise.all(empty.map(toRemove=>this.removeSingle(toRemove.shortcut)));
+        return shortcutsAndcommands.filter(shortcutAndCommand=>shortcutAndCommand.command);;
     }
     async getCommand(shortcut){
         if(!Util.isType(shortcut,"KeyboardShortcut")){
@@ -175,6 +192,10 @@ export class DBKeyboardShortcut{
         }
         const fromDb = await this.db.shortcuts.get(shortcut.toString());
         const shortcutAndCommand = await convertFromDb(fromDb);
+        if(!shortcutAndCommand.command){
+            await this.removeSingle(shortcutAndCommand.shortcut);
+            return null;
+        }
         return shortcutAndCommand.command;
     }
 }

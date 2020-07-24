@@ -6,10 +6,11 @@ import './v2/extensions.js';
 import { App,RequestLoadDevicesFromServer } from "./v2/app.js";
 import {AppHelperSettings} from "./v2/settings/apphelpersettings.js"
 import { ControlSettings } from "./v2/settings/controlsetting.js";
-import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync } from "./v2/settings/setting.js";
+import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync, SettingCustomActions } from "./v2/settings/setting.js";
 import { AppGCMHandler } from "./v2/gcm/apphelpergcm.js";
 import { ControlDialogInput, ControlDialogOk } from "./v2/dialog/controldialog.js";
 import { AppContext } from "./v2/appcontext.js";
+import { ControlTabs, Tab } from "./v2/tabs/controltabs.js";
 
 class ResultNotificationAction{
     constructor(success){
@@ -149,16 +150,40 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
     }
     get settingsList(){
         return (async () => {
-            return new ControlSettings([
-                new SettingCompanionAppPortToReceive(),
-                new SettingEventGhostNodeRedPort(),
-                new SettingEncryptionPassword(),
-                new SettingTheme(),
-                new SettingThemeAccentColor(),
-                new SettingKeyboardShortcutLastCommand(),
-                new SettingKeyboardShortcutShowWindow(),
-                new SettingClipboardSync({devices:(await this.app.devicesFromDb)})
+            const devices = await this.app.devicesFromDb;
+            return new ControlTabs([    
+                new Tab({title:"Theme",controlContent:new ControlSettings([
+                    new SettingTheme(),
+                    new SettingThemeAccentColor(),
+                ])}),      
+                new Tab({title:"Shortcuts",controlContent:new ControlSettings([
+                    new SettingKeyboardShortcutLastCommand(),
+                    new SettingKeyboardShortcutShowWindow(),
+                ])}),   
+                new Tab({title:"Actions",controlContent:new ControlSettings([
+                    new SettingCustomActions({devices}),
+                ])}),   
+                new Tab({title:"Clipboard Sync",controlContent:new ControlSettings([
+                    new SettingClipboardSync({devices})
+                ])}),
+                new Tab({title:"Automation",controlContent:new ControlSettings([
+                    new SettingEventGhostNodeRedPort(),
+                ])}),
+                new Tab({title:"General",controlContent:new ControlSettings([
+                    new SettingCompanionAppPortToReceive(),
+                    new SettingEncryptionPassword(),
+                ])}),
             ]);
+            // return new ControlSettings([
+            //     new SettingCompanionAppPortToReceive(),
+            //     new SettingEventGhostNodeRedPort(),
+            //     new SettingEncryptionPassword(),
+            //     new SettingTheme(),
+            //     new SettingThemeAccentColor(),
+            //     new SettingKeyboardShortcutLastCommand(),
+            //     new SettingKeyboardShortcutShowWindow(),
+            //     new SettingClipboardSync({devices:(await this.app.devicesFromDb)})
+            // ]);
         })();
     }
     async load(){
@@ -180,18 +205,28 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
         await super.onSettingSaved(settingSaved);
         this.setOpenWebAppListener();
     }
-    async manageSelectedDevices(wasClick){
-        if(!wasClick) return;
 
-        const controlsetting = await this.controlSettings.getSetting(SettingClipboardSync.id);
-        controlsetting.setting.value = controlsetting.content.controlDevices.currentSelectedDeviceIds
+}
+class RequestRunCommandLineCommand{
+    constructor(args = {command,args}){
+        Object.assign(this,args);
     }
-    async onSelectedDevice({controlDevice,wasClick}){
-        await this.manageSelectedDevices(wasClick);
+}
+export class AppGCMHandlerDashboard extends AppGCMHandler{    
+    async handleGCMPush({gcm, push, notification}){
+        if(push.clipboard){
+            notification.text = push.clipboard;
+        }
+        if(push.commandLine){
+            const {CustomAction} = await import("./v2/customactions/customactions.js")
+            const {command,args} = CustomAction.getCommandToExecuteFromCommandText(push.text);
+            EventBus.post(new RequestRunCommandLineCommand({command,args}));
+            if(push.commandName){
+                notification.text = push.commandName;
+            }
+        }
     }
-    async onUnselectedDevice({controlDevice,wasClick}){
-        await this.manageSelectedDevices(wasClick);
-    }
+    
 }
 class RequestToggleDevOptions{}
 class RequestClipboard{}
@@ -270,6 +305,13 @@ export class AppDashboard extends App{
             const helperNotifications = new AppDashboardNotifications(this);
             await helperNotifications.load();
         }
+    }
+    applyTheme(theme,accent){
+        super.applyTheme(theme,accent);
+        EventBus.post({},"ThemeApplied");
+    }
+    get newGcmHandlerInstance(){
+        return new AppGCMHandlerDashboard(this);
     }
     get appInfo(){
         return ServerEventBus.postAndWaitForResponse(new RequestAppVersion(),ResponseAppVersion,5000);
@@ -415,6 +457,9 @@ export class AppDashboard extends App{
         const devices = await this.getDevices(deviceIdsToSendTo);
         console.log("Sending auto clipboard", gcm, devices);
         await devices.send(gcm);
+    }
+    async onRequestRunCommandLineCommand(request){
+        await ServerEventBus.post(request);
     }
     get isBrowserRegistered(){
         return true;

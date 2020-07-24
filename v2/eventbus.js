@@ -34,7 +34,7 @@ export class EventBus{
 			return;
 		}
 		this.registered.push(obj);
-      //back.console.log(registered);
+        // console.log("EventBus registered",this.registered.length);
 	}
 	async registerSticky(obj){	
 		const index = this.registeredSticky.indexOf(obj);
@@ -50,6 +50,7 @@ export class EventBus{
             }
           }
         }
+        // console.log("EventBus registered sticky",this.registeredSticky.length);
 	}
     removeStickyData(clazz){
       if(clazz){

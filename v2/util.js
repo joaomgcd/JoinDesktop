@@ -70,7 +70,7 @@ class Util{
     static isSubTypeOf(value,name){
         if(!value) return;
         
-        if(!Util.isString(value)){
+        if(!Util.isString(name)){
             name = name.name;
         }
         var superType = Object.getPrototypeOf(Object.getPrototypeOf(value));
@@ -111,7 +111,7 @@ class Util{
         return Util.isType(value,"Function");
     }
     static isArray(value){
-        return Util.isType(value,"Array") || Util.isSubTypeOf("Array");
+        return Util.isType(value,"Array") || Util.isSubTypeOf(value, "Array");
     }
     static isFile(value){
         return Util.isType(value,"File");
@@ -234,6 +234,21 @@ class Util{
     static getBase64SvgUrl(svgXml){
         return `data:image/svg+xml,${svgXml}`;
     }
+    /**
+     * 
+     * @param {String} src Any src like http, base64, <svg> etc.
+     * @returns {String} A src suitable string or null if the input is not compatible
+     */
+    static async getUsableImgSrc({src,convertToData,token}){
+        if(!src) return null;
+
+        if(src.startsWith("data:image/")) return src;
+        if(src.includes("<svg")) return Util.getBase64SvgUrl(src);
+        if(convertToData){
+            src = await Util.getImageAsBase64(src,token);
+        }
+        return src;
+    }    
     static getQueryParameterValue(key,url = (window ? window.location.search : null)){
         const urlParams = new URLSearchParams(url);
         return urlParams.get(key);
@@ -448,6 +463,22 @@ class Util{
             callback(darkModeOn);
         });
     }
+    static get uuid(){
+        return new Date().getTime().toString();
+    }
+    static debounce(func, wait, immediate) {
+        var timeout;
+        return debouncedArgs => {
+            var later = () => {
+                timeout = null;
+                if (!immediate) func(debouncedArgs);
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) func(debouncedArgs);
+        };
+    };
 }
 const darkModeMediaQuery = () => window.matchMedia('(prefers-color-scheme: dark)');
 try{

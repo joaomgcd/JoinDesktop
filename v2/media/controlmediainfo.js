@@ -75,6 +75,11 @@ export class ControlMediaInfos extends Control{
             }
         }
     }
+    async unload(){
+        await super.unload();
+
+        await Promise.all(this.controlsMediaInfos.map(control=>control.unload()))
+    }
    
 }
 

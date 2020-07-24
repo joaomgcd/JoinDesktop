@@ -14,6 +14,7 @@ import { Util } from '../v2/util.js';
 import { ServerKeyboardShortcuts } from './serverkeyboardshortcut.js';
 import { AutoUpdater } from './autoupdater.js';
 import { UtilServer } from './serverutil.js';
+import { CommandLine } from './commandline.js';
 
 const path = require('path')
 const Store = require('./store.js');
@@ -293,6 +294,19 @@ class Server{
     }
     async onCompanionHostConnected(info){
         await this.sendToPageEventBus(info);
+    }
+    async onRequestRunCommandLineCommand({command,args}){
+        if(!command){
+            console.log("Won't run empty command line command");
+            return;
+        }
+        console.log("Running command line",command,args);
+        try{
+            const result = await CommandLine.run(command,args);
+            console.log("Command line result",result);
+        }catch(error){
+            console.log("Command line error",error);
+        }
     }
     async sendToPageEventBus(object){
         await this.window.webContents.send('eventbus', {data:object,className:object.constructor.name});

@@ -15,6 +15,13 @@ export class Commands extends Array{
         if(!extraArgs){
             extraArgs = {}
         }
+        if(initial.forEach || initial.length > 0){
+            initial.forEach(command => {                
+                if(!Util.isSubTypeOf(command, Command)) return;
+                
+                this.push(command);
+            });
+        }
         this.push(new CommandNoteToSelf());
         this.push(new CommandSendCommand());
         if(Util.canReadClipboard){
@@ -46,6 +53,9 @@ export class Commands extends Array{
 }
 const lastExecutedCommandKey = "lastExecutedCommandKey";
 class Command {
+    constructor(){
+        this.id = Util.getType(this);
+    }
     static get lastExecutedCommand(){
         const commandName = AppContext.context.localStorage.get(lastExecutedCommandKey);
         if(!commandName) return null;
@@ -95,6 +105,9 @@ class Command {
         return true;
     }
     matches(other){
+        if(this.id && other.id){
+            return this.id == other.id;
+        }
         return Util.getType(this) == Util.getType(other);
     }
 }
@@ -483,7 +496,7 @@ export class CommandSMS extends Command{
        await EventBus.post(new RequestOpenSms(device));
     }
     get icon(){
-        return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" id="devicebuttonimage" class=" replaced-svg"><path fill="none" d="M0 0h24v24H0V0z"></path><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12zM7 9h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"></path></svg>`;
+        return `<svg style="width:24px;height:24px" viewBox="0 0 24 24"><path d="M20,20H7A2,2 0 0,1 5,18V8.94L2.23,5.64C2.09,5.47 2,5.24 2,5A1,1 0 0,1 3,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20M8.5,7A0.5,0.5 0 0,0 8,7.5V8.5A0.5,0.5 0 0,0 8.5,9H18.5A0.5,0.5 0 0,0 19,8.5V7.5A0.5,0.5 0 0,0 18.5,7H8.5M8.5,11A0.5,0.5 0 0,0 8,11.5V12.5A0.5,0.5 0 0,0 8.5,13H18.5A0.5,0.5 0 0,0 19,12.5V11.5A0.5,0.5 0 0,0 18.5,11H8.5M8.5,15A0.5,0.5 0 0,0 8,15.5V16.5A0.5,0.5 0 0,0 8.5,17H13.5A0.5,0.5 0 0,0 14,16.5V15.5A0.5,0.5 0 0,0 13.5,15H8.5Z" /></svg>`;
     }
 	
 }
@@ -645,7 +658,7 @@ export class CommandNotifications extends Command{
     }
     get icon(){
         return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-        <path fill="none" d="M0 0h24v24H0V0z"></path>
+        <path d="M0 0h24v24H0V0z"></path>
         <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"></path></svg>`;
     }
 }
@@ -732,7 +745,44 @@ export class CommandShowAppWindow extends Command{
         return false;
     }
 }
+export class CommandCustom extends Command{
+    constructor(args={idFromArgs, iconFromArgs,text,textExtendedGetter,shouldEnableFromArgs,needsFocusFromArgs}){
+        super();
+        Object.assign(this,args);
+        if(!args.idFromArgs) throw "Must set custom command id!";
+        this.id = args.idFromArgs;
+    }
+    getText(){
+		return this.text;
+    }
+    getTextExtended(device){
+        return this.textExtendedGetter(device);
+    }
+    shouldEnable(device){
+        if(!this.shouldEnableFromArgs) return true;
 
+        return this.shouldEnableFromArgs(device);
+    }
+    async executeSpecific(device){
+        await EventBus.post(new CommandCustomExecuted(this,device));
+    }
+    get shouldSaveAsLastExecutedCommand(){
+        return true;
+    }
+    get icon(){
+        return this.iconFromArgs;
+    }
+    get needsFocus(){
+        return this.needsFocusFromArgs ? true : false;
+    }
+}
+
+class CommandCustomExecuted{
+    constructor(commandCustom,device){
+        this.commandCustom = commandCustom;
+        this.device = device;
+    }
+}
 class RequestLoadDevicesFromServer{}
 class RequestToggleShowApiBuilder{}
 class RequestOpenFileBrowser{

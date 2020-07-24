@@ -1,9 +1,12 @@
 import { EventBus } from "../eventbus.js";
 import { AppHelperBase } from "../apphelperbase.js";
 import { ControlSettings } from "./controlsetting.js";
-import { SettingEncryptionPassword, SettingSingleOption, SettingTheme, SettingThemeAccentColor, SettingEventGhostNodeRedPort, SettingCompanionAppPortToConnect, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow } from "./setting.js";
+import { SettingEncryptionPassword, SettingSingleOption, SettingTheme, SettingThemeAccentColor, SettingEventGhostNodeRedPort, SettingCompanionAppPortToConnect, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingCustomActions } from "./setting.js";
 import { UtilDOM } from "../utildom.js";
+import { ControlTabs, Tab } from "../tabs/controltabs.js";
+import { AppContext } from "../appcontext.js";
 
+const selectedTabKey = "selectedsettingstab";
 const handleConnectingToEventghostOrNodeRed = async (setting,value) => {
     if(setting.id != SettingEventGhostNodeRedPort.id) return value;
     if(!value) return value;
@@ -128,14 +131,36 @@ export class AppHelperSettings extends AppHelperBase{
         this.connectoport = args.connectoport;
     }
     get settingsList(){
-        return  new ControlSettings([
-            new SettingCompanionAppPortToConnect(),
-            new SettingEncryptionPassword(),
-            new SettingEventGhostNodeRedPort(),
-            new SettingTheme(),
-            new SettingThemeAccentColor(),
-            new SettingKeyboardShortcutLastCommand()
-        ]);
+        return (async()=>{
+            const devices = await app.devicesFromDb;
+            return new ControlTabs([
+                new Tab({title:"Theme",controlContent:new ControlSettings([
+                    new SettingTheme(),
+                    new SettingThemeAccentColor(),
+                ])}),
+                new Tab({title:"Actions",controlContent:new ControlSettings([
+                    new SettingCustomActions({devices}),
+                ])}),
+                new Tab({title:"Automation",controlContent:new ControlSettings([
+                    new SettingEventGhostNodeRedPort(),
+                ])}),
+                new Tab({title:"Shortcuts",controlContent:new ControlSettings([
+                    new SettingKeyboardShortcutLastCommand(),
+                ])}),
+                new Tab({title:"General",controlContent:new ControlSettings([
+                    new SettingCompanionAppPortToConnect(),
+                    new SettingEncryptionPassword(),
+                ])}),
+            ])
+        })();
+        // return  new ControlSettings([
+        //     new SettingCompanionAppPortToConnect(),
+        //     new SettingEncryptionPassword(),
+        //     new SettingEventGhostNodeRedPort(),
+        //     new SettingTheme(),
+        //     new SettingThemeAccentColor(),
+        //     new SettingKeyboardShortcutLastCommand()
+        // ]);
     }
     async load(){
         EventBus.register(this);     
@@ -145,6 +170,7 @@ export class AppHelperSettings extends AppHelperBase{
         app.controlTop.shouldAlwaysShowImageRefresh = false;  
 
         this.controlSettings = await this.settingsList;
+        this.controlSettings.selectTab(AppContext.context.localStorage.get(selectedTabKey))
         await app.addElement(this.controlSettings);
 
         if(this.connectoport){
@@ -152,12 +178,16 @@ export class AppHelperSettings extends AppHelperBase{
             const value = this.connectoport;
             await this.handleSettingSaved(setting,value);
         }
+
     }
     updateUrl(){
         Util.changeUrl("/?settings");
     }
     get isPanel(){
         return true;
+    }
+    onTabSelected({tab}){
+        AppContext.context.localStorage.set(selectedTabKey,tab.title);
     }
     async handleSettingSaved(setting, value){
         if(setting.id == SettingEncryptionPassword.id && value){
@@ -176,5 +206,23 @@ export class AppHelperSettings extends AppHelperBase{
         if(!setting) return;
 
         await this.handleSettingSaved(setting,value);
+    }
+    
+    async manageSelectedDevices(settingId, wasClick){
+        if(!wasClick) return;
+
+        const controlsetting = await this.controlSettings.getSetting(settingId);
+        if(!controlsetting) return;
+
+
+        const selectedDevices = controlsetting.content.getCurrentSelectedDeviceIds(settingId) || [];
+        await controlsetting.setting.updateSelectedDevices(settingId, selectedDevices);
+        await controlsetting.render();
+    }
+    async onSelectedDevice({controlDevice,wasClick}){
+        await this.manageSelectedDevices(controlDevice.controlDevices.id, wasClick);
+    }
+    async onUnselectedDevice({controlDevice,wasClick}){
+        await this.manageSelectedDevices(controlDevice.controlDevices.id, wasClick);
     }
 }

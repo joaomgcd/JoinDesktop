@@ -156,10 +156,10 @@ export class ControlDialogInput extends ControlDialog {
     static getDialogArgs(args){
         return {args,dialogclass:DialogInput,controlclass:ControlDialogInput,waitForClass:InputSubmitted};
     }
-    static async show(args = {position,choices,choiceToLabelFunc}){
+    static async show(args = {position,title,placeholder,initialText}){
         return showDialog(ControlDialogInput.getDialogArgs(args));        
     }
-    static async showAndWait(args){      
+    static async showAndWait(args = {position,title,placeholder,initialText}){      
         const result = (await showDialogAndWait(ControlDialogInput.getDialogArgs(args)));
         if(!result) return;
         

@@ -1,4 +1,5 @@
 import { AppContext } from "../appcontext.js";
+import { CustomActions } from "../customactions/customactions.js";
 
 export class Settings extends Array{
     constructor(initial){
@@ -325,5 +326,57 @@ export class SettingClipboardSync extends SettingMultipleDevices{
             label:"Automatically Send Clipboard To",
             devices: args.devices.filter(device=>device.canSyncClipboardTo())
         })
+    }
+    async updateSelectedDevices(settingId, selectedDeviceIds){
+        this.value = selectedDeviceIds;
+    }
+}
+export class SettingCustomActions extends Setting{
+    static get id(){
+        return "customActions";
+    }
+    /** @type {Promise<CustomActions>} */
+    get value(){
+        return (async () => {
+            let stringValue = await super.value
+            const {CustomActions} = await import("../customactions/customactions.js");
+            if(!stringValue) return new CustomActions();
+
+            const array = JSON.parse(stringValue);
+            return new CustomActions(array);
+        })();
+    }
+    set value(toSet){
+        super.value = JSON.stringify(toSet);
+    }
+    constructor(args = {devices}){
+        super({
+            id:SettingCustomActions.id,
+            label:"Custom Actions",
+            subtext: `<h4>These actions will show up in your device command list in the Join popup. Use Tasker (Android), EventGhost (Windows), Node-RED (Windows,Linux,Mac) or IFTTT (web) to react to them. More info <a href="https://joaoapps.com/join/actions/">here</a>.</h4>`,
+            devices: args.devices
+        })
+    }
+    async updateCustomAction(customAction){
+        const customActions = await this.value;
+        customActions.update(customAction)
+        this.value = customActions;
+        console.log("Saved custom actions",customActions)
+    }
+    async deleteCustomAction(customAction){
+        const customActions = await this.value;
+        customActions.delete(customAction)
+        this.value = customActions;
+        console.log("Deleted custom action",customAction)
+    }
+    async updateSelectedDevices(settingId, selectedDeviceIds){
+        console.log("Updating deviceIds",settingId,selectedDeviceIds);
+
+        const customActions = await this.value;
+        const customAction = await customActions.getCustomAction(settingId);
+        if(!customAction) return;
+
+        customAction.deviceIds = selectedDeviceIds;
+        this.value = customActions;
     }
 }

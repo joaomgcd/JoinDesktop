@@ -253,6 +253,28 @@ export class UtilDOM{
 			fr.readAsDataURL(file);
 		});
     }
+    
+    static async getUsableImgOrSvgElementSrc({src,defaultImage,convertToData,token}){
+        if(!src) return `<img src="${defaultImage || ""}" />`;
+        if(src.startsWith("<img")) return src;
+        if(src.includes("<svg")){
+            if(!src.includes("fill=")) return src;
+            
+            const parser = new DOMParser();
+            const element = parser.parseFromString(src, "text/xml");
+            element.querySelector("[fill]").setAttribute("fill",null)
+            return element.querySelector("svg").outerHTML;
+        }
+
+        const imageElement = UtilDOM.createElement({type:"img"});
+        try{
+            if(!src.startsWith("data:image/") && convertToData){
+                src = await Util.getImageAsBase64(src,token);
+            }
+        }catch{}
+        imageElement.src = src;
+        return imageElement.outerHTML;
+    }
     static onclickandlongclick(element, onclick, onlongclick){
 		element.onmousedown = eDown=>{
 			var long = true;

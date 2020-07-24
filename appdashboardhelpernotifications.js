@@ -31,7 +31,9 @@ export class AppDashboardNotifications extends AppHelperBase{
         await app.addElement(this.controlNotifications,app.rootElement)
         ServerEventBus.post(new RequestNotificationInfo());
     }
-    
+    async onThemeApplied(){
+        UtilDOM.setCssVariable("theme-background-color-panel","transparent");
+    }
     async onNotificationInfos(notificationInfos){
         if(!this.controlNotifications) return;
 
