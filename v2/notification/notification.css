@@ -121,6 +121,7 @@
 }
 .notificationclosebutton{
 	cursor: pointer;
+	font-size: x-large;
 }
 .notificationclosebutton:hover{
 	background-color: var(--theme-accent-color-light);

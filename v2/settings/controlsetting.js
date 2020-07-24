@@ -28,6 +28,9 @@ export class ControlSettings extends Control{
         }       
     }
     async update(setting){
+        this.controlsSettings.forEach(async controlSetting=>{
+            UtilDOM.showOrHide(controlSetting,await controlSetting.setting.isApplicable);
+        })
         const controlSetting = this.controlsSettings.find(controlSetting=>controlSetting.setting.id == setting.id);
         if(!controlSetting) return;
 

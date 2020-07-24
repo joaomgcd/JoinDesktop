@@ -1,5 +1,6 @@
 import { AppContext } from "../appcontext.js";
 import { CustomActions } from "../customactions/customactions.js";
+import { EventBus } from "../eventbus.js";
 
 export class Settings extends Array{
     constructor(initial){
@@ -43,6 +44,9 @@ export class Setting{
     }
     get isDbSetting(){
         return false;
+    }
+    get isApplicable(){
+        return true;
     }
 }
 export class SettingTextInput extends Setting{
@@ -121,6 +125,37 @@ export class SettingEventGhostNodeRedPort extends SettingTextInput{
         })
     }
 }
+class SettingIntInput extends SettingTextInput{    
+    get value(){
+        return (async ()=>{
+            let value = await super.value;
+            value = parseInt(value);
+            return value ? value : null;
+        })()
+    }
+    set value(v){
+        super.value = v
+    }
+}
+export class SettingNotificationTimeout extends SettingIntInput{
+    static get id(){
+        return "SettingNotificationTimeout";
+    }
+    get isDbSetting(){
+        return true;
+    }
+    constructor(){
+        super({
+            id:SettingNotificationTimeout.id,
+            label:"Notification Timeout",
+            placeholder:"Time in Seconds",
+            subtext:`If set, will make all non-native notifications disappear automatically after these seconds. They will still be available in the notifications screen in the main app.`
+        })
+    }
+    get isApplicable(){
+        return new SettingUseNativeNotifications().value.then(value=>!value);
+    }
+}
 export class SettingAutomationPortFullPush extends SettingTextInput{
     static get id(){
         return "SettingAutomationPortFullPush";
@@ -162,6 +197,7 @@ export class SettingUseNativeNotifications extends SettingBoolean{
     }
     set value(v){
         super.value = v
+        EventBus.post(new RequestRefreshSettings());
     }
 }
 export class SettingSingleOption extends Setting{
@@ -412,3 +448,4 @@ export class SettingCustomActions extends Setting{
         this.value = customActions;
     }
 }
+class RequestRefreshSettings{}
