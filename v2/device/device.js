@@ -914,19 +914,13 @@ class WebSocketGCM{
         this.gcmRaw = gcmRaw;
     }
 }
-export class DeviceAndroidPhone extends Device{
+class DeviceAndroid extends Device{
 	canReceiveSms(){
 		return !this.isShared;
 	}
 	canOpenApps(){
 		return !this.isShared;
 	}
-	getIcon(){
-		return "./images/phone.png";
-	}
-	get hasLocalNetworkCapabilities(){
-		return !this.isShared;
-	}	
 	canTakeScreenshot(){
 		return !this.isShared;
 	}
@@ -939,6 +933,20 @@ export class DeviceAndroidPhone extends Device{
 	canBrowseFiles(){
 		return !this.isShared;
 	}
+	get hasLocalNetworkCapabilities(){
+		return !this.isShared;
+	}
+}
+export class DeviceAndroidPhone extends DeviceAndroid{
+	getIcon(){
+		return "./images/phone.png";
+	}	
+}
+
+export class DeviceAndroidTablet extends DeviceAndroid{
+	getIcon(){
+		return "./images/tablet.png";
+	}
 }
 
 export class DeviceIPhone extends Device{
@@ -948,18 +956,6 @@ export class DeviceIPhone extends Device{
 	 
 	canSyncClipboardTo(){
 		return false;
-	}
-}
-
-export class DeviceAndroidTablet extends Device{
-	canReceiveSms(){
-		return true;
-	}
-	canOpenApps(){
-		return true;
-	}
-	getIcon(){
-		return "../images/tablet.png";
 	}
 }
 export class DeviceIPad extends Device{
