@@ -25,17 +25,27 @@ class LocalStorage{
         localStorageCache[key] = value;
         try{
             localStorage.setItem(key,value);
-        }catch{
-            console.log("Saving to local storage",key, value);
-            getServerStore().set(key,value);
+        }catch(error){
+            try{
+                console.log("Saving to local storage",key, value);
+                getServerStore().set(key,value);                
+            }catch{
+                console.error("Can't save to local storage",error);
+                throw error;
+            }
         }
     }
     delete(key){        
         delete localStorageCache[key];
         try{
             localStorage.removeItem(key);
-        }catch{
-            getServerStore().remove(key);
+        }catch(error){
+            try{
+                getServerStore().remove(key);
+            }catch{
+                console.error("Can't delete from local storage",error);
+                throw error;
+            }
         }
     }
     setObject(key,value){
@@ -50,8 +60,13 @@ class LocalStorage{
                 value = null;
             }
             return value;
-        }catch{
-            return getServerStore().get(key);
+        }catch(error){
+            try{
+                return getServerStore().get(key);
+            }catch{
+                console.error("Can't get from local storage",error);
+                throw error;
+            }
         }
     }
     getBoolean(key){
