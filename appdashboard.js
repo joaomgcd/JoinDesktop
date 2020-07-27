@@ -394,6 +394,9 @@ export class AppDashboard extends App{
     async onNotificationsCleared(notificationsCleared){
         await ServerEventBus.post(notificationsCleared);
     }
+    async onGCMNotificationClear(gcm){
+        await ServerEventBus.post(gcm);
+    }
     onRequestStoredNotifications(request){
         ServerEventBus.post(request);
     }

@@ -73,7 +73,7 @@ export class Control extends ExtendableProxy {
                         element.value = value;
                         return true;
                     }
-                    element.innerHTML = target.replaceSpecialCharacters(value);
+                    element.innerHTML = target.replaceSpecialCharacters(value) || "";
                     return true;
                 }
             });                

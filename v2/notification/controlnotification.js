@@ -51,7 +51,7 @@ export class ControlNotification extends Control{
         }
         this.setDismissEverywhereButton();
         this.data = this.notification;
-        
+    
         // if(!this.notification.iconData){
         //     this.iconDataElement.src = "../join.png";
         // }

@@ -159,6 +159,16 @@ class WindowNotifications extends Array{
         
         EventBus.post(new ResultNotificationAction(true));
     }
+    async onGCMNotificationClear(gcm){
+        const requestNotification = gcm.requestNotification;
+        if(!requestNotification) return;
+
+        const id = requestNotification.requestId;
+        console.log("Removing notification with id", id);
+        Util.removeIf(this,windowNotification=>windowNotification.options.id == id);
+
+        await this.sendNotificationsToPage();
+    }
     async closeWindowIfNoNotifications(){
         if(this.notificationsToShow.length > 0) return;
 
