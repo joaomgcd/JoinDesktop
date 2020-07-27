@@ -141,6 +141,14 @@ export class GCMPush extends GCMBaseApp{
 		Object.assign(notification, push);
 		return notification;
 	}
+	
+	getValueToCheckIfWasEncrypted(props){
+
+		const push = props ? props.push : this.push;
+		if(!push) return null;
+
+		return push.text;
+	}
 	async encrypt(){
 		const push = this.push;
 		const e = Encryption.encrypt

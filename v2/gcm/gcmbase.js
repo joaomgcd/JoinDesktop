@@ -67,7 +67,11 @@ class GCMBase{
 	async handleNotificationClick(action){
 		console.log("GCMBase doing nothing on click",action)
 	}
+	getValueToCheckIfWasEncrypted(props){
+		return null;
+	}
 	async fromJson(json) {
+		let valueToCheckIfWasEncrypted = this.getValueToCheckIfWasEncrypted(json);
 		for (const prop in json) {
 			let value = json[prop];
 			try{
@@ -76,6 +80,9 @@ class GCMBase{
 			try{
 				this[prop] = value;
 			}catch{}
+		}
+		if(valueToCheckIfWasEncrypted && valueToCheckIfWasEncrypted != this.getValueToCheckIfWasEncrypted()){
+			this.wasEncrypted = true;
 		}
 	}
 	async fromJsonString(str) {

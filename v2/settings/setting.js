@@ -200,6 +200,18 @@ export class SettingUseNativeNotifications extends SettingBoolean{
         EventBus.post(new RequestRefreshSettings());
     }
 }
+export class SettingRequireEncryptionForCommandLine extends SettingBoolean{  
+    static get id(){
+        return "SettingRequireEncryptionForCommandLine";
+    } 
+    constructor(){
+        super({
+            id:SettingRequireEncryptionForCommandLine.id,
+            label:"Require Encryption For Command Line",
+            subtext:`If set, will require incoming pushes to be encrypted to be able to run command line commands`
+        })
+    }
+}
 export class SettingSingleOption extends Setting{
     //options is {id,label}
     constructor(args = {options}){

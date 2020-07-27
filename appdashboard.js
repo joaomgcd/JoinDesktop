@@ -6,7 +6,7 @@ import './v2/extensions.js';
 import { App,RequestLoadDevicesFromServer } from "./v2/app.js";
 import {AppHelperSettings} from "./v2/settings/apphelpersettings.js"
 import { ControlSettings } from "./v2/settings/controlsetting.js";
-import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync, SettingCustomActions, SettingUseNativeNotifications, SettingNotificationTimeout } from "./v2/settings/setting.js";
+import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync, SettingCustomActions, SettingUseNativeNotifications, SettingNotificationTimeout, SettingRequireEncryptionForCommandLine } from "./v2/settings/setting.js";
 import { AppGCMHandler } from "./v2/gcm/apphelpergcm.js";
 import { ControlDialogInput, ControlDialogOk } from "./v2/dialog/controldialog.js";
 import { AppContext } from "./v2/appcontext.js";
@@ -181,6 +181,7 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
                 new Tab({title:"General",controlContent:new ControlSettings([
                     new SettingCompanionAppPortToReceive(),
                     new SettingEncryptionPassword(),
+                    new SettingRequireEncryptionForCommandLine(),
                     new SettingUseNativeNotifications(),
                     new SettingNotificationTimeout(),
                 ])}),
@@ -230,6 +231,11 @@ export class AppGCMHandlerDashboard extends AppGCMHandler{
             notification.text = push.clipboard;
         }
         if(push.commandLine){
+            const needsToBeEncrypted =  await new SettingRequireEncryptionForCommandLine().value;
+            if(needsToBeEncrypted && !gcm.wasEncrypted){
+                this.app.showToast({text:"Didn't run command line command. Not encrypted.",isError:true});
+                return;
+            }
             const {CustomAction} = await import("./v2/customactions/customactions.js")
             const {command,args} = CustomAction.getCommandToExecuteFromCommandText(push.text);
             const response = await EventBus.postAndWaitForResponse(new RequestRunCommandLineCommand({command,args}),ResponseRunCommandLineCommand,10000);
