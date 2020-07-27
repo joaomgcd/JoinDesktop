@@ -278,6 +278,18 @@ class RequestDownloadAndOpenFile{
     }
 }
 class RequestInstallLatestUpdate{}
+class Changes{
+    static async getAll(){
+        const info = await UtilWeb.get("changes.json");
+        return info.changes;
+    }
+    static async get(version){
+        const changes = await Changes.getAll();
+        const change = changes.find(change => change.version == version);
+        if(!change) return null;
+        return change;
+    }
+}
 export class AppDashboard extends App{
     constructor(contentElement){
         super(contentElement);
@@ -325,6 +337,7 @@ export class AppDashboard extends App{
         const query = Util.getQueryObject();
         if(!query.notificationpopup){
             await super.load();
+            await this.showNewVersionInfo();
         }else{
             await this.loadEssentials();
 
@@ -337,6 +350,32 @@ export class AppDashboard extends App{
     applyTheme(theme,accent){
         super.applyTheme(theme,accent);
         EventBus.post({},"ThemeApplied");
+    }
+    async showNewVersionInfo(){
+        const appInfo = await this.appInfo;
+        const key = "lastupdatelogshown";
+        const lastVersionShown = parseFloat(AppContext.context.localStorage.get(key))
+        if(lastVersionShown && lastVersionShown >= parseFloat(appInfo.version)) return;
+
+        const info = await Changes.get(appInfo.version);
+        if(!info) return;
+
+        let liTag = `<li style="padding: 8px;">`
+        let text = info.log.join(`</li>${liTag}`);
+        text = `<ul>${liTag}${text}</li></ul>`;
+        const title = `Changes for version ${appInfo.version}`;
+        const timeout = 999999999;
+        if(info.demo){
+            const buttons = ["OK","Demo"]
+            const buttonsDisplayFunc = button=>button;
+            const button = await ControlDialogOk.showAndWait({title,text,timeout,buttons,buttonsDisplayFunc});
+            AppContext.context.localStorage.set(key,appInfo.version);
+            if(button.button != "Demo") return;
+
+            Util.openWindow(info.demo);
+        }else{
+            ControlDialogOk.showAndWait({title,text,timeout});
+        }
     }
     get newGcmHandlerInstance(){
         return new AppGCMHandlerDashboard(this);
@@ -389,6 +428,7 @@ export class AppDashboard extends App{
         let success = false;
         try{
             const resultPromise = EventBus.waitFor(ResultNotificationAction,3000);
+            // request = JSON.parse(JSON.stringify(request))
             ServerEventBus.post(request);
             const result = await resultPromise;
             success = result.success;

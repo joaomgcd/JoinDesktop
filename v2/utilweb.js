@@ -23,7 +23,9 @@ class UtilWeb{
         const result = await fetch(url,options);
         return await result.json();
     }
-    static async get({url,token}){
+    static async get(args = {url,token}){
+        let url = Util.isString(args) ? args : args.url;
+        let token = args.token;
         return await this.request({url,token,method:"GET"})
     }
     static async post({url,token,contentObject}){

@@ -292,6 +292,8 @@ export class ControlDialogOk extends ControlDialog {
         .dialogoktext{
             margin-top: 24px;
             margin-bottom: 8px;
+            max-height: 300px;
+            overflow-y: auto;
         }
         `
     }

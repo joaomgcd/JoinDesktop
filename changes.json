@@ -1,0 +1,26 @@
+{
+    "changes":[
+        {
+            "version": "0.3.1",
+            "demo": "https://youtu.be/YOrXfcShOI0",
+            "log":[
+                "Auto and Auto (Black) theme added which will follow system's theme",
+                "Made close button send app to tray and added option there to really close the app",
+                "Added ability to create custom actions; these also can be used with keyboard shortcuts.",
+                "If custom action only targets browser devices you can enable the option to run the action as a command line command",
+                "Added ability to respond to command line command",
+                "hide commands when they don't apply to the selected device instead of disabling",
+                "Added tabs to Settings screen",
+                "Added ability for the app to show this changelog",
+                "Added option to use native OS notifications",
+                "Fixed some issues for Android tablets",
+                "Added option for default non-native notification timeout",
+                "Added option to require encryption for command line commands",
+                "Fixed notification buttons for synced notifications not showing",
+                "Fixed synced notifications not being cleared in desktop app when cleared on Android",
+                "When app crashes user can close crash details to continue using the app",
+                "When app crashes, user now has ability to report the crash via email"
+            ]
+        } 
+    ]
+}

@@ -50,9 +50,6 @@ export class AppDashboardNotifications extends AppHelperBase{
         await this.controlNotifications.render();
         ServerEventBus.post(new RequestResize(this.controlNotifications.notificationsListSize));
     }
-    async onRequestDimissNotification(request){
-        // GCMNotificationBase.
-    }
     async onRequestReplyMessage(request){
         ServerEventBus.post(request);
     }
