@@ -63,7 +63,7 @@ export class Control extends ExtendableProxy {
                     const tagName = element.tagName;
                     if(tagName == "IMG" && value){
                         if(Util.isString(value) && value.startsWith("icons")){
-                            value = `/${value}`;
+                            value = `./${value}`;
                         }else{
                             value = await GoogleDrive.convertFilesToGoogleDriveIfNeeded({files:value,downloadToBase64IfNeeded:true,authToken:this.authToken});
                         }

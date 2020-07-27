@@ -185,12 +185,12 @@ class GCMMediaInfo extends GCMServer{
 	}
 }
 class GCMNotification extends GCMServer{    
-	async modifyNotification(notification,index){
+	/*async modifyNotification(notification,index){
 		const notificationfromGcm = this.requestNotification.notifications[index];
         this.notificationId = notificationfromGcm.id;
 		const options = await GCMNotificationBase.getNotificationOptions(notificationfromGcm,Util,GoogleDrive);
 		Object.assign(notification,options);
-    }
+    }*/
     
 	async handleNotificationClick(serviceWorker,action,data){
         const notification  = this.requestNotification.notifications[0];

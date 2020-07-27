@@ -188,6 +188,11 @@ class GCMNotificationBase{
 				GCMNotificationBase.notificationDismissAction
 			]      
 		};
+		if(notificationfromGcm.buttons){
+			notificationfromGcm.buttons.forEach(button=>{
+				options.actions.push({action:button.actionId,title:button.text});
+			});
+		}
 		if(notificationfromGcm.replyId){
 			options.actions.push(GCMNotificationBase.notificationReplyAction);
 		}

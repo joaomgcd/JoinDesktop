@@ -164,7 +164,7 @@ class WindowNotifications extends Array{
         if(!requestNotification) return;
 
         const id = requestNotification.requestId;
-        console.log("Removing notification with id", id);
+        // console.log("Removing notification with id", id);
         Util.removeIf(this,windowNotification=>windowNotification.options.id == id);
 
         await this.sendNotificationsToPage();
