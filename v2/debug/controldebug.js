@@ -31,6 +31,11 @@ export class ControlDebug extends Control{
         const showAllDebugs = window.location.href.indexOf("debug")>0;
         if(!showAllDebugs && !isError) return;
 
+        const body = `This happenened when I: _____
+
+Error Details:
+${message}`
+        this.reportElement.href = `mailto:support@joaoapps.com?subject=${encodeURIComponent("[Join Desktop] Error")}&body=${encodeURIComponent(body)}`
         this.debugTextElement.innerHTML = message;
         UtilDOM.show(this.wrapperElement);
     }    
@@ -38,6 +43,7 @@ export class ControlDebug extends Control{
         return `
         <div id="debugwrapper" class="hidden">
             <div id="debug"></div>
+            <a id="debugreportlink">Report</a>
             <div id="debugclose">Close X</div>
         </div>`;
     }
@@ -58,6 +64,7 @@ export class ControlDebug extends Control{
         this.wrapperElement = root;
         this.debugTextElement = await this.$("#debug");
         this.debugCloseElement = await this.$("#debugclose");
+        this.reportElement = await this.$("#debugreportlink");
 
         this.debugCloseElement.onclick = ()  => UtilDOM.hide(this.wrapperElement)
         return root;
