@@ -63,7 +63,7 @@ export class AutoUpdater{
                 const versionFromGithub = packageInfoFromGithub.version;
                 console.log("Package version from github", versionFromGithub);
 
-                if(versionFromGithub == appVersion) return null;
+                if(parseFloat(versionFromGithub) <= parseFloat(appVersion)) return null;
 
 
                 let downloadLinkEnd = `squirrel-windows/Join%20Desktop%20Setup%20${versionFromGithub}.exe`;
