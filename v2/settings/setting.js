@@ -226,7 +226,7 @@ export class SettingTheme extends SettingSingleOption{
         return "black"
     }
     get value(){
-        return super.value || SettingTheme.themeIdLight;
+        return super.value || SettingTheme.themeIdAuto;
     }
     set value(val){
         super.value = val

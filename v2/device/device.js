@@ -774,7 +774,13 @@ export class Device{
 		const workedRightAway = await this.testLocalNetwork();
 		if(workedRightAway) return new ConnectViaLocalNetworkSuccess(this);
 
-		const response = await resultPromise;
+		let response = false;
+		try{
+			response = await resultPromise;
+			response = response.device.canContactViaLocalNetwork
+		}catch{
+			response = false;
+		}
 		console.log("Result test local network",response);
 		return response;
 	}
@@ -811,8 +817,7 @@ export class Device{
 
 		const testIfAvailable = async () => {
 			try{
-				await Util.withTimeout(this.testIfLocalNetworkIsAvailable({serverAddress,webSocketServerAddress,allowUnsecureContent}),5000);
-				return true;
+				return await Util.withTimeout(this.testIfLocalNetworkIsAvailable({serverAddress,webSocketServerAddress,allowUnsecureContent}),5000);
 			}catch{
 				return false;
 			}

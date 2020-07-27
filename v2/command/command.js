@@ -550,8 +550,12 @@ export class CommandTestLocalNetwork extends Command{
 	async executeSpecific(device){
         this.showToast({text:`Testing local network for ${device.deviceName} on ${device.deviceName}`});
         try{
-            await device.requestLocalNetworkTestAndWaitForResponse();
-            this.showToast({text:`Success!`});
+            const result = await device.requestLocalNetworkTestAndWaitForResponse();
+            if(result){
+                this.showToast({text:`Success!`});
+            }else{
+                this.showToast({text:`Seems like device is not on same local network...`,isError:true});
+            }
         }catch(error){
             console.error("Can't contact on local network",error);
             this.showToast({text:`Seems like device is not on same local network...`,isError:true});

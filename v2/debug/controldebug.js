@@ -32,18 +32,34 @@ export class ControlDebug extends Control{
         if(!showAllDebugs && !isError) return;
 
         this.debugTextElement.innerHTML = message;
-        UtilDOM.show(this.debugTextElement);
+        UtilDOM.show(this.wrapperElement);
     }    
     getHtml(){
-        return `<div id="debug" class="hidden"></div>`;
+        return `
+        <div id="debugwrapper" class="hidden">
+            <div id="debug"></div>
+            <div id="debugclose">Close X</div>
+        </div>`;
     }
-    // getHtmlFile(){
-    //     return "./v2/debug/debug.html";
-    // }
-    
+    getStyle(){
+        return `
+            #debugwrapper{
+                display: flex;
+            }
+            #debug{
+                flex-grow: 1;
+            }
+            #debugclose{
+                cursor: pointer;
+            }
+        `;
+    }
     async renderSpecific({root}){
-        this.debugTextElement = root;
+        this.wrapperElement = root;
+        this.debugTextElement = await this.$("#debug");
+        this.debugCloseElement = await this.$("#debugclose");
 
+        this.debugCloseElement.onclick = ()  => UtilDOM.hide(this.wrapperElement)
         return root;
     }
 }

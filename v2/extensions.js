@@ -1,9 +1,14 @@
 let UtilFinal = null;
 try{
 	UtilFinal = Util
-}catch{
-	const {Util} = require("./util.js")
-	UtilFinal = Util
+}catch(error){
+	try{
+		const {Util} = require("./util.js")
+		UtilFinal = Util
+	}catch{
+		console.log(error);
+		throw error;
+	}
 }
 
 Array.prototype.groupBy = function(keyGetter){

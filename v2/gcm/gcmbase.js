@@ -275,7 +275,7 @@ class GCMMediaInfoBase{
 		notification.id = gcm.packageName + gcm.senderId;
 		notification.title = `Media ${gcm.playing ? "playing" : "stopped"}${device ? " on " + device.deviceName : ""}`
 		notification.body = `${gcm.track} by ${gcm.artist}`
-		notification.icon =  gcm.art.startsWith("http") ? gcm.art : Util.getBase64ImageUrl(gcm.art);
+		notification.icon =  gcm.art.startsWith("http") ? `${gcm.art}?token=${gcm.authToken}` : Util.getBase64ImageUrl(gcm.art);
 		notification.badge = Util.getBase64SvgUrl(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24"><path d="M12 3V13.55C11.41 13.21 10.73 13 10 13C7.79 13 6 14.79 6 17S7.79 21 10 21 14 19.21 14 17V7H18V3H12Z" /></svg>`);
 		notification.actions = [
 			// GCMMediaInfo.notificationActionBack,

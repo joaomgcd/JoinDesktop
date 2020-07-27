@@ -3,9 +3,14 @@ import { EventBus } from "../eventbus.js";
 let GCMBaseFinal = null;
 try{
 	GCMBaseFinal = GCMBase
-}catch{
-	const {GCMBase} = require("./gcmbase.js")
-	GCMBaseFinal = GCMBase
+}catch(error){
+	try{
+		const {GCMBase} = require("./gcmbase.js")
+		GCMBaseFinal = GCMBase
+	}catch{
+		console.log(error);
+		throw error;
+	}
 }
 GCMBaseFinal.getGCMFromType = type => eval(`new ${type}()`);
 class GCMBaseApp extends GCMBaseFinal{

@@ -52,17 +52,17 @@ const handleConnectingToDesktopApp = async (setting,value) => {
     if(setting.id != SettingCompanionAppPortToConnect.id) return value;
     if(!value) return value;
 
-    const {ControlDialogDialogProgress,ControlDialogOk} = (await import("../dialog/controldialog.js"))
-    const myDeviceId = app.myDeviceId;
-    if(!myDeviceId){
-        await ControlDialogOk.showAndWait({title:"Must Be Registered",text:"To make the desktop app work correctly your browser needs to be registered as a Join device."});
-        value = null;
-        return value;
-    }
+    const {ControlDialogDialogProgress,ControlDialogOk} = await import("../dialog/controldialog.js")
 
     const notificationsAllowed = Notification.permission == "granted";
     if(!notificationsAllowed){
         await ControlDialogOk.showAndWait({title:"Must Allow Notifications", text:"To make the desktop app work correctly you need to enable notifications.<br/><br/>To allow your browser to receive pushes, notifications must be enabled for this website otherwise pushes won't be received and the desktop app won't work."});
+        value = null;
+        return value;
+    }
+    const myDeviceId = app.myDeviceId;
+    if(!myDeviceId){
+        await ControlDialogOk.showAndWait({title:"Must Be Registered",text:"To make the desktop app work correctly your browser needs to be registered as a Join device."});
         value = null;
         return value;
     }
