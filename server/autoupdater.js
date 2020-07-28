@@ -74,6 +74,10 @@ export class AutoUpdater{
                     downloadLinkEnd = `Join%20Desktop-${versionFromGithub}.AppImage`;
                 }
                 const downloadLink = `https://raw.githubusercontent.com/joaomgcd/JoinDesktop/master/dist/${downloadLinkEnd}`;
+                const urlExists = await UtilServer.urlExists(downloadLink);
+                console.log("URL exists",downloadLink,urlExists)
+                if(!urlExists) return null;
+
                 return new UpdateAvailable({version:versionFromGithub,downloadLink});
             }catch(error){
                 console.error("Error when checking for updates",error);

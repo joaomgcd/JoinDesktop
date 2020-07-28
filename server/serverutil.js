@@ -82,6 +82,11 @@ export class UtilServer{
             });
         })
     }
+        
+    static async urlExists(url){
+        const urlExist = require("url-exist");
+        return await urlExist(url);
+    }
     static openUrlOrFile(urlOrFile){        
         const { shell } = require('electron')
         if(urlOrFile.path){
