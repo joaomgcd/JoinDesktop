@@ -52,6 +52,17 @@ export class ControlNotification extends Control{
         this.setDismissEverywhereButton();
         this.data = this.notification;
     
+        if(this.notification.messages && this.notification.messages.length > 0){
+            this.textElement.innerHTML = await Util.join(this.notification.messages,"",async message=>{
+                // const token = await self.getAuthTokenPromise()
+                let image = message.image ? `<img class="notificationmessageimage" src="${message.image}"></img>`   : ""
+                return `<div class="notificationmessage">
+                            <div class="notificationmessagetext">${message.sender}: ${message.text}</div>
+                            ${image}
+                        </div>
+                `
+            });
+        }
         // if(!this.notification.iconData){
         //     this.iconDataElement.src = "../join.png";
         // }

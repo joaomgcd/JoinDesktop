@@ -187,6 +187,13 @@ class Util{
     static get canReadClipboard(){
         return (navigator.clipboard && navigator.clipboard.readText) ? true : false
     }
+    static async join(array, joiner, func){
+        const funced = [];
+        for(const item of array){
+            funced.push(await func(item));
+        }        
+        return funced.join(joiner);
+    }
     static withTimeout(promise,timeMs){
         let timeout = new Promise((resolve, reject) => {
             let id = setTimeout(() => {

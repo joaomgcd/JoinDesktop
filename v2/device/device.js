@@ -817,7 +817,7 @@ export class Device{
 
 		const testIfAvailable = async () => {
 			try{
-				return await Util.withTimeout(this.testIfLocalNetworkIsAvailable({serverAddress,webSocketServerAddress,allowUnsecureContent}),5000);
+				return await Util.withTimeout(this.testIfLocalNetworkIsAvailable({serverAddress,webSocketServerAddress,allowUnsecureContent,token}),5000);
 			}catch{
 				return false;
 			}
@@ -833,7 +833,7 @@ export class Device{
 		return success;
 	}
 
-	async testIfLocalNetworkIsAvailable({serverAddress,webSocketServerAddress,allowUnsecureContent}){
+	async testIfLocalNetworkIsAvailable({serverAddress,webSocketServerAddress,allowUnsecureContent,token}){
 
 		console.log(`Testing local network for ${this.deviceName} on ${serverAddress}...`);
 		
@@ -858,7 +858,16 @@ export class Device{
 			// 	return
             // }
             if(!allowUnsecureContent) return true;      
-            if(this.socket) return true;
+			if(this.socket) return true;
+			
+			try{
+				const webSocketInfo = await this.getViaLocalNetwork({path:`websocket`,token});
+				if(webSocketInfo.payload && webSocketInfo.payload.address){
+					webSocketServerAddress = webSocketInfo.payload.address;
+				}
+			}catch(error){
+				console.log("Can't get socket info via http server",error)
+			}
             if(!webSocketServerAddress) return true;
 			
 			try{

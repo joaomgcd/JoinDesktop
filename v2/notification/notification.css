@@ -59,7 +59,9 @@
 	color: var(--theme-accent-color-lowlight);
 	overflow:hidden;
 	line-height:1.5em;
-	max-height:7.5em;
+}
+.notificationmessageimage{
+	width: 100px;
 }
 .notificationdate{
 	display: flex;

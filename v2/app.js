@@ -870,7 +870,7 @@ export class App{
         try{
             const webSocketServerAddress = gcm.webSocketServerAddress;
             const allowUnsecureContent = this.allowUnsecureContent;
-            const isLocalNetworkAvailable = await device.testIfLocalNetworkIsAvailable({serverAddress,webSocketServerAddress,allowUnsecureContent});
+            const isLocalNetworkAvailable = await device.testIfLocalNetworkIsAvailable({serverAddress,webSocketServerAddress,allowUnsecureContent,token:await this.getAuthToken()});
             console.log("Local Network avaialble?",isLocalNetworkAvailable,device);    
         }catch(error){
             console.log("Error testing local network",error);    

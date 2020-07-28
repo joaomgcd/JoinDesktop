@@ -56,7 +56,7 @@ const handleConnectingToDesktopApp = async (setting,value) => {
 
     const notificationsAllowed = Notification.permission == "granted";
     if(!notificationsAllowed){
-        await ControlDialogOk.showAndWait({title:"Must Allow Notifications", text:"To make the desktop app work correctly you need to enable notifications.<br/><br/>To allow your browser to receive pushes, notifications must be enabled for this website otherwise pushes won't be received and the desktop app won't work."});
+        await ControlDialogOk.showAndWait({title:"Must Allow Notifications", text:"To make the desktop app work correctly you need to enable notifications.<br/><br/>To allow your browser to receive pushes, notifications must be enabled for this website otherwise pushes won't be received and the desktop app won't work.<br/><br/>Please make sure that you're not blocking this website's notifications in your browser settings."});
         value = null;
         return value;
     }
