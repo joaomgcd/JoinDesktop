@@ -114,7 +114,7 @@ export class ControlDialogSingleChoice extends ControlDialog {
         
         return showDialog(ControlDialogSingleChoice.getDialogArgs(args));        
     }
-    static async showAndWait(args){       
+    static async showAndWait(args= {position,choices,choiceToLabelFunc}){       
         if(!args.choices || !args.choices.length || args.choices.length == 0) return;
 
         const result = (await showDialogAndWait(ControlDialogSingleChoice.getDialogArgs(args)));

@@ -227,9 +227,13 @@ export class AppHelperSettings extends AppHelperBase{
         await controlsetting.render();
     }
     async onSelectedDevice({controlDevice,wasClick}){
+        if(!controlDevice) return;
+
         await this.manageSelectedDevices(controlDevice.controlDevices.id, wasClick);
     }
     async onUnselectedDevice({controlDevice,wasClick}){
+        if(!controlDevice) return;
+        
         await this.manageSelectedDevices(controlDevice.controlDevices.id, wasClick);
     }
 }

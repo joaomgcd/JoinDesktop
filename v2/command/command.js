@@ -587,18 +587,30 @@ export class CommandUploadFiles extends CommandPush{
      * @param {Device} device 
      */
 	async customizePush({device,push}){
-        const files = await UtilDOM.pickFiles();
-        this.showToast({text:`Sending files to ${device.deviceName}...`});
-        try{
-            const uploadedFiles = await device.uploadFiles({files,token:GoogleAccount.getToken()});
-            push.files = uploadedFiles;
-            this.showToast({text:`Success!`});
+        const { ControlDialogSingleChoice, ControlDialogInput } = await import("../dialog/controldialog.js");
+        const choices = [{id:"local",label:"Local Files"},{id:"web",label:"From Web"}]
+        const localOrWeb = await ControlDialogSingleChoice.showAndWait({choices,choiceToLabelFunc:choice=>choice.label})
+        if(localOrWeb == "local"){
+            const files = await UtilDOM.pickFiles();
+                
+            this.showToast({text:`Sending files to ${device.deviceName}...`});
+            try{
+                const uploadedFiles = await device.uploadFiles({files,token:GoogleAccount.getToken()});
+                push.files = uploadedFiles;
+                this.showToast({text:`Success!`});
+                return push;
+            }catch(error){
+                console.error(error);
+                this.showToast({text:`Can't send files to ${device.deviceName}`,isError:true});
+            }
+	    }else{
+            const file = await ControlDialogInput.showAndWait({title:"Input the URL of the file to send", placeholder:"File URL"});
+            if(!file) return;
+
+            push.files = [file]
             return push;
-        }catch(error){
-            console.error(error);
-            this.showToast({text:`Can't send files to ${device.deviceName}`,isError:true});
         }
-	}
+    }
     get icon(){
         return `<svg style="width:24px;height:24px" viewBox="0 0 24 24">
         <path d="M14,2L20,8V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2H14M18,20V9H13V4H6V20H18M12,12L16,16H13.5V19H10.5V16H8L12,12Z" />
