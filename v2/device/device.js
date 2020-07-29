@@ -147,9 +147,9 @@ export class Devices extends Array{
 						const result = await device.uploadFileLocalNetwork({file,token});
 						return result.payload[0].path;
 					}catch(error){
-						failedDevices.push[device];
+						failedDevices.push(device);
 						device.canContactViaLocalNetwork = false;
-						console.log(`Couldn't upload via local network for ${device}`);
+						console.log(`Couldn't upload via local network for `,device.deviceName);
 						return null;
 					}
 				}));

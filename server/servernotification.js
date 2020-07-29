@@ -97,9 +97,11 @@ class WindowNotifications extends Array{
         return this.map(windowNotification=>windowNotification.options);
     }
     get notificationsToShow(){
-        return this.filter(windowNotification=>windowNotification.shouldShow);
+        return this.filter(windowNotification=>windowNotification.shouldShow || this.isUserInteracting);
     }
     async purgeNotifications(){
+        if(this.isUserInteracting) return;
+
         Util.removeIf(this,windowNotification=>windowNotification.canBeDiscarded);
         storeNotifications.setData(this.storedNotifications);
     }
@@ -169,6 +171,20 @@ class WindowNotifications extends Array{
 
         await this.sendNotificationsToPage();
     }
+    async onMouseLeave(){
+        this.isUserInteracting = false;
+        console.log("Mouse left");
+        await Util.sleep(3000);
+        if(this.isUserInteracting) return;
+        this.forEach(windowNotification=>windowNotification.alwaysShow = false);
+
+        await this.sendNotificationsToPage();
+    }
+    async onMouseEnter(){
+        this.isUserInteracting = true;
+        this.forEach(windowNotification=>windowNotification.alwaysShow = true);
+        console.log("Mouse entered");
+    }
     async closeWindowIfNoNotifications(){
         if(this.notificationsToShow.length > 0) return;
 
@@ -231,6 +247,7 @@ class WindowNotification{
         return this.options.hidden;
     }
     get shouldShow(){
+        if(this.alwaysShow) return true;
         if(this.options.hidden) return false;
         if(this.options.requireInteraction) return true;
 

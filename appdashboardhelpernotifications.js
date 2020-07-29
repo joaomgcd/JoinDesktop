@@ -11,7 +11,8 @@ class RequestResize{
         this.height = height;
     }
 }
-
+class MouseLeave{}
+class MouseEnter{}
 /** @type {AppDashboard} */
 let app = null
 export class AppDashboardNotifications extends AppHelperBase{
@@ -30,6 +31,8 @@ export class AppDashboardNotifications extends AppHelperBase{
         this.controlNotifications.backgroundColor = "transparent";
         await app.addElement(this.controlNotifications,app.rootElement)
         ServerEventBus.post(new RequestNotificationInfo());
+        document.addEventListener("mouseleave", e=>ServerEventBus.post(new MouseLeave()))
+        document.addEventListener("mouseenter", e=>ServerEventBus.post(new MouseEnter()))
     }
     async onThemeApplied(){
         UtilDOM.setCssVariable("theme-background-color-panel","transparent");
