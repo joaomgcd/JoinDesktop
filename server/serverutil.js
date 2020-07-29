@@ -94,4 +94,11 @@ export class UtilServer{
         }
         shell.openExternal(urlOrFile);
     }
+    static get myIp(){
+        const networkInterfaces = require('os').networkInterfaces();
+        const ipv4s = Object.keys(networkInterfaces).map(key => networkInterfaces[key]).flat().filter(networkInterface => networkInterface.family == "IPv4" && !networkInterface.internal);
+        if(ipv4s.length == 0) return null;
+
+        return ipv4s.slice(-1)[0].address;
+    }
 }

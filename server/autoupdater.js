@@ -35,6 +35,7 @@ export class AutoUpdater{
         response.isWindowsSystem = this.isWindowsSystem;
         response.isMacSystem = this.isMacSystem;
         response.isLinuxSystem = !this.isWindowsSystem && !this.isMacSystem;
+        response.ipAddress = UtilServer.myIp;
         return response;
     }
     async checkForUpdate(){

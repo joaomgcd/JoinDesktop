@@ -9,6 +9,7 @@ import { GCMLocalNetworkTest,GCMWebSocketRequest } from "../gcm/gcmapp.js";
 import { App } from "../app.js";
 import { SenderLocal } from "../api/sender.js";
 import { Devices } from "./device.js";
+import { AppContext } from "../appcontext.js";
 
 /** @type {App} */
 let app = null;
@@ -262,6 +263,8 @@ export class AppHelperDevices extends AppHelperBase{
         await this.refreshDevices(request.devices);
     }
     async onSelectedDevice(selectedDevice){
+        if(AppContext.context.allowUnsecureContent) return;
+        
         if(!selectedDevice.wasClick) return;
 
         const controlDevice = selectedDevice.controlDevice;

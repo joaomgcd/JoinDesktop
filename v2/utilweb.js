@@ -31,6 +31,9 @@ class UtilWeb{
     static async post({url,token,contentObject}){
         return await this.request({url,token,contentObject,method:"POST"})
     }
+    static async put({url,token,contentObject}){
+        return await this.request({url,token,contentObject,method:"PUT"})
+    }
     static async delete({url,token}){
         return await this.request({url,token,method:"DELETE"})
     }

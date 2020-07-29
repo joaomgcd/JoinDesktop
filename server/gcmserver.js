@@ -209,3 +209,4 @@ class GCMAutoClipboard extends GCMServer{}
 class GCMNotificationAction extends GCMServer{}
 class GCMNotificationClear extends GCMServer{}
 class GCMNewSmsReceived extends GCMServer{}
+export class GCMLocalNetworkRequest extends GCMServer{}

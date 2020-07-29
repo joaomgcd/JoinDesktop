@@ -720,7 +720,7 @@ export class Device{
 		AppContext.context.localStorage.set(this.tentativeLocalNetworkServerAddressKey,value);
 	}
 	get hasFixableIssue(){
-		return !this.canContactViaLocalNetwork && (this.tentativeLocalNetworkServerAddress ? true : false);
+		return !AppContext.context.allowUnsecureContent && !this.canContactViaLocalNetwork && (this.tentativeLocalNetworkServerAddress ? true : false);
 	}
 	async getViaLocalNetwork({path,token}){
 		if(!this.canContactLocalNetworkKey) throw `Can't contact ${this.deviceName} via local network`;

@@ -49,11 +49,14 @@ let tray = null;
 class Server{
     constructor(){
     }
+    get serverPort(){
+        return AppContext.context.localStorage.get(SettingCompanionAppPortToReceive.id);
+    }
     async createServer(){
         if(this.httpTerminator){
             await this.httpTerminator.terminate();
         }
-        const port = AppContext.context.localStorage.get(SettingCompanionAppPortToReceive.id);
+        const port = this.serverPort;
         if(!port){
             console.log("Not creating server. No port yet.")
             return;
@@ -278,6 +281,10 @@ class Server{
     get appInfo(){
         const response = new ResponseAppVersion();
         Object.assign(response,this.autoUpdater.appInfo);
+        const port = this.serverPort;
+        if(port){
+            response.serverAddress = `http://${response.ipAddress}:${port}/`
+        }
         return response;
     }
     async onRequestAppVersion(){

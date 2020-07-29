@@ -11,6 +11,10 @@ class GoogleDrive {
 			const token = await tokenGetter()
 			return UtilWeb.post({url,token,contentObject});
 		}
+		const doPutWithAuthPromise = async (url,contentObject) => {
+			const token = await tokenGetter()
+			return UtilWeb.put({url,token,contentObject});
+		}
 		const getUserInfoPromise = async () => {
 			return {};
 		}

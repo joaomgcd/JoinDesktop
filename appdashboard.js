@@ -338,6 +338,7 @@ export class AppDashboard extends App{
         if(!query.notificationpopup){
             await super.load();
             await this.showNewVersionInfo();
+            await this.uploadIpAddressesFile();
         }else{
             await this.loadEssentials();
 
@@ -350,6 +351,25 @@ export class AppDashboard extends App{
     applyTheme(theme,accent){
         super.applyTheme(theme,accent);
         EventBus.post({},"ThemeApplied");
+    }
+    async uploadIpAddressesFile(){
+        const deviceId = this.myDeviceId;
+        if(!deviceId) return;
+
+        const appInfo = await this.appInfo;
+        const serverAddress = appInfo.serverAddress;
+        if(!serverAddress) return;
+
+        const googleDrive = new GoogleDrive(async ()=>await this.getAuthToken());
+        const result = await googleDrive.uploadContent({
+            ignoreFolderForGetFile: true,
+            //getParents:true,
+            fileName: `serveraddresses=:=${deviceId}`,
+            content: {serverAddress,senderId:deviceId},
+            folderName: `${GoogleDrive.getBaseFolderForMyDevice()}/Settings Files`,
+            overwrite: true
+        });
+        console.log(result);
     }
     async showNewVersionInfo(){
         const appInfo = await this.appInfo;
