@@ -244,7 +244,18 @@ class GCMNotificationAction extends GCMGenericPush{
 	}
 }
 class GCMDeviceRegistered extends GCMBaseServiceWorker{}
-class GCMLocalNetworkRequest extends GCMBaseServiceWorker{}
+class GCMLocalNetworkRequest extends GCMBaseServiceWorker{
+	async modifyNotification(notification,index){
+		if(!this.senderId) return;
+
+		const device = await this.getSender();
+		if(!device) return;
+
+		notification.title = "Local Network";
+		notification.body = `${device.deviceName} asked to be tested on local network`;
+	}
+	
+}
 class GCMLocalNetworkTest extends GCMGenericPush{}
 class GCMWebSocketRequest extends GCMGenericPush{}
 class GCMLocalNetworkTestRequest extends GCMGenericPush{}
@@ -258,6 +269,16 @@ class GCMDeviceNotOnLocalNetwork extends GCMGenericPush{
 
 		notification.title = "Local Network";
 		notification.body = `${device.deviceName} not on local network`;
+	}
+}
+class GCMDeviceRegistered extends GCMGenericPush{
+	async modifyNotification(notification,index){
+		notification.title = "Device Registered";
+		
+		const device = this.device;
+		if(!device) return;
+
+		notification.body = `${device.deviceName} registered itself on the server`;
 	}
 }
 class GCMNewSmsReceived extends GCMGenericPush{	
