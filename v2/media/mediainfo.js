@@ -100,16 +100,17 @@ export class MediaInfos extends Array{
     }
     /**@type {MediaInfo} */
     get latest(){
-        return (async=>{            
-            this.sortByMultiple(false,mediaInfo=>{
-                if(mediaInfo.playing) return Number.MAX_SAFE_INTEGER;
-                
-                if(mediaInfo.date) return mediaInfo.date;
-                
-                return Number.MIN_SAFE_INTEGER;
-            })
-            return this[0];
-        })()
+        return MediaInfos.getLatest(this);
+    }
+    static async getLatest(mediaInfosArray){
+        mediaInfosArray.sortByMultiple(false,mediaInfo=>{
+            if(mediaInfo.playing) return Number.MAX_SAFE_INTEGER;
+            
+            if(mediaInfo.date) return mediaInfo.date;
+            
+            return Number.MIN_SAFE_INTEGER;
+        })
+        return mediaInfosArray[0];
     }
 }
 

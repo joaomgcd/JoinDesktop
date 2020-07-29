@@ -335,26 +335,32 @@ export class SettingKeyboardShortcut extends Setting{
     constructor(args){
         super(args)
     }
+    isDbSetting(){
+        return true;
+    }
     get commands(){        
         return import("../command/command.js");
     }
+    get command(){
+        return (async()=>{
+            return new (await this.commands)[this.commandName]()
+        })()
+    }
+    //abstract 
+    get commandName(){}
 }
 export class SettingKeyboardShortcutLastCommand extends SettingKeyboardShortcut{
     static get id(){
         return "keyboardshortcutlastcommand";
     }
-    isDbSetting(){
-        return true;
-    }
-    get command(){
-        return (async()=>{
-            return new (await this.commands)["CommandRepeatLastCommand"]()
-        })()
+    get commandName(){
+        return "CommandRepeatLastCommand";
     }
     constructor(args){
         super({
             id:SettingKeyboardShortcutLastCommand.id,
-            label:"Keyboard Shortcut To Repeat Last Command"
+            label:"Repeat Last Command",
+            subtext:"Keyboard shortcut To repeat the last used command on the devices screen"
         })
     }
 }
@@ -362,18 +368,59 @@ export class SettingKeyboardShortcutShowWindow extends SettingKeyboardShortcut{
     static get id(){
         return "keyboardshortcutshowwindow";
     }
-    isDbSetting(){
-        return true;
-    }
-    get command(){
-        return (async()=>{
-            return new (await this.commands)["CommandShowAppWindow"]()
-        })()
+    get commandName(){
+        return "CommandShowAppWindow";
     }
     constructor(args){
         super({
             id:SettingKeyboardShortcutShowWindow.id,
-            label:"Keyboard Shortcut To Show the App Window"
+            label:"Show App",
+            subtext:"Keyboard Shortcut To Show the App Window"
+        })
+    }
+}
+export class SettingKeyboardShortcutSkipSong extends SettingKeyboardShortcut{
+    static get id(){
+        return "SettingKeyboardShortcutSkipSong";
+    }
+    get commandName(){
+        return "CommandSkipSong";
+    }
+    constructor(args){
+        super({
+            id:SettingKeyboardShortcutSkipSong.id,
+            label:"Skip Song",
+            subtext:"Keyboard Shortcut To Skip the Currently Playing Song"
+        })
+    }
+}
+export class SettingKeyboardShortcutPreviousSong extends SettingKeyboardShortcut{
+    static get id(){
+        return "SettingKeyboardShortcutPreviousSong";
+    }
+    get commandName(){
+        return "CommandPreviousSong";
+    }
+    constructor(args){
+        super({
+            id:SettingKeyboardShortcutPreviousSong.id,
+            label:"Previous Song",
+            subtext:"Keyboard Shortcut To press the back button on the currently playing media app"
+        })
+    }
+}
+export class SettingKeyboardShortcutPlayPause extends SettingKeyboardShortcut{
+    static get id(){
+        return "SettingKeyboardShortcutPlayPause";
+    }
+    get commandName(){
+        return "CommandPlayPause";
+    }
+    constructor(args){
+        super({
+            id:SettingKeyboardShortcutPlayPause.id,
+            label:"Play/Pause",
+            subtext:"Keyboard Shortcut To toggle playing on the currently playing media app"
         })
     }
 }

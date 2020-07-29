@@ -518,6 +518,9 @@ export class Device{
 	async pressPause(packageName){
 		await this.sendPush({pause:true,mediaAppPackage:packageName});
 	}
+	async togglePlayPause(packageName){
+		await this.sendPush({playpause:true,mediaAppPackage:packageName});
+	}
 	async pressNext(packageName){
 		await this.sendPush({next:true,mediaAppPackage:packageName});
 	}
@@ -734,6 +737,20 @@ export class Device{
 	get socket(){ 
 		return this._socket && this._socket.send && this._socket.readyState == this._socket.OPEN ? this._socket : null;
 	}
+	get canSendMessagesViaSocket(){
+		const socket = this.socket;
+		if(!socket) return;
+
+		return (async ()=>{
+			try{
+				const result = await socket.send({});
+				return true;
+			}catch(error){
+				console.log("Couldn't contact socket that was open",error);
+				return false;
+			}
+		})()
+	}
 	get api(){
 		return (async ()=>{
 			return (await import("../api/apiserver.js")).ApiServer;
@@ -764,7 +781,7 @@ export class Device{
 	}
 
 	async requestLocalNetworkTestAndWaitForResponse(){
-		if(this.socket) return true;
+		if(await this.canSendMessagesViaSocket) return true;
 
 		if(!this.hasLocalNetworkCapabilities) throw "Can't contact via local network";
 
@@ -785,52 +802,57 @@ export class Device{
 		return response;
 	}
 	async testLocalNetworkLastKnownAndGoogleDrive(){
-		if(this.socket) return true;
+		if(await this.canSendMessagesViaSocket) return true;
 
-		const allowUnsecureContent = this.allowUnsecureContent;
-		const token = await this.token;
-		let serverAddress = this.lastKnownLocalNetworkAddress;
-		let webSocketServerAddress = this.lastKnownSocketAddress;
-		let addressesFile = null;
-		const setAddressesFromGoogleDrive = async () => {
-			if(!addressesFile){
-				try{
-					addressesFile = await new GoogleDrive(()=>token).downloadContent({fileName: "serveraddresses=:=" + this.deviceId});
-				}catch{
-					addressesFile = {};
+		try{
+			const allowUnsecureContent = this.allowUnsecureContent;
+			const token = await this.token;
+			let serverAddress = this.lastKnownLocalNetworkAddress;
+			let webSocketServerAddress = this.lastKnownSocketAddress;
+			let addressesFile = null;
+			const setAddressesFromGoogleDrive = async () => {
+				if(!addressesFile){
+					try{
+						addressesFile = await new GoogleDrive(()=>token).downloadContent({fileName: "serveraddresses=:=" + this.deviceId});
+					}catch{
+						addressesFile = {};
+					}
 				}
-			}
-			let serverAddressGD = allowUnsecureContent ? addressesFile.serverAddress : addressesFile.secureServerAddress;
-			let webSocketServerAddressGD = addressesFile.webSocketServerAddress;
-			if(serverAddressGD != serverAddress || webSocketServerAddress != webSocketServerAddressGD){
-				serverAddress = serverAddressGD;
-				webSocketServerAddress = webSocketServerAddressGD;
-				return true;
-			}
+				let serverAddressGD = allowUnsecureContent ? addressesFile.serverAddress : addressesFile.secureServerAddress;
+				let webSocketServerAddressGD = addressesFile.webSocketServerAddress;
+				if(serverAddressGD != serverAddress || webSocketServerAddress != webSocketServerAddressGD){
+					serverAddress = serverAddressGD;
+					webSocketServerAddress = webSocketServerAddressGD;
+					return true;
+				}
 
-			return false;
-		}
-		if(!serverAddress || !webSocketServerAddress) {
-			await setAddressesFromGoogleDrive();
-		}
-		if(!serverAddress || !webSocketServerAddress) return false;
-
-		const testIfAvailable = async () => {
-			try{
-				return await Util.withTimeout(this.testIfLocalNetworkIsAvailable({serverAddress,webSocketServerAddress,allowUnsecureContent,token}),5000);
-			}catch{
 				return false;
 			}
-		}
-		let success = await testIfAvailable();
-		if(!success){					
-			const shouldTestAgain = await setAddressesFromGoogleDrive();
-			if(shouldTestAgain){
-				success = await testIfAvailable();
+			if(!serverAddress || !webSocketServerAddress) {
+				await setAddressesFromGoogleDrive();
 			}
+			if(!serverAddress || !webSocketServerAddress) return false;
+
+			const testIfAvailable = async () => {
+				try{
+					return await Util.withTimeout(this.testIfLocalNetworkIsAvailable({serverAddress,webSocketServerAddress,allowUnsecureContent,token}),5000);
+				}catch{
+					return false;
+				}
+			}
+			let success = await testIfAvailable();
+			if(!success){					
+				const shouldTestAgain = await setAddressesFromGoogleDrive();
+				if(shouldTestAgain){
+					success = await testIfAvailable();
+				}
+			}
+			this.canContactViaLocalNetwork = serverAddress;
+			return success;
+				
+		}catch(error){
+			console.log("Unexpected error when testing local network",this.deviceName,error);
 		}
-		this.canContactViaLocalNetwork = serverAddress;
-		return success;
 	}
 
 	async testIfLocalNetworkIsAvailable({serverAddress,webSocketServerAddress,allowUnsecureContent,token}){
@@ -858,7 +880,7 @@ export class Device{
 			// 	return
             // }
             if(!allowUnsecureContent) return true;      
-			if(this.socket) return true;
+			if(await this.canSendMessagesViaSocket) return true;
 			
 			try{
 				const webSocketInfo = await this.getViaLocalNetwork({path:`websocket`,token});
@@ -875,8 +897,9 @@ export class Device{
 				
 				this.socket = await this.connectToSocket(webSocketServerAddress);
 				console.log("Socket connected!!!",this.deviceName,this.socket);
-				const socketDisconnected = () => {	
-					//this.setToRemoteNetwork(true);
+				const socketDisconnected = async () => {	
+					await this.setToRemoteNetwork(true);
+					await this.testLocalNetworkLastKnownAndGoogleDrive();
 				}
 				this.socket.onmessage = e =>{			
 					const gcmRaw = JSON.parse(e.data);

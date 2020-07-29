@@ -145,10 +145,8 @@ export class AppHelperMedia extends AppHelperBase{
     async updateMediaInfo(mediaInfo){
         if(!this.controlMediaInfos) return;
         
-        const device = mediaInfo.device;
         await mediaInfo.convertArtToBase64(await app.getAuthToken());
         await this.controlMediaInfos.updateMediaInfo(mediaInfo);
-        await this.dbMedia.updateSingle({device,mediaInfo});
     }
     async onGCMRespondFile(gcm){
         const responseFile = gcm.responseFile;

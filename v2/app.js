@@ -241,7 +241,8 @@ export class App{
         shortcut = new KeyboardShortcut(shortcut);
         const db = new DBKeyboardShortcut(this.db);
         const commandInstance = await db.getCommand(shortcut);
-        await commandInstance.execute(device);
+        const devices = await this.devicesFromDb;
+        await commandInstance.execute(device,devices);
     }
     showCloseButton(){
         return false;

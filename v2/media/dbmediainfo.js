@@ -31,4 +31,11 @@ export class DBMediaInfos{
         const mediaInfos = new MediaInfos(fromJson,device);
         return mediaInfos;
     }
+    async getLatest(devices){
+        if(!devices || devices.length == 0) return null;
+
+        let all = await Promise.all(devices.map(device=>this.getAll({device})));
+        all = all.flat();
+        return await MediaInfos.getLatest(all);
+    }
 }

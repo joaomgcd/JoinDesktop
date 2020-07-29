@@ -1,7 +1,7 @@
 import { EventBus } from "../eventbus.js";
 import { AppHelperBase } from "../apphelperbase.js";
 import { ControlSettings } from "./controlsetting.js";
-import { SettingEncryptionPassword, SettingSingleOption, SettingTheme, SettingThemeAccentColor, SettingEventGhostNodeRedPort, SettingCompanionAppPortToConnect, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingCustomActions } from "./setting.js";
+import { SettingEncryptionPassword, SettingSingleOption, SettingTheme, SettingThemeAccentColor, SettingEventGhostNodeRedPort, SettingCompanionAppPortToConnect, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingCustomActions, SettingKeyboardShortcutSkipSong, SettingKeyboardShortcutPreviousSong, SettingKeyboardShortcutPlayPause } from "./setting.js";
 import { UtilDOM } from "../utildom.js";
 import { ControlTabs, Tab } from "../tabs/controltabs.js";
 import { AppContext } from "../appcontext.js";
@@ -103,7 +103,10 @@ const handleConnectingToDesktopApp = async (setting,value) => {
 const handleSavingKeyboardShortcut = async (setting,value) => {
     const isLastCommand = setting.id == SettingKeyboardShortcutLastCommand.id;
     const isShowWindow = setting.id == SettingKeyboardShortcutShowWindow.id;
-    if(!isLastCommand && !isShowWindow) return value;
+    const isSkipSong = setting.id == SettingKeyboardShortcutSkipSong.id;
+    const isPreviousSong = setting.id == SettingKeyboardShortcutPreviousSong.id;
+    const isPlayPause = setting.id == SettingKeyboardShortcutPlayPause.id;
+    if(!isLastCommand && !isShowWindow && !isSkipSong && !isPreviousSong && !isPlayPause) return value;
 
     let shortcutAndCommand = null;
     const command = await setting.command;
@@ -153,6 +156,9 @@ export class AppHelperSettings extends AppHelperBase{
                 ])}),
                 new Tab({title:"Shortcuts",controlContent:new ControlSettings([
                     new SettingKeyboardShortcutLastCommand(),
+                    new SettingKeyboardShortcutSkipSong(),
+                    new SettingKeyboardShortcutPreviousSong(),
+                    new SettingKeyboardShortcutPlayPause(),
                 ])}),
                 new Tab({title:"General",controlContent:new ControlSettings([
                     new SettingCompanionAppPortToConnect(),

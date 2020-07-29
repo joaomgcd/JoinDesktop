@@ -74,11 +74,11 @@ class Command {
     getText(){}
     //abstract
     shouldEnable(device){}
-    async execute(device){ 
+    async execute(device,devices=null){ 
         if(this.shouldSaveAsLastExecutedCommand){
             Command.lastExecutedCommand = this;
         } 
-        return this.executeSpecific(device);
+        return this.executeSpecific(device,devices);
     }
     //abstract
     async executeSpecific(device){}
@@ -112,8 +112,8 @@ class Command {
     }
 }
 export class CommandPush extends Command {
-    async executeSpecific(device){
-        const push = await this.customizePush({device,push:{}});
+    async executeSpecific(device,devices){
+        const push = await this.customizePush({device,devices,push:{}});
         if(!push) return;
         
         this.showToast({text:"Sending Push..."});
@@ -126,7 +126,7 @@ export class CommandPush extends Command {
         return result;		
     };
     //abstract
-    async customizePush({device,push}){}
+    async customizePush({device,devices,push}){}
 }
 export class CommandNoteToSelf extends CommandPush{
     getText(){
@@ -743,6 +743,12 @@ export class CommandRepeatLastCommand extends Command{
     get shouldSaveAsLastExecutedCommand(){
         return false;
     }
+    get needsFocus(){
+        const command = Command.lastExecutedCommand;
+        if(!command) return false;
+
+        return command.needsFocus;
+    }
 }
 export class CommandShowAppWindow extends Command{
     getText(){
@@ -759,6 +765,61 @@ export class CommandShowAppWindow extends Command{
     }
     get shouldSaveAsLastExecutedCommand(){
         return false;
+    }
+}
+class CommandMedia extends Command{    
+    async executeSpecific(device,devices){
+        const {DBMediaInfos} = await import("../media/dbmediainfo.js");
+        const db = new DBMediaInfos(DB.get());
+        const latest = await db.getLatest(devices);
+        if(!latest) return;
+
+        console.log("Latest Media Info", latest);
+        await this.doMediaCommand(latest.device,latest.packageName);
+    }
+    shouldEnable(device){
+        return device.canBeMediaControlled();
+    }
+    //abstract
+    async doMediaCommand(device,packageName){}
+    get shouldSaveAsLastExecutedCommand(){
+        return false;
+    }
+    get needsFocus(){
+        return false;
+    }
+}
+export class CommandSkipSong extends CommandMedia{
+    getText(){
+		return "Skip Song";
+    }
+    getTextExtended(device){
+        return `Skip the currently playing song`;
+    }
+    async doMediaCommand(device,packageName){
+        await device.pressNext(packageName);
+    }
+}
+export class CommandPreviousSong extends CommandMedia{
+    getText(){
+		return "Previous Song";
+    }
+    getTextExtended(device){
+        return `Press the back key on the currently playing media app`;
+    }
+    async doMediaCommand(device,packageName){
+        await device.pressBack(packageName);
+    }
+}
+export class CommandPlayPause extends CommandMedia{
+    getText(){
+		return "Play/Pause";
+    }
+    getTextExtended(device){
+        return `Toggle playing on the currently playing media app`;
+    }
+    async doMediaCommand(device,packageName){
+        await device.togglePlayPause(packageName);
     }
 }
 export class CommandCustom extends Command{

@@ -36,9 +36,20 @@ export class AppGCMHandler{
         });
     }
     async onGCMMediaInfo(gcm){
+        const device = await app.getDevice(gcm.senderId);
+        if(!device) return;
+
+        const {MediaInfo} = await import("../media/mediainfo.js");
+        const mediaInfo = new MediaInfo(gcm,device);
+        // await mediaInfo.convertArtToBase64(await app.getAuthToken());
+
         const notification = {};
         await GCMMediaInfoBase.modifyNotification(gcm,notification,Util);
         await app.showNotification(notification,gcm);
+        
+        const {DBMediaInfos} = await import("../media/dbmediainfo.js");
+        const dbMedia = new DBMediaInfos(app.db);
+        await dbMedia.updateSingle({device,mediaInfo});
     }
     /**
      * 
