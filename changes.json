@@ -1,6 +1,15 @@
 {
     "changes":[
         {
+            "version": "0.4.0",
+            "log":[
+                "When sending files to device from main devices screen ask if you want to send a URL or local file",
+                "Added ability to set keyboard shortcuts for previous, next and play/pause media actions",
+                "Made notifications not go away if user is interacting with them",
+                "Made some fixes related to Local Network functionality"
+            ]
+        } ,
+        {
             "version": "0.3.1",
             "demo": "https://youtu.be/YOrXfcShOI0",
             "log":[
