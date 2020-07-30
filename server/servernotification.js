@@ -33,7 +33,8 @@ class WindowNotifications extends Array{
     
     async createWindowIfNeeded(){
         if(this.window) return;
-        
+
+        this.isUserInteracting = false;
         let notificationWidth = 0;
         let notificationHeight = 0;
         if(debugging){
