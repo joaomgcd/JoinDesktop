@@ -51,7 +51,7 @@ export class AppDashboardNotifications extends AppHelperBase{
         const {NotificationInfo} = await import("./v2/notification/notificationinfo.js")
         this.controlNotifications.notifications = options.map(optionsSingle=>new NotificationInfo(optionsSingle,optionsSingle.device));
         await this.controlNotifications.render();
-        await Util.sleep(500);
+        await Util.sleep(50);
         ServerEventBus.post(new RequestResize(this.controlNotifications.notificationsListSize));
     }
     async onRequestReplyMessage(request){

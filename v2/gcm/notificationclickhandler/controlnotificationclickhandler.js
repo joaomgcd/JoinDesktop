@@ -97,8 +97,13 @@ export class ControlNotificationClickHandler extends Control{
         const index = this.controlsNotifications.findIndex(criteriaFunc);
         if(index < 0) return;
 
+        const controlNotification = this.controlsNotifications[index];
         this.controlsNotifications.splice(index,1);
-        await this.render();
+        if(controlNotification){
+            await controlNotification.dispose(true);
+        }else{
+            await this.render();
+        }
     }
     /**
      * 

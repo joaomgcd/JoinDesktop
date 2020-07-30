@@ -122,7 +122,11 @@ export class ControlSMSConversation extends Control{
         //     UtilDOM.hide(this.contactPictureElement);
         // }
 
-        this.inputElement.placeholder = `Send message to ${this.smsConversation.contact.address}`;
+
+        const contact = this.smsConversation.contact;
+        if(contact){
+            this.inputElement.placeholder = `Send message to ${contact.address}`;
+        }
         this.listenToEnterKey();
         UtilDOM.onclickandlongclick(this.sendButtonElement, async ()=> await this.sendSms(), async () => UtilDOM.toggleShow(this.mmsExtrasElement))
 
@@ -201,8 +205,8 @@ export class ControlSMSMessage extends Control{
 
         const isMMS = this.smsMessage.isMMS;
         UtilDOM.showOrHide(this.attachmentElement,isMMS);
-        UtilDOM.showOrHide(this.urgentElement,isMMS);
-        UtilDOM.showOrHide(this.subjectElement,isMMS);
+        UtilDOM.showOrHide(this.urgentElement,isMMS && this.smsMessage.urgent);
+        UtilDOM.showOrHide(this.subjectElement,isMMS && this.smsMessage.subject);
         UtilDOM.addOrRemoveClass(this.senderPictureContainerElement,!this.isLastMultiple,"invisible");
         UtilDOM.addOrRemoveClass(this.containerElement,this.isLastMultiple && this.multipleReceived,"lastofmultiple");
         UtilDOM.addOrRemoveClass(this.containerElement,!this.isLastMultiple && this.multipleReceived,"oneofmultiple");

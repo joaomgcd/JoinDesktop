@@ -666,8 +666,9 @@ export class Device{
 		return AppContext.context.localStorage.get(this.canContactLocalNetworkKey);
 	}
 	get canContactViaLocalNetwork(){ 
-		if(this.socket) return true;
 		// return false;
+		if(this.socket) return true;
+		
 		return this.localNetworkServerAddress ? true : false;
 	}
 	set canContactViaLocalNetwork(value) {

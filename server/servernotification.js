@@ -63,6 +63,7 @@ class WindowNotifications extends Array{
         
         const request = EventBus.waitFor(RequestNotificationInfo,3000);
         this.window = new BrowserWindow(args)
+        this.window.showInactive();
         this.window.loadFile('index.html',{ query: { notificationpopup: true }});
         if(debugging){
             this.window.webContents.toggleDevTools();

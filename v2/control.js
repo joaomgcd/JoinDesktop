@@ -169,11 +169,11 @@ export class Control extends ExtendableProxy {
         return root;
     }
     //open
-    async unload(){
-        await Control.unloadControls(this);
+    async unload(justSelf){
+        await Control.unloadControls(this,justSelf);
     }
-    async dispose(){
-        await this.unload();
+    async dispose(justSelf){
+        await this.unload(justSelf);
         const parent = this.root.parentElement;
         if(!parent) return;
 
@@ -192,8 +192,10 @@ export class Control extends ExtendableProxy {
     //abstract
     getStyle(){}
     
-    static async unloadControls(obj){
+    static async unloadControls(obj,justSelf){
         await EventBus.unregister(obj);
+        if(justSelf) return;
+
         for(const prop in obj){
             const value = obj[prop];
             // if(Util.isArray(value)){
