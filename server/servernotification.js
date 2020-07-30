@@ -138,7 +138,7 @@ class WindowNotifications extends Array{
         // console.log("Chaging window by request",request,position);
         this.window.setPosition(position.x, position.y);
         this.window.setSize(width,height,true);
-        
+        this.window.blur();
     }
     async onRequestNotificationAction({notificationButton,notification}){
         // console.log("Received notification action",notificationButton,notification);
