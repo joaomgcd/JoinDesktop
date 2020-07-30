@@ -388,16 +388,19 @@ export class AppDashboard extends App{
         text = `<ul>${liTag}${text}</li></ul>`;
         const title = `Changes for version ${appInfo.version}`;
         const timeout = 999999999;
-        if(info.demo){
-            const buttons = ["OK","Demo"]
-            const buttonsDisplayFunc = button=>button;
-            const button = await ControlDialogOk.showAndWait({title,text,timeout,buttons,buttonsDisplayFunc});
+        try{
+            if(info.demo){
+                const buttons = ["OK","Demo"]
+                const buttonsDisplayFunc = button=>button;
+                const button = await ControlDialogOk.showAndWait({title,text,timeout,buttons,buttonsDisplayFunc});
+                if(button.button != "Demo") return;
+    
+                Util.openWindow(info.demo);
+            }else{
+                await ControlDialogOk.showAndWait({title,text,timeout});
+            }
+        }finally{            
             AppContext.context.localStorage.set(key,appInfo.version);
-            if(button.button != "Demo") return;
-
-            Util.openWindow(info.demo);
-        }else{
-            ControlDialogOk.showAndWait({title,text,timeout});
         }
     }
     get newGcmHandlerInstance(){

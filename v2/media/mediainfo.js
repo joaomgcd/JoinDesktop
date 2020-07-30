@@ -102,7 +102,7 @@ export class MediaInfos extends Array{
     get latest(){
         return MediaInfos.getLatest(this);
     }
-    static async getLatest(mediaInfosArray){
+    static getLatest(mediaInfosArray){
         mediaInfosArray.sortByMultiple(false,mediaInfo=>{
             if(mediaInfo.playing) return Number.MAX_SAFE_INTEGER;
             

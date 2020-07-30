@@ -169,7 +169,7 @@ export class AppHelperMedia extends AppHelperBase{
         const mediaInfos = new MediaInfos(mediaInfosRaw,device);
         await mediaInfos.convertArtToBase64(await app.getAuthToken());
         await this.dbMedia.updateAll(device.deviceId,mediaInfos);
-        const latest = mediaInfos.latest;
+        const latest = await mediaInfos.latest;
         if(!latest) return;
 
         await this.updateMediaInfo(latest);
