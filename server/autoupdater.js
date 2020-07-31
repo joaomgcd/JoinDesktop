@@ -67,15 +67,15 @@ export class AutoUpdater{
                 if(parseFloat(versionFromGithub) <= parseFloat(appVersion)) return null;
 
 
-                let downloadLinkEnd = `squirrel-windows/Join%20Desktop%20Setup%20${versionFromGithub}.exe`;
+                let downloadLinkEnd = `Join.Desktop.Setup.${versionFromGithub}.exe`;
                 if(appInfo.isMacSystem){
-                    downloadLinkEnd = `Join%20Desktop-${versionFromGithub}.dmg`;
+                    downloadLinkEnd = `Join.Desktop-${versionFromGithub}.dmg`;
                 }
                 if(appInfo.isLinuxSystem){
-                    downloadLinkEnd = `Join%20Desktop-${versionFromGithub}.AppImage`;
+                    downloadLinkEnd = `Join.Desktop-${versionFromGithub}.AppImage`;
                 }
-                const downloadLink = `https://raw.githubusercontent.com/joaomgcd/JoinDesktop/master/dist/${downloadLinkEnd}`;
-                const urlExists = await UtilServer.urlExists(downloadLink);
+                const downloadLink = `https://github.com/joaomgcd/JoinDesktop/releases/download/v${versionFromGithub}/${downloadLinkEnd}`;
+                const urlExists = (await fetch(downloadLink,{method:"HEAD"})).status != 404
                 console.log("URL exists",downloadLink,urlExists)
                 if(!urlExists) return null;
 
@@ -95,7 +95,7 @@ export class AutoUpdater{
         const fileName = this.updateFileName;
         console.log("Downloading update", downloadLink, fileName);
         const file = await UtilServer.downloadFile(downloadLink,fileName)
-        UtilServer.openUrlOrFile(file);
+        UtilServer.openUrlOrFile(file,this.isMacSystem);
         this.app.quit();
     }
 

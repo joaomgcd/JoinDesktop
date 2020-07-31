@@ -1,4 +1,5 @@
 import { Util } from '../v2/util.js';
+import { url } from 'inspector';
 
 const electron = require('electron');
 const { nativeImage} = electron;
@@ -57,41 +58,32 @@ export class UtilServer{
     }
         
     static async downloadFile(url,relativeLocalPath){
-        return new Promise(async (resolve,reject)=>{
-            const http = url.startsWith("https") ? require('https') : require('http');
-            const fs = require('fs');
+        const util = require('util')
+        const fs = require('fs')
+        const streamPipeline = util.promisify(require('stream').pipeline)
 
-            const dest = await UtilServer.getUserDataFilePath(relativeLocalPath);
-            console.log("Downloading file",url, dest);
-            let downloaded = 0;
-            const file = fs.createWriteStream(dest);
-            http.get(url, (response)=>{
-                response.pipe(file);
-                file.on('finish', ()=>{
-                    file.close(()=>resolve(file));
-                });
-                response.on("data",chunk=>{
-                    downloaded += chunk.length;
-                    let toDisplay = downloaded / 1024 / 1024;
-                    toDisplay = Math.round((toDisplay + Number.EPSILON) * 100) / 100;
-                    process.stdout.write(`Downloaded ${toDisplay}MB\r`);
-                });
-            }).on('error', (err)=>{ 
-                fs.unlink(dest);
-                reject(err);
-            });
-        })
+        const response = await fetch(url)
+        if (!response.ok) throw new Error(`unexpected response ${response.statusText}`)
+
+        const dest = await UtilServer.getUserDataFilePath(relativeLocalPath);
+        const file = fs.createWriteStream(dest);
+        await streamPipeline(response.body, file)
+        return file;
     }
         
     static async urlExists(url){
         const urlExist = require("url-exist");
         return await urlExist(url);
     }
-    static openUrlOrFile(urlOrFile){        
+    static openUrlOrFile(urlOrFile,needsFilePrefix){        
         const { shell } = require('electron')
         if(urlOrFile.path){
             urlOrFile = urlOrFile.path;
         }
+        if(needsFilePrefix){
+            urlOrFile = `file://${urlOrFile}`
+        }
+        console.log("Opening url or file",urlOrFile)
         shell.openExternal(urlOrFile);
     }
     static get myIp(){
