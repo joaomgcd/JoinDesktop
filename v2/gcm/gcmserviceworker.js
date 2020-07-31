@@ -243,7 +243,6 @@ class GCMNotificationAction extends GCMGenericPush{
 		return this.requestNotification;
 	}
 }
-class GCMDeviceRegistered extends GCMBaseServiceWorker{}
 class GCMLocalNetworkRequest extends GCMBaseServiceWorker{
 	async modifyNotification(notification,index){
 		if(!this.senderId) return;

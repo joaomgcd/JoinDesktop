@@ -355,6 +355,12 @@ export class ServerNotification{
         if(!this.timeout){
             this.timeout = 10000;
         }
+        if(!this.group){
+            this.group = this.id || this.tag;
+        }
+        if(!this.sender){
+            this.sender = "com.joaomgcd.join"
+        }
         // this.d = "long";
         // this.timeout = 100000;
         this.wait = true;
@@ -380,8 +386,12 @@ export class ServerNotification{
                         reject(action);
                         return;
                     }
-
-                    if(action){
+                    if(metadata){
+                        const index = parseInt(metadata.activationValueIndex);
+                        if(index >= 0){
+                            action = this.originalActions[metadata.activationValueIndex].action;
+                        }
+                    }else if(action){
                         // console.log("Clicked notification original action",action,metadata);    
                         if(action == "activate"){
                             action = null;

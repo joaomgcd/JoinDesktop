@@ -144,7 +144,14 @@ class ServerSetting{
 }
 export class ServerEventBus{
     static async post(object){
-        await window.api.send('eventbus', {data:object,className:object.constructor.name});
+        try{
+            await window.api.send('eventbus', {data:object,className:object.constructor.name});
+        }catch{
+            let data = {data:object,className:object.constructor.name};
+            data = JSON.stringify(data);
+            data = JSON.parse(data);
+            await window.api.send('eventbus', data);
+        }
     }
     static async postAndWaitForResponse(object,repsonseClzz,timeout){
         const responsePromise = EventBus.waitFor(repsonseClzz,timeout);
