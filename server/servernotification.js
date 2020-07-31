@@ -64,7 +64,7 @@ class WindowNotifications extends Array{
         
         const request = EventBus.waitFor(RequestNotificationInfo,3000);
         this.window = new BrowserWindow(args)
-        this.window.showInactive();
+        // this.window.showInactive();
         this.window.loadFile('index.html',{ query: { notificationpopup: true }});
         if(debugging){
             this.window.webContents.toggleDevTools();
@@ -231,9 +231,6 @@ class ResultNotificationAction{
 }
 class WindowNotification{
     constructor(options){
-        if(!options.timeout){
-            options.timeout = 10000;
-        }
         this.options = options;
         if(!this.options.id){
             const crypto = require("crypto");
@@ -355,6 +352,9 @@ export class ServerNotification{
             this.originalActions = [...this.actions];
             this.actions = this.actions.map(action=>action.title);
         }
+        if(!this.timeout){
+            this.timeout = 10000;
+        }
         // this.d = "long";
         // this.timeout = 100000;
         this.wait = true;
@@ -421,6 +421,8 @@ export class ServerNotification{
                 const notificationWindow = new WindowNotification(this);
                 notificationWindow.notify(callback)
             }else{
+                this.timeout = this.timeout / 1000;
+                console.log("Timing out after", this.timeout)
                 notifier.notify(this,callback);
             }
             // const Growl = require('node-notifier/notifiers/growl');
