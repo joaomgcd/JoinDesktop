@@ -234,6 +234,9 @@ export class SettingTheme extends SettingSingleOption{
     static get themeIdDark(){
         return "dark"
     }
+    static get themeIdDarker(){
+        return "darker"
+    }
     static get themeIdBlack(){
         return "black"
     }
@@ -270,6 +273,15 @@ export class SettingTheme extends SettingSingleOption{
                 backgroundColor:"#37474F",
                 backgroundColorPanel:"#78909C",
                 backgroundHover:"#455A64",
+                textColor:"white",
+                accentColorLowlight:"white"
+            },
+            {
+                id:SettingTheme.themeIdDarker,
+                label:"Darker",
+                backgroundColor:"#2f3a40",
+                backgroundColorPanel:"#505659",
+                backgroundHover:"#223a45",
                 textColor:"white",
                 accentColorLowlight:"white"
             },
