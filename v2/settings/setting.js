@@ -225,6 +225,9 @@ export class SettingTheme extends SettingSingleOption{
     static get themeIdAuto(){
         return "auto"
     }
+    static get themeIdAutoDarker(){
+        return "autodarker"
+    }
     static get themeIdAutoBlack(){
         return "autoblack"
     }
@@ -253,6 +256,12 @@ export class SettingTheme extends SettingSingleOption{
                 label:"Auto (Dark)",
                 light:SettingTheme.themeIdLight,
                 dark:SettingTheme.themeIdDark
+            },
+            {
+                id:SettingTheme.themeIdAutoDarker,
+                label:"Auto (Darker)",
+                light:SettingTheme.themeIdLight,
+                dark:SettingTheme.themeIdDarker
             },
             {
                 id:SettingTheme.themeIdAutoBlack,
