@@ -92,11 +92,11 @@ export class CustomAction{
         let args = [];
         return (async () => {
             for(const parameter of this.parameters){
-                const text = parameter.text;
-                if(!text) continue;
+                const parameterPrompt = parameter.text;
+                if(!parameterPrompt) continue;
                 
                 const {ControlDialogInput} = await import("../dialog/controldialog.js");
-                const result = await ControlDialogInput.showAndWait({title:this.name,placeholder:text});
+                const result = await ControlDialogInput.showAndWait({title:this.name,placeholder:parameterPrompt});
                 if(!result) return;
 
                 args.push(result);

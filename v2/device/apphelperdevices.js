@@ -263,7 +263,6 @@ export class AppHelperDevices extends AppHelperBase{
         await this.refreshDevices(request.devices);
     }
     async onSelectedDevice(selectedDevice){
-        if(AppContext.context.allowUnsecureContent) return;
         
         if(!selectedDevice.wasClick) return;
 
@@ -277,6 +276,7 @@ export class AppHelperDevices extends AppHelperBase{
             this.apiBuilder.device = device;
         }
         
+        if(AppContext.context.allowUnsecureContent) return;
         if(!device.hasFixableIssue) return;
 
         var serverAddress = device.tentativeLocalNetworkServerAddress;

@@ -52,6 +52,7 @@ export class Commands extends Array{
     }
 }
 const lastExecutedCommandKey = "lastExecutedCommandKey";
+const lastExecutedCommandArgsKey = "lastExecutedCommandArgsKey";
 class Command {
     constructor(){
         this.id = Util.getType(this);
@@ -60,12 +61,16 @@ class Command {
         const commandName = AppContext.context.localStorage.get(lastExecutedCommandKey);
         if(!commandName) return null;
 
-        const command = eval(`new ${commandName}()`);
+        const args = AppContext.context.localStorage.getObject(lastExecutedCommandArgsKey);
+        const argsString = args ? JSON.stringify(args) : ""
+        const code = `new ${commandName}(${argsString})`;
+        const command = eval(code);
         return command;
     }
     static set lastExecutedCommand(command){
         const commandName = Util.getType(command);
         AppContext.context.localStorage.set(lastExecutedCommandKey,commandName);
+        AppContext.context.localStorage.setObject(lastExecutedCommandArgsKey,command);
     }
     get shouldSaveAsLastExecutedCommand(){
         return true;
@@ -842,9 +847,6 @@ export class CommandCustom extends Command{
     }
     async executeSpecific(device){
         await EventBus.post(new CommandCustomExecuted(this,device));
-    }
-    get shouldSaveAsLastExecutedCommand(){
-        return true;
     }
     get icon(){
         return this.iconFromArgs;
