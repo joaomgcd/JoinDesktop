@@ -1,7 +1,7 @@
 import { EventBus } from "../eventbus.js";
 import { AppHelperBase } from "../apphelperbase.js";
 import { ControlSettings } from "./controlsetting.js";
-import { SettingEncryptionPassword, SettingSingleOption, SettingTheme, SettingThemeAccentColor, SettingEventGhostNodeRedPort, SettingCompanionAppPortToConnect, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingCustomActions, SettingKeyboardShortcutSkipSong, SettingKeyboardShortcutPreviousSong, SettingKeyboardShortcutPlayPause } from "./setting.js";
+import { SettingEncryptionPassword, SettingSingleOption, SettingTheme, SettingThemeAccentColor, SettingEventGhostNodeRedPort, SettingCompanionAppPortToConnect, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingCustomActions, SettingKeyboardShortcutSkipSong, SettingKeyboardShortcutPreviousSong, SettingKeyboardShortcutPlayPause, SettingThemeBackgroundColor, SettingThemeBackgroundPanelColor, SettingThemeTextColor, SettingThemeTextColorOnAccent } from "./setting.js";
 import { UtilDOM } from "../utildom.js";
 import { ControlTabs, Tab } from "../tabs/controltabs.js";
 import { AppContext } from "../appcontext.js";
@@ -147,6 +147,10 @@ export class AppHelperSettings extends AppHelperBase{
                 new Tab({title:"Theme",controlContent:new ControlSettings([
                     new SettingTheme(),
                     new SettingThemeAccentColor(),
+                    new SettingThemeBackgroundColor(),
+                    new SettingThemeBackgroundPanelColor(),
+                    new SettingThemeTextColor(),
+                    new SettingThemeTextColorOnAccent(),
                 ])}),
                 new Tab({title:"Actions",controlContent:new ControlSettings([
                     new SettingCustomActions({devices}),

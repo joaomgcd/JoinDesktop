@@ -174,6 +174,8 @@ export class Control extends ExtendableProxy {
     }
     async dispose(justSelf){
         await this.unload(justSelf);
+        if(!this.root) return;
+        
         const parent = this.root.parentElement;
         if(!parent) return;
 

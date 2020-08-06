@@ -6,7 +6,7 @@ import './v2/extensions.js';
 import { App,RequestLoadDevicesFromServer } from "./v2/app.js";
 import {AppHelperSettings} from "./v2/settings/apphelpersettings.js"
 import { ControlSettings } from "./v2/settings/controlsetting.js";
-import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync, SettingCustomActions, SettingUseNativeNotifications, SettingNotificationTimeout, SettingRequireEncryptionForCommandLine, SettingKeyboardShortcutSkipSong, SettingKeyboardShortcutPreviousSong, SettingKeyboardShortcutPlayPause } from "./v2/settings/setting.js";
+import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync, SettingCustomActions, SettingUseNativeNotifications, SettingNotificationTimeout, SettingRequireEncryptionForCommandLine, SettingKeyboardShortcutSkipSong, SettingKeyboardShortcutPreviousSong, SettingKeyboardShortcutPlayPause, SettingThemeBackgroundColor, SettingThemeBackgroundPanelColor, SettingThemeTextColor, SettingThemeTextColorOnAccent } from "./v2/settings/setting.js";
 import { AppGCMHandler } from "./v2/gcm/apphelpergcm.js";
 import { ControlDialogInput, ControlDialogOk } from "./v2/dialog/controldialog.js";
 import { AppContext } from "./v2/appcontext.js";
@@ -171,6 +171,10 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
                 new Tab({title:"Theme",controlContent:new ControlSettings([
                     new SettingTheme(),
                     new SettingThemeAccentColor(),
+                    new SettingThemeBackgroundColor(),
+                    new SettingThemeBackgroundPanelColor(),
+                    new SettingThemeTextColor(),
+                    new SettingThemeTextColorOnAccent(),
                 ])}),      
                 new Tab({title:"Shortcuts",controlContent:new ControlSettings([
                     new SettingKeyboardShortcutLastCommand(),

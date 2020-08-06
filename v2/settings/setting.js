@@ -272,7 +272,7 @@ export class SettingTheme extends SettingSingleOption{
             {
                 id:SettingTheme.themeIdLight,
                 label:"Light",
-                backgroundColor: "white",
+                backgroundColor: "#FFFFFF",
                 backgroundColorPanel:"#F0F0F0",
                 accentColorLowlight:"#757575"
             },
@@ -282,8 +282,8 @@ export class SettingTheme extends SettingSingleOption{
                 backgroundColor:"#37474F",
                 backgroundColorPanel:"#78909C",
                 backgroundHover:"#455A64",
-                textColor:"white",
-                accentColorLowlight:"white"
+                textColor:"#FFFFFF",
+                accentColorLowlight:"#FFFFFF"
             },
             {
                 id:SettingTheme.themeIdDarker,
@@ -291,17 +291,17 @@ export class SettingTheme extends SettingSingleOption{
                 backgroundColor:"#2f3a40",
                 backgroundColorPanel:"#505659",
                 backgroundHover:"#223a45",
-                textColor:"white",
-                accentColorLowlight:"white"
+                textColor:"#FFFFFF",
+                accentColorLowlight:"#FFFFFF"
             },
             {
                 id:SettingTheme.themeIdBlack,
                 label:"Black",
-                backgroundColor:"black",
-                backgroundColorPanel:"black",
-                backgroundHover:"black",
-                textColor:"white",
-                accentColorLowlight:"white"
+                backgroundColor:"#000000",
+                backgroundColorPanel:"#000000",
+                backgroundHover:"#000000",
+                textColor:"#FFFFFF",
+                accentColorLowlight:"#FFFFFF"
             }
         ]
     }
@@ -333,6 +333,13 @@ export class SettingColor extends Setting{
     constructor(args){
         super(args)
     }
+    static isThemeSetting(settingId){
+        if(!settingId) return false;
+
+        return settingId == SettingTheme.id
+            ||  settingId == SettingThemeAccentColor.id
+            ||  settingId.startsWith("SettingTheme");
+    }
 }
 export class SettingThemeAccentColor extends SettingColor{
     static get id(){
@@ -349,6 +356,90 @@ export class SettingThemeAccentColor extends SettingColor{
         super({
             id:SettingThemeAccentColor.id,
             label:"Accent Color"
+        })
+    }
+}
+export class SettingSecondaryColor extends Setting{
+    //abstract
+    get themeProperty(){}
+    
+    get value(){
+        const theme =  new SettingTheme().theme;
+        return super.value || theme[this.themeProperty];
+    }
+    set value(val){
+        super.value = val
+    }
+    constructor(args){
+        super(args)
+    }
+}
+export class SettingThemeBackgroundColor extends SettingSecondaryColor{
+    static get id(){
+        return "SettingThemeBackgroundColor";
+    }
+    get themeProperty(){
+        return "backgroundColor";
+    }
+    //options is {id,label}
+    constructor(args){
+        super({
+            id:SettingThemeBackgroundColor.id,
+            label:"Background Color"
+        })
+    }
+}
+export class SettingThemeBackgroundPanelColor extends SettingSecondaryColor{
+    static get id(){
+        return "SettingThemeBackgroundPanelColor";
+    }
+    get themeProperty(){
+        return "backgroundColorPanel";
+    }
+    //options is {id,label}
+    constructor(args){
+        super({
+            id:SettingThemeBackgroundPanelColor.id,
+            label:"Background Panel Color"
+        })
+    }
+}
+export class SettingThemeTextColor extends SettingSecondaryColor{
+    static get id(){
+        return "SettingThemeTextColor";
+    }
+    get themeProperty(){
+        return "textColor";
+    }
+    //options is {id,label}
+    constructor(args){
+        super({
+            id:SettingThemeTextColor.id,
+            label:"Text Color"
+        })
+    }
+}
+export class SettingThemeTextColorOnAccent extends SettingColor{
+    static get id(){
+        return "SettingThemeTextColorOnAccent";
+    }
+    get themeProperty(){
+        return "textColor";
+    }
+    get value(){
+        return super.value || "#FFFFFF";
+    }
+    get storedValue(){
+        return super.value;
+    }
+    set value(val){
+        super.value = val
+    }
+    //options is {id,label}
+    constructor(args){
+        super({
+            id:SettingThemeTextColorOnAccent.id,
+            label:"Text Color on Accent"
         })
     }
 }

@@ -1,5 +1,5 @@
 import { Control } from "../control.js";
-import { SettingTextInput, SettingSingleOption, SettingColor, SettingKeyboardShortcut, SettingMultipleDevices, SettingCustomActions, SettingClipboardSync, SettingBoolean } from "./setting.js";
+import { SettingTextInput, SettingSingleOption, SettingColor, SettingKeyboardShortcut, SettingMultipleDevices, SettingCustomActions, SettingClipboardSync, SettingBoolean, SettingSecondaryColor } from "./setting.js";
 import { UtilDOM } from "../utildom.js";
 import { EventBus } from "../eventbus.js";
 
@@ -110,7 +110,7 @@ export class ControlSetting extends Control{
         if(Util.isSubTypeOf(setting,SettingBoolean)){
             return new ControlSettingContentColorBoolean(setting);
         }
-        if(Util.isSubTypeOf(setting,SettingColor)){
+        if(Util.isSubTypeOf(setting,SettingColor)||Util.isSubTypeOf(setting,SettingSecondaryColor)){
             return new ControlSettingContentColor(setting);
         }
         if(Util.isSubTypeOf(setting,SettingKeyboardShortcut)){
@@ -238,14 +238,28 @@ export class ControlSettingContentColor extends ControlSettingContent{
         super(setting)
     }
     getHtml(){
-        return `<input type="color"></input>`
+        return `
+            <div class="colorsettingroot">
+                <input type="color"></input>
+                <div class="button reset">Reset</div>
+            </div>
+        `
+    }
+    getStyle(){
+        return `
+            .colorsettingroot{
+                display: flex;
+            }
+        `
     }
    
     async renderSpecific({root}){
-        this.settingElement = root;   
+        this.settingElement = await this.$("input[type=color]"); 
+        this.resetElement = await this.$(".reset"); 
 
         this.settingElement.value = await this.setting.value;
         this.settingElement.onchange = async () => await EventBus.post(new SettingSaved(this.setting,this.settingElement.value));
+        this.resetElement.onclick = async () => await EventBus.post(new SettingSaved(this.setting,null));
     }
 }
 export class ControlSettingContentColorBoolean extends ControlSettingContent{

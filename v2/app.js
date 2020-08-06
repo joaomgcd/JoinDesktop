@@ -17,7 +17,7 @@ import { ControlMenu } from './menu/controlmenu.js';
 import { Menu,MenuEntry } from './menu/menu.js';
 import { ControlTop } from './top/controltop.js';
 import { ControlDebug } from './debug/controldebug.js';
-import { SettingTheme, SettingThemeAccentColor, SettingCompanionAppPortToConnect } from './settings/setting.js';
+import { SettingTheme, SettingThemeAccentColor, SettingCompanionAppPortToConnect, SettingThemeBackgroundColor, SettingThemeBackgroundPanelColor,SettingColor, SettingThemeTextColor, SettingThemeTextColorOnAccent } from './settings/setting.js';
 
 const CLIENT_ID  = "596310809542-c2bg952rtmf05el5kouqlcf0ajqnfpdl.apps.googleusercontent.com";
 const settingKeySignOutCompanion = "signOutCompanion";
@@ -884,10 +884,11 @@ export class App{
         const setting = settingSaved.setting;
         const isTheme = setting.id == SettingTheme.id
         const isAccent = setting.id == SettingThemeAccentColor.id
-        if(!isTheme && !isAccent) return;
+        if(!SettingColor.isThemeSetting(setting.id)) return;
 
         const theme = isTheme ? SettingTheme.getThemeOption(settingSaved.value) : null;
         const accent = isAccent ? settingSaved.value : null;
+        setting.value = settingSaved.value;
         this.applyTheme(theme,accent);
     }
     applyTheme(theme,accent){
@@ -899,16 +900,18 @@ export class App{
         }
         if(theme){
             if(accent){
-                let textColorOnAccent = "white";
-                if(Util.isColorLight(accent)){
+                const setting = new SettingThemeTextColorOnAccent();
+                let storedTextColorOnAccess = setting.storedValue;
+                let textColorOnAccent = setting.value;
+                if(!storedTextColorOnAccess && Util.isColorLight(accent)){
                     textColorOnAccent = "black";
                 }                   
                 UtilDOM.setCssVariable("theme-text-color-on-accent",textColorOnAccent)
             }
-            UtilDOM.setCssVariable("theme-background-color",theme.backgroundColor)
-            UtilDOM.setCssVariable("theme-background-color-panel",theme.backgroundColorPanel)
+            UtilDOM.setCssVariable("theme-background-color",new SettingThemeBackgroundColor().value)
+            UtilDOM.setCssVariable("theme-background-color-panel",new SettingThemeBackgroundPanelColor().value)
             UtilDOM.setCssVariable("theme-background-color-hover",theme.backgroundHover)
-            UtilDOM.setCssVariable("theme-text-color",theme.textColor)
+            UtilDOM.setCssVariable("theme-text-color",new SettingThemeTextColor().value)
             UtilDOM.setCssVariable("theme-accent-color-lowlight",theme.accentColorLowlight)                
         }
         if(accent){
