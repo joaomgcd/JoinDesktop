@@ -148,7 +148,7 @@ export class Devices extends Array{
 						return result.payload[0].path;
 					}catch(error){
 						failedDevices.push(device);
-						device.canContactViaLocalNetwork = false;
+						await device.setToRemoteNetwork(true);
 						console.log(`Couldn't upload via local network for `,device.deviceName);
 						return null;
 					}
@@ -190,23 +190,27 @@ export class Device{
             method: 'POST',
             body: file,
             headers: {
-                "Content-Disposition": `filename="${file.name}"`
+                "Content-Disposition": `filename*=UTF-8''${encodeURIComponent(file.name)}`
               }
 		}
 		const serverAddress = this.localNetworkServerAddress;
         const url = `${serverAddress}files?token=${token}`; 
+        StatusReport.report(`Uploading ${file.name} via Local Network...`);
         console.log(`Uploading ${file.name} to ${serverAddress}...`);
         const result = await fetch(url,options);
+        StatusReport.clear();
         console.log(`Uploading ${file.name} to ${serverAddress} done!`);
         return result.json();
 	}
 	async uploadFilesGoogleDrive({files,token}){
 		const googleDrive = new GoogleDrive(()=>token);
+		StatusReport.report("Uploading files via Google Drive...");
 		const uploadedFiles = await googleDrive.uploadFiles({
 			folderName: GoogleDrive.getBaseFolderForMyDevice(),
 			accountToShareTo:this.userAccount,
 			notify: false
 		}, files);
+        StatusReport.clear();
 
 		return uploadedFiles.map(uploadedFile=>GoogleDrive.getDownloadUrlFromFileId(uploadedFile));
 	}
@@ -1138,6 +1142,12 @@ export class DeviceBrowser extends Device{
 }
 
 class StatusReport{
+    static report(message){
+        EventBus.post(new StatusReport(message))
+    }
+    static clear(){
+        StatusReport.report(null);
+    }
 	constructor(message){
 		this.message = message;
 	}
