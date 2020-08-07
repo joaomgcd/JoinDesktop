@@ -28,3 +28,4 @@ dist/win-unpacked
 dist/squirrel-windows/com.joaomgcd.join-**full.nupkg
 dist/squirrel-windows/RELEASES
 **.nupkg
+*.bak

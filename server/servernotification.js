@@ -236,8 +236,11 @@ class WindowNotification{
             const crypto = require("crypto");
             this.options.id = crypto.randomBytes(16).toString("hex");
         }
-        this.timeCreated = new Date().getTime();
-        this.timeoutTime = this.timeCreated + this.options.timeout;
+        this.timeCreated = options.timeCreated || new Date().getTime();
+        this.timeoutTime = options.timeoutTime || (this.timeCreated + this.options.timeout);
+
+        this.options.timeCreated = this.timeCreated;
+        this.options.timeoutTime = this.timeoutTime;
     }
     set hidden(value){
         this.options.hidden = value;
