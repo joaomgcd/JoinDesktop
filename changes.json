@@ -1,6 +1,19 @@
 {
     "changes":[
         {
+            "version": "0.5.0",
+            "log":[
+                "Added Copy Number action on notifications with numbers",
+                "Added inline reply action on SMS notifications",
+                "Added Commands to Get Clipboard and Set Wallpaper",
+                "Made notifications tab only show own notifications by default. You can see all other device's notifications by hitting refresh or each individual device's notifications by selecting the device directly",
+                "Fixed getting local IP in some situations",
+                "Fixed a bunch of notification related bugs",
+                "Fixed several local network related bugs",
+                "Made device selection stick in the various tabs"
+            ]
+        } ,
+        {
             "version": "0.4.0",
             "log":[
                 "When sending files to device from main devices screen ask if you want to send a URL or local file",
