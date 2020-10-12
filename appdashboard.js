@@ -458,6 +458,9 @@ export class AppDashboard extends App{
             await super.onShortcutPressed(shortcutPressed);
         }
     }
+    async onRequestFocusWindow(){
+        ServerEventBus.post(new RequestFocusWindow());
+    }
     async onRequestReplyMessageFromServer(request){
         EventBus.post(request,"RequestReplyMessage");
     }

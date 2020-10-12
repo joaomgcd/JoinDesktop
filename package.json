@@ -2,7 +2,7 @@
   "name": "com.joaomgcd.join",
   "productName": "Join Desktop",
   "homepage": "https://joaoapps.com/join/desktop",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A companion app for the Join website",
   "main": "main_esm.js",
   "scripts": {
@@ -38,6 +38,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "esm": "^3.2.25",
     "http-terminator": "2.0.3",
+    "network": "^0.5.0",
     "node-fetch": "^2.6.0",
     "node-notifier": "^7.0.1",
     "url-exist": "^2.0.2"

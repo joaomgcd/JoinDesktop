@@ -279,16 +279,21 @@ class Server{
         UtilServer.openUrlOrFile(file);
     }
     get appInfo(){
-        const response = new ResponseAppVersion();
-        Object.assign(response,this.autoUpdater.appInfo);
-        const port = this.serverPort;
-        if(port){
-            response.serverAddress = `http://${response.ipAddress}:${port}/`
-        }
-        return response;
+        return (async ()=>{
+            const response = new ResponseAppVersion();
+            Object.assign(response,this.autoUpdater.appInfo);
+            const port = this.serverPort;
+            if(port){
+                response.ipAddress = await response.ipAddress;
+                console.log(`IP Address: ${response.ipAddress}`)
+                response.serverAddress = `http://${response.ipAddress}:${port}/`
+            }
+            return response;
+        })();
     }
     async onRequestAppVersion(){
-        await this.sendToPageEventBus(this.appInfo);
+        const appInfo = await this.appInfo;
+        await this.sendToPageEventBus(appInfo);
     }
     async onRequestExecuteGCMOnPage(request){
         await this.sendToPageEventBus(request);

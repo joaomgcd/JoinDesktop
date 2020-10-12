@@ -30,22 +30,22 @@ export class AppHelperNotifications extends AppHelperBase{
         await app.addElement(this.controlNotificationClickHandler);
 
         await app.loadFcmClient();
-        await this.refreshNotifications();
+        await this.refreshNotifications(true);
         
     }    
     async onAppNameClicked(appNameClicked){
-        await app.showDeviceChoiceOnAppNameClicked(appNameClicked,device=> device.isMyDevice || device.canSendNotifications())
+        await app.showDeviceChoiceOnAppNameClicked(appNameClicked,device=> device.isMyDevice || device.canSendNotifications()/*,device=>device.isMyDevice?"All Devices":device.deviceName*/)
     }
     async onAppDeviceSelected(appDeviceSelected){
         this.device = appDeviceSelected.device;
-        await this.refreshNotifications();
+        await this.refreshNotifications(true);
     }
     async onNotificationInfos(notificationInfos){
         if(!this.device || !this.device.isMyDevice) return;
 
-        await this.refreshNotifications();
+        await this.refreshNotifications(true);
     }
-    async refreshNotifications(){
+    async refreshNotifications(onlyStoredIfMine){
         let stillLoading = false;
         try{
             this.notifications = [];
@@ -68,18 +68,21 @@ export class AppHelperNotifications extends AppHelperBase{
                     const {NotificationInfo} = await import("./notificationinfo.js");
                     let notifications = options.map(async option => {
                         const notification = new NotificationInfo(option);
+                        notification.isMyNotification = true;
                         await notification.getDeviceFromInfo(async deviceId => await app.getDevice(deviceId));
                         return notification;
                     });
                     notifications = await Promise.all(notifications);
                     await this.addNotifications(notifications);
-                    return;
+                    if(onlyStoredIfMine){
+                        return;
+                    }
                 }catch(error){
                     console.error("Couldn't get own notifications",error);
                 }
             }
             const token = await app.getAuthToken();
-            const devices = this.device ? [this.device] : (await app.devicesFromDb).filter(device=>device.canSendNotifications());
+            const devices = this.device && !this.device.isMyDevice ? [this.device] : (await app.devicesFromDb).filter(device=>device.canSendNotifications());
             if(devices.length == 0){
                 this.notifications = [];
                 return;

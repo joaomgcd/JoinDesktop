@@ -12,7 +12,9 @@ class LoaderMediaInfos extends DBGoogleDriveLoader{
         const mediaInfos = await MediaInfos.fromLocalNetwork(args);
         if(mediaInfos){
             const latest = await mediaInfos.latest;
-            await latest.convertArtToBase64(args.token);
+            if(latest){
+                await latest.convertArtToBase64(args.token);
+            }
         }
         return mediaInfos;
     }    

@@ -183,6 +183,7 @@ export class AppHelperSMS extends AppHelperBase{
         this.device = device;
         this.deviceId = this.device.deviceId;
         this.address = null;
+        app.smsDevice = device;
         await this.setMode({byBrowser:false});
     }
     async onRequestGoBack(request){

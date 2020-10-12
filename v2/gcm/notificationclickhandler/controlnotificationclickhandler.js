@@ -136,7 +136,7 @@ export class ControlNotificationClickHandler extends Control{
     
             this.controlsNotifications.splice(0,0,controlNotification);
         }
-        this.controlsNotifications.sortByMultiple(false,controlNotification=>controlNotification.notification.gcmId)
+        this.controlsNotifications.sortByMultiple(false,controlNotification=>controlNotification.notification.isMyNotification,controlNotification=>controlNotification.notification.gcmId)
         return await this.render();
     }
 

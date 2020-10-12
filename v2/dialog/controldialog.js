@@ -125,6 +125,9 @@ export class ControlDialogSingleChoice extends ControlDialog {
     constructor(args = {dialog,choiceToLabelFunc}){
         super(args);
         this.choiceToLabelFunc = args.choiceToLabelFunc;
+        if(!this.choiceToLabelFunc){
+            this.choiceToLabelFunc = choice => choice ? choice.toString() : choice;
+        }
     }
     getHtmlFile(){
         return "./v2/dialog/dialogsinglechoice.html";

@@ -5,7 +5,7 @@ try{
 	GCMBaseFinal = GCMBase
 }catch(error){
 	try{
-		const {GCMBase} = require("./gcmbase.js")
+		const {GCMBase, GCMNotificationBase} = require("./gcmbase.js")
 		GCMBaseFinal = GCMBase
 	}catch{
 		console.log(error);
@@ -138,6 +138,10 @@ export class GCMPush extends GCMBaseApp{
         if(push.url){
             notification.actions.push(GCMPushBase.notificationActionCopyUrl);
         }
+        const numbers = Util.get2FactorAuthNumbers(text);
+        if(numbers){
+			notification.actions.unshift(GCMNotificationBase.notificationCopyNumberAction)
+		}
 		Object.assign(notification, push);
 		return notification;
 	}
@@ -178,7 +182,9 @@ export class GCMPush extends GCMBaseApp{
 		if(notificationAction == GCMPushBase.notificationActionCopyUrl.action){
 			Util.setClipboardText(push.url);
 		}
+		await GCMNotificationBase.handleNotificationNumbers(notificationAction,this.push.text);
 	}
+	
 }
 class GCMNotification extends GCMBaseApp{}
 export class GCMNotificationClear extends GCMGenericPush{}
@@ -237,7 +243,11 @@ export class GCMRespondFile extends GCMGenericPush{
 		await Util.openWindow(downloadUrl);*/
 	}
 }
-export class GCMNewSmsReceived extends GCMGenericPush{}
+export class GCMNewSmsReceived extends GCMGenericPush{
+	async handleNotificationClick(notificationAction){
+		return await GCMNotificationBase.handleNotificationNumbers(notificationAction,this.text);
+	}
+}
 export class GCMSmsSentResult extends GCMGenericPush{}
 export class GCMMediaInfo extends GCMGenericPush{	
 	async handleNotificationClick(action){

@@ -1,3 +1,6 @@
+.dialogchoices{
+    padding: 8px;
+}
 .dialogchoice{
     cursor: pointer;
     padding: 4px;

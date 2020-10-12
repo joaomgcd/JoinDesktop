@@ -168,25 +168,33 @@ class GCMNotificationBase{
 	static get notificationReplyAction(){
 		return {action: "reply",title: 'Reply Directly'}
 	}
+	static get notificationCopyNumberAction(){
+		return {action: "copynumber",title: 'Copy Number'}
+	}
 	static async getNotificationOptions(notificationfromGcm,Util,GoogleDrive){
 		const icon = Util.getBase64ImageUrl(notificationfromGcm.iconData);
 		var badge = notificationfromGcm.statusBarIcon;
 		badge =  badge ? Util.getBase64ImageUrl(badge) : icon;
 		const image = await GoogleDrive.convertFilesToGoogleDriveIfNeeded({files:notificationfromGcm.image,authToken:this.authToken,downloadToBase64IfNeeded:true});
+		const actions = [GCMNotificationBase.notificationDismissAction];
+		const text = notificationfromGcm.text;
+		const numbers = Util.get2FactorAuthNumbers(text);
+		console.log("Notification text", text);
+		if(numbers){
+			actions.unshift(GCMNotificationBase.notificationCopyNumberAction)
+		}
 		const options = {
 			"id": notificationfromGcm.id,
 			"tag": notificationfromGcm.id,
 			"title": notificationfromGcm.title,
-			"text": notificationfromGcm.text,
-			"body": notificationfromGcm.text,
+			"text": text,
+			"body": text,
 			"icon": icon,
 			"badge": badge,
 			"image": image,
 			"requireInteraction":true,
 			"data": {notificationForClick:notificationfromGcm},
-			actions: [
-				GCMNotificationBase.notificationDismissAction
-			]      
+			actions 
 		};
 		if(notificationfromGcm.buttons){
 			notificationfromGcm.buttons.forEach(button=>{
@@ -237,17 +245,45 @@ class GCMNotificationBase{
 		};
 		return gcmNotificationAction;
 	}
+	
+	static async handleNotificationNumbers(notificationAction,text){
+		if(notificationAction != GCMNotificationBase.notificationCopyNumberAction.action) return;
+
+		const numbers = Util.get2FactorAuthNumbers(text);
+		if(!numbers) return;
+		
+		let number = null;
+		if(numbers.length == 1){
+			number = numbers[0];
+		}else{
+			// EventBus.post({},"RequestFocusWindow");
+			// if(Util.isNotificationPopup) return;
+			
+			const {ControlDialogSingleChoice} = await import("../dialog/controldialog.js");
+			number = await ControlDialogSingleChoice.showAndWait({choices:numbers})
+		}
+		Util.setClipboardText(number);
+	}
 }
 class GCMNewSmsReceivedBase{
 	static async modifyNotification(notification,gcm,contact){
 		const title = contact ? `New SMS from ${contact.name}` : "New SMS";
+		const actions = [GCMNotificationBase.notificationReplyAction];
+		const text = gcm.text;
+		const numbers = Util.get2FactorAuthNumbers(text);
+		console.log("SMS text", text);
+		if(numbers){
+			actions.unshift(GCMNotificationBase.notificationCopyNumberAction)
+		}
 		const options = {
 			"tag": gcm.number,
 			title,
-			"body": gcm.text,
+			"body": text,
 			"icon": gcm.photo,
 			"requireInteraction":true,
-			"data": await gcm.gcmRaw
+			"data": await gcm.gcmRaw,
+			actions,
+			"replyId":`sms=:=${gcm.number}=:=${gcm.senderId}`
 		};
 		Object.assign(notification,options);
 	}

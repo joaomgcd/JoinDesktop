@@ -142,6 +142,12 @@ export class AppHelperDevices extends AppHelperBase{
         EventBus.post(devices);
         return devices;
     }
+    async onConnectViaLocalNetworkSuccess(){       
+        await this.refreshDevices();
+    }
+    async onConnectViaLocalNetworkFailure(){       
+        await this.refreshDevices();
+    }
     async onRequestPushFiles(request){
         const files = request.files;
         if(!files) return;

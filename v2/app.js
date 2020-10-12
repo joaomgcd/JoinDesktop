@@ -758,20 +758,20 @@ export class App{
     async onRegisterBrowserRequest(){
         await this.registerBrowser({force:true});
     }
-    async showDeviceChoice({filter,x,y}){
+    async showDeviceChoice({filter,x,y,customDeviceNameFunc}){
         const choices = (await this.devicesFromDb).filter(filter);
-        const choiceToLabelFunc = device => device.deviceName;
+        const choiceToLabelFunc = device => customDeviceNameFunc ? customDeviceNameFunc(device) : device.deviceName;
         const ControlDialogSingleChoice = (await import("./dialog/controldialog.js")).ControlDialogSingleChoice
         const device = await ControlDialogSingleChoice.showAndWait({position:{x,y},choices,choiceToLabelFunc});
         if(!device) return;
         
         EventBus.post(new AppDeviceSelected(device));
     }
-    async showDeviceChoiceOnAppNameClicked(appNameClicked,filter){ 
+    async showDeviceChoiceOnAppNameClicked(appNameClicked,filter,customDeviceNameFunc){ 
         const event = appNameClicked.event;
         const x = event.clientX;
         const y = event.clientY;
-        await this.showDeviceChoice({filter,x,y});
+        await this.showDeviceChoice({filter,x,y,customDeviceNameFunc});
     }
     async getAuthToken(){
         const account = await this.googleAccount;

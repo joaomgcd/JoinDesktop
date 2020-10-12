@@ -657,6 +657,12 @@ export class Device{
 	get canReceiveFiles(){
 		return !this.isShared;
 	}
+	get canSetWallpaper(){
+		return false;
+	}
+	get canGetWallpaper(){
+		return false;
+	}
 	getIcon(){
 		return null;
 	}
@@ -688,6 +694,7 @@ export class Device{
 			this.lastKnownLocalNetworkAddress = value;
 		}else{
 			AppContext.context.localStorage.delete(key);
+			EventBus.post(new ConnectViaLocalNetworkFailure(this));
 		}
 	}
 	get lastKnownLocalNetworkAddressKey(){ 
@@ -978,6 +985,12 @@ class DeviceAndroid extends Device{
 	get hasLocalNetworkCapabilities(){
 		return !this.isShared;
 	}
+	get canSetWallpaper(){
+		return !this.isShared;
+	}
+	get canGetWallpaper(){
+		return !this.isShared;
+	}
 }
 export class DeviceAndroidPhone extends DeviceAndroid{
 	getIcon(){
@@ -1158,6 +1171,11 @@ class RequestUpdateDevice{
 	}
 }
 class ConnectViaLocalNetworkSuccess{
+	constructor(device){
+		this.device = device;
+	}
+}
+class ConnectViaLocalNetworkFailure{
 	constructor(device){
 		this.device = device;
 	}

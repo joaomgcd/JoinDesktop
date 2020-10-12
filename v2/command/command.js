@@ -27,6 +27,7 @@ export class Commands extends Array{
         if(Util.canReadClipboard){
             this.push(new CommandPaste());
         }
+        this.push(new CommandGetClipboard());
         this.push(new CommandWrite());
         this.push(new CommandOpenUrl());
         this.push(new CommandSMS());
@@ -36,6 +37,7 @@ export class Commands extends Array{
             this.push(new CommandSendTab());
             this.push(new CommandPasteSelectedText());
         }
+        this.push(new CommandSetWallpaper());
         this.push(new CommandUploadFiles());
         this.push(new CommandFiles());
         this.push(new CommandPushHistory());
@@ -260,6 +262,27 @@ export class CommandLocate extends CommandPush{
     }
     get icon(){
         return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24" id="devicebuttonimage" class=" replaced-svg"><path d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z"></path></svg>`;
+    }
+    get needsFocus(){
+        return false;
+    }
+}
+export class CommandGetClipboard extends CommandPush{
+    getText(){
+		return "Get Clipboard";
+	}
+    getTextExtended(device){
+        return `Get device's clipboard`;
+    }
+	shouldEnable(device){
+		return true
+    }
+    customizePush({device,push}){
+        push.clipboardget = true;
+        return push;
+    }
+    get icon(){
+        return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24"><path d="M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3H9.18C9.6,1.84 10.7,1 12,1C13.3,1 14.4,1.84 14.82,3H19M12,3A1,1 0 0,0 11,4A1,1 0 0,0 12,5A1,1 0 0,0 13,4A1,1 0 0,0 12,3M7,7V5H5V19H19V5H17V7H7M12,18L7,13H10V9H14V13H17L12,18Z" /></svg>`;
     }
     get needsFocus(){
         return false;
@@ -573,7 +596,44 @@ export class CommandTestLocalNetwork extends Command{
     }
 	
 }
-export class CommandUploadFiles extends CommandPush{
+
+export class CommandUploadAndPush extends CommandPush{
+    /**
+     * 
+     * @param {Device} device 
+     */
+	async customizePush({device,push}){
+        const { ControlDialogSingleChoice, ControlDialogInput } = await import("../dialog/controldialog.js");
+        const choices = [{id:"local",label:"Local File"},{id:"web",label:"From Web"}]
+        const localOrWeb = await ControlDialogSingleChoice.showAndWait({choices,choiceToLabelFunc:choice=>choice.label})
+        if(localOrWeb.id == "local"){
+            const files = await UtilDOM.pickFiles();
+                
+            this.showToast({text:`Sending files to ${device.deviceName}...`});
+            try{
+                const uploadedFiles = await device.uploadFiles({files,token:GoogleAccount.getToken()});
+                this.setPushFiles(push,uploadedFiles);
+                this.showToast({text:`Success!`});
+                return push;
+            }catch(error){
+                console.error(error);
+                this.showToast({text:`Can't send files to ${device.deviceName}`,isError:true});
+            }
+	    }else{
+            const file = await ControlDialogInput.showAndWait({title:"Input the URL of the file to send", placeholder:"File URL"});
+            if(!file) return;
+
+            this.setPushFiles(push,[file]);
+            return push;
+        }
+    }
+
+    async setPushFiles(push,files){
+        
+    }
+	
+}
+export class CommandUploadFiles extends CommandUploadAndPush{
 	getText(){
 		return "Upload Files";
     }
@@ -587,39 +647,38 @@ export class CommandUploadFiles extends CommandPush{
 	shouldEnable(device){
 		return device.canReceiveFiles;
 	}
-    /**
-     * 
-     * @param {Device} device 
-     */
-	async customizePush({device,push}){
-        const { ControlDialogSingleChoice, ControlDialogInput } = await import("../dialog/controldialog.js");
-        const choices = [{id:"local",label:"Local Files"},{id:"web",label:"From Web"}]
-        const localOrWeb = await ControlDialogSingleChoice.showAndWait({choices,choiceToLabelFunc:choice=>choice.label})
-        if(localOrWeb == "local"){
-            const files = await UtilDOM.pickFiles();
-                
-            this.showToast({text:`Sending files to ${device.deviceName}...`});
-            try{
-                const uploadedFiles = await device.uploadFiles({files,token:GoogleAccount.getToken()});
-                push.files = uploadedFiles;
-                this.showToast({text:`Success!`});
-                return push;
-            }catch(error){
-                console.error(error);
-                this.showToast({text:`Can't send files to ${device.deviceName}`,isError:true});
-            }
-	    }else{
-            const file = await ControlDialogInput.showAndWait({title:"Input the URL of the file to send", placeholder:"File URL"});
-            if(!file) return;
-
-            push.files = [file]
-            return push;
-        }
+    async setPushFiles(push,files){
+        push.files = files;
     }
     get icon(){
         return `<svg style="width:24px;height:24px" viewBox="0 0 24 24">
         <path d="M14,2L20,8V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2H14M18,20V9H13V4H6V20H18M12,12L16,16H13.5V19H10.5V16H8L12,12Z" />
     </svg>`;
+    }
+	
+}
+export class CommandSetWallpaper extends CommandUploadAndPush{
+	getText(){
+		return "Set Wallpaper";
+    }
+    getTextExtended(device){
+        return `Set the wallpaper on your device`;
+    }
+    /**
+     * 
+     * @param {Device} device 
+     */
+	shouldEnable(device){
+		return device.canSetWallpaper;
+	}
+    
+    async setPushFiles(push,files){
+        if(!files || files.length == 0) return;
+
+        push.wallpaper = files[0];
+    }
+    get icon(){
+        return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="24" height="24" viewBox="0 0 24 24"><path d="M4,4H11V2H4A2,2 0 0,0 2,4V11H4V4M10,13L6,18H18L15,14L12.97,16.71L10,13M17,8.5A1.5,1.5 0 0,0 15.5,7A1.5,1.5 0 0,0 14,8.5A1.5,1.5 0 0,0 15.5,10A1.5,1.5 0 0,0 17,8.5M20,2H13V4H20V11H22V4A2,2 0 0,0 20,2M20,20H13V22H20A2,2 0 0,0 22,20V13H20V20M4,13H2V20A2,2 0 0,0 4,22H11V20H4V13Z" /></svg>`;
     }
 	
 }

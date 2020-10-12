@@ -21,7 +21,7 @@ export class AppHelperFiles extends AppHelperBase{
         app = args.app;
         this.device = args.device;
         this.subFolder = args.path;
-        this.deviceId = args.files;
+        this.deviceId = args.deviceId;
     }
     async load(){
         EventBus.register(this);

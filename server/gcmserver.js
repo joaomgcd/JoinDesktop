@@ -154,6 +154,10 @@ class GCMPush extends GCMServer{
         if(push.url){
             notification.actions.push(GCMPushBase.notificationActionCopyUrl);
         }
+        const numbers = Util.get2FactorAuthNumbers(text);
+        if(numbers){
+			notification.actions.unshift(GCMNotificationBase.notificationCopyNumberAction)
+		}
 		Object.assign(notification, push);
 		return notification;
 	}

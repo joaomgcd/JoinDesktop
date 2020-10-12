@@ -70,7 +70,11 @@ class WindowNotifications extends Array{
             this.window.webContents.toggleDevTools();
         }
         this.window.on("close",()=>this.window = null);
-        await request;
+        try{
+            await request;
+        }catch(error){
+            console.log("Couldn't show notification window",error);
+        }
     }
     findExistingNotification(notificationId){
         const index = this.findIndex(existing=>existing.options.id == notificationId);
@@ -99,7 +103,13 @@ class WindowNotifications extends Array{
         return this.map(windowNotification=>windowNotification.options);
     }
     get notificationsToShow(){
-        return this.filter(windowNotification=>windowNotification.shouldShow || this.isUserInteracting);
+        return this.filter(windowNotification=>{
+            const willShow = !windowNotification.wasEverHidden && !windowNotification.hidden && (windowNotification.shouldShow || this.isUserInteracting)
+            if(!willShow){
+                windowNotification.wasEverHidden = true;
+            }
+            return willShow;
+        });
     }
     async purgeNotifications(){
         if(this.isUserInteracting) return;
@@ -111,6 +121,9 @@ class WindowNotifications extends Array{
         await this.purgeNotifications()
         const options = this.storedNotifications;
         await EventBus.post(new StoredNotifications(options));
+    }
+    async onResultNotificationAction(request){
+        await this.sendToPageEventBus(request)
     }
     async sendNotificationsToPage(){
         await this.purgeNotifications()
@@ -143,7 +156,7 @@ class WindowNotifications extends Array{
         this.window.blur();
     }
     async onRequestNotificationAction({notificationButton,notification}){
-        // console.log("Received notification action",notificationButton,notification);
+        console.log("Received notification action",notificationButton/*,notification*/);
         const {index,windowNotification} = this.findExistingNotification(notification.id);
         // console.log(`Existing notifications for id ${notification.id}`,windowNotification)
         if(!windowNotification){
@@ -156,6 +169,11 @@ class WindowNotifications extends Array{
             this.splice(index,1);
             // await this.sendToPageEventBus(new RequestDimissNotification(notification.id))
             this.sendNotificationsToPage();
+        }
+        if(GCMNotificationBase.notificationCopyNumberAction.action == notificationButton.action){
+            EventBus.post(new ResultNotificationAction(false));
+            // will execute on page.
+            return;
         }
         windowNotification.callActionCallback(notificationButton);
         
@@ -239,6 +257,7 @@ class WindowNotification{
         this.timeCreated = options.timeCreated || new Date().getTime();
         this.timeoutTime = options.timeoutTime || (this.timeCreated + this.options.timeout);
 
+        this.options.isStored = true;
         this.options.timeCreated = this.timeCreated;
         this.options.timeoutTime = this.timeoutTime;
     }
@@ -247,6 +266,12 @@ class WindowNotification{
     }    
     get hidden(){
         return this.options.hidden;
+    }
+    set wasEverHidden(value){
+        this.options.wasEverHidden = value;
+    }    
+    get wasEverHidden(){
+        return this.options.wasEverHidden;
     }
     get shouldShow(){
         if(this.alwaysShow) return true;
@@ -282,7 +307,7 @@ class WindowNotification{
     async callActionCallback(notificationButton){
         if(!this.callback) return;
 
-         console.log("Performing action in window notification",notificationButton);
+        console.log("Performing action in window notification",notificationButton);
         notificationButton.button = notificationButton.text
         this.callback(null,notificationButton.action,notificationButton,notificationButton.action);
     }

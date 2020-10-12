@@ -268,6 +268,9 @@ class Util{
         }
         return result;
     }
+    static get isNotificationPopup(){
+        return Util.getQueryObject().notificationpopup ? true : false;
+    }
     static async import(script,...classes){
         const imported = await import("./eventbus.js");
         const hasClasses = classes.length > 0;
@@ -485,7 +488,15 @@ class Util{
             timeout = setTimeout(later, wait);
             if (callNow) func(debouncedArgs);
         };
-    };
+    }
+    static getNumbers(str,minNumber) {
+        const regexString = `[0-9\.]{${minNumber},}`;
+        const regex = new RegExp(regexString,"g");
+        return str.match(regex);
+    }
+    static get2FactorAuthNumbers(str) {        
+        return Util.getNumbers(str,4);
+    }
 }
 const darkModeMediaQuery = () => window.matchMedia('(prefers-color-scheme: dark)');
 try{
