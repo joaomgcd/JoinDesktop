@@ -91,6 +91,8 @@ export class MediaInfos extends Array{
         }
     }
     matches(otherMediaInfos){
+        if(!his.device) return;
+        
         return this.device.deviceId == otherMediaInfos.device.deviceId
     }
     async convertArtToBase64(token){   

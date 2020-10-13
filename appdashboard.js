@@ -503,6 +503,8 @@ export class AppDashboard extends App{
          window.api.send("gcm",webSocketGCM.gcmRaw);
     }
     async onDevices(devices){
+        devices = JSON.stringify(devices);
+        devices = JSON.parse(devices);
         window.api.send("devices",devices);
     }
     async onCloseAppClicked(closeAppClicked){
