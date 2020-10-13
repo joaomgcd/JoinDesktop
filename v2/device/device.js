@@ -104,25 +104,26 @@ export class Devices extends Array{
 		}
 		const isPush = (await options.gcmRaw).type == "GCMPush";
 		const results = await Promise.all(groupsBySender.map(async group=>{
-			const sender = options.forceServer ? new SenderServer() : new group.key();
-			options.devices = group.values;
+			const optionsForThisGroup = Util.cloneObject(options);
+			const sender = optionsForThisGroup.forceServer ? new SenderServer() : new group.key();
+			optionsForThisGroup.devices = group.values;
 			if(!isPush){
-				options.devices = options.devices.filter(device=>!device.onlySendPushes);
+				optionsForThisGroup.devices = optionsForThisGroup.devices.filter(device=>!device.onlySendPushes);
 			}else{
-				options.gcmPush = JSON.parse((await options.gcmRaw).json);
+				optionsForThisGroup.gcmPush = JSON.parse((await optionsForThisGroup.gcmRaw).json);
 			}
-			if(options.devices.length == 0) return Promise.resolve(Sender.newSuccessResult)
+			if(optionsForThisGroup.devices.length == 0) return Promise.resolve(Sender.newSuccessResult)
 
-			options.gcmParams = {};
+			optionsForThisGroup.gcmParams = {};
 			try{
-				return await sender.send(options);
+				return await sender.send(optionsForThisGroup);
 			}catch(error){
 				if(!Util.isType(sender,"SenderLocal")) throw error
 				
-				options.devices.forEach(async device=>{
+				optionsForThisGroup.devices.forEach(async device=>{
 					await device.setToRemoteNetwork(true)
 				});
-				return await this.send(options);
+				return await this.send(optionsForThisGroup);
 			}
 		}));
 		return SendResults.fromMany(results)

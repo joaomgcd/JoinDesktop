@@ -497,6 +497,9 @@ class Util{
     static get2FactorAuthNumbers(str) {        
         return Util.getNumbers(str,4);
     }
+    static cloneObject(obj){
+        return Object.assign(Object.create(Object.getPrototypeOf(obj)), obj);
+    }
 }
 const darkModeMediaQuery = () => window.matchMedia('(prefers-color-scheme: dark)');
 try{
