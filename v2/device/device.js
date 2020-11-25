@@ -543,6 +543,8 @@ export class Device{
             smsMessage.mmsfile = await this.uploadFile({file:smsMessage.mmsfile,token})
             this.reportStatus(null);
 		}
+		const sentResult = EventBus.waitFor(GCMSmsSentResult,15000);
+		var gcm = null;
 		try{		
 			await this.sendPush({
 				senderId,
@@ -554,10 +556,15 @@ export class Device{
 				requestId:"SMS",
 				responseType: GCMPush.RESPONSE_TYPE_PUSH
 			});
-			const gcm = await EventBus.waitFor(GCMSmsSentResult,15000);
+			gcm = await sentResult;
 			return gcm;
 		}catch(e){
-			const gcm = new GCMSmsSentResult();
+			try{
+				gcm = await sentResult;
+			}catch(error){}
+			if(gcm != null) return gcm;
+			
+			gcm = new GCMSmsSentResult();
 			gcm.success = false;
 			if(!e){
 				e = "Timed out while waiting to send";

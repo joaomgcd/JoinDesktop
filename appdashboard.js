@@ -500,7 +500,10 @@ export class AppDashboard extends App{
     async onWebSocketGCM(webSocketGCM){
         const gcmRaw = webSocketGCM.gcmRaw;
         //await GCMBase.executeGcmFromJson(gcmRaw.type,gcmRaw.json);
-         window.api.send("gcm",webSocketGCM.gcmRaw);
+        //Need to decrypt possible encrypted fields so convert to gcm first
+        const gcm = await GCMBase.getGCMFromJson(webSocketGCM.gcmRaw.type,webSocketGCM.gcmRaw.json)
+        const raw = await gcm.gcmRaw;
+        window.api.send("gcm",raw);
     }
     async onDevices(devices){
         devices = JSON.stringify(devices);

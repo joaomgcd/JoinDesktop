@@ -91,7 +91,7 @@ export class MediaInfos extends Array{
         }
     }
     matches(otherMediaInfos){
-        if(!his.device) return;
+        if(!this.device) return;
         
         return this.device.deviceId == otherMediaInfos.device.deviceId
     }

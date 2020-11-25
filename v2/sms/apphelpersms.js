@@ -277,6 +277,10 @@ export class AppHelperSMS extends AppHelperBase{
     async onRequestSendSMS(request){
         console.log("Sending SMS!",request);
         const senderId = await this.senderId;
+        if(!request.contact){            
+            app.showToast({text:"Error: no contact to send message to.",isError:true,time:3000});
+            return;
+        }
         const address = request.contact.address;
         const text = request.text;
         let attachment = request.attachment;
