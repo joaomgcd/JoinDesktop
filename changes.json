@@ -1,6 +1,12 @@
 {
     "changes":[
         {
+            "version": "0.5.1",
+            "log":[
+                "Fixed a bunch of miscellaneous bugs"
+            ]
+        } ,
+        {
             "version": "0.5.0",
             "log":[
                 "Added Copy Number action on notifications with numbers",
