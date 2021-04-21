@@ -182,7 +182,7 @@ export class GCMPush extends GCMBaseApp{
 		if(notificationAction == GCMPushBase.notificationActionCopyUrl.action){
 			Util.setClipboardText(push.url);
 		}
-		await GCMNotificationBase.handleNotificationNumbers(notificationAction,this.push.text);
+		await GCMNotificationBase.handleNotificationNumbers(notificationAction, push.text || push.clipboard || push.url);
 	}
 	
 }

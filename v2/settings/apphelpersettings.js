@@ -38,7 +38,7 @@ const handleConnectingToEventghostOrNodeRed = async (setting,value) => {
             await ControlDialogOk.showAndWait({title:"Success!",text:`Sending text pushes to ${value}`});
             settingAutomationPortFullPush.value = false;
         }catch{
-            await ControlDialogOk.showAndWait({title:"Error!",text:`Couldn't connect. Make sure that the app is listening on port ${value}.`});
+            await ControlDialogOk.showAndWait({title:"Error!",text:`Couldn't connect. Make sure that the app is listening on port ${value} and that you don't have anything blocking access to localhost on your browser (like an adblocker for example).`});
             console.log(error);
             value = null;
             settingAutomationPortFullPush.value = false;
