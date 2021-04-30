@@ -54,7 +54,7 @@ export class ServerKeyboardShortcuts{
                 shortcutText = `Alt+${shortcutText}`;
             }
             // console.log("Registering shortcut",shortcutText);
-            globalShortcut.register(shortcutText, async () => {
+            globalShortcut.register(shortcutText.replace("Digit","").replace("NumpadDecimal","numdec").replace("NumpadMultiply","nummult").replace("NumpadDivide","numdiv").replace("NumpadSubtract","numsub").replace("Numpad","num"), async () => {
                 await EventBus.post(new ShortcutPressed(shortcut));
                 console.log("Shortcut pressed",shortcutText,shortcut)
             })

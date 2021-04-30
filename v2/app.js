@@ -589,6 +589,12 @@ export class App{
     set alreadyAskedRegistration(value){
         AppContext.context.localStorage.set("alreadyAskedRegistration",value);
     }
+    get alreadyWarnedNoPushes(){
+        return AppContext.context.localStorage.getBoolean("alreadyWarnedNoPushes");
+    }
+    set alreadyWarnedNoPushes(value){
+        AppContext.context.localStorage.set("alreadyWarnedNoPushes",value);
+    }
     get myDeviceName(){
         return AppContext.context.localStorage.get("myDeviceName");
     }
@@ -606,6 +612,10 @@ export class App{
     }
     get isBrowserRegistered(){
         return (this.myDeviceId && this.myDeviceName) ? true : false;
+    }
+    resetBrowserRegistration(){
+        this.myDeviceId = null;
+        this.myDeviceName = null;
     }
     async registerBrowser({force}){  
         var token = null;
@@ -636,6 +646,11 @@ export class App{
             const shouldShowRegistrationButton = !this.isBrowserRegistered && (token ? true : false);
             this.controlTop.showOrHideRegistrationButton(shouldShowRegistrationButton);            
             await EventBus.post(new RequestLoadDevicesFromServer());
+            if(!token){
+                if(!this.alreadyWarnedNoPushes){
+                    this.alreadyWarnedNoPushes = confirm("This browser is not able to receive pushes from other devices.\n\nYou can send stuff TO other devices, but not receive stuff FROM other devices.\n\nSome stuff can be received if you're on the same local network as the other device.");
+                }
+            }
         }                              
     }
     async getDevice(deviceId){
@@ -757,6 +772,15 @@ export class App{
     }
     async onRegisterBrowserRequest(){
         await this.registerBrowser({force:true});
+    }
+    async onDeviceDeleted({device}){
+        if(!device) return;
+        if(this.myDeviceId != device.deviceId) return;
+
+
+        console.log("Device my device. Reseting isBrowserRegistered");
+        this.resetBrowserRegistration();
+
     }
     async showDeviceChoice({filter,x,y,customDeviceNameFunc}){
         const choices = (await this.devicesFromDb).filter(filter);

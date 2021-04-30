@@ -118,7 +118,11 @@ export class NotificationInfo{
 		if(!device){
 			const gcm = await this.gcmFromInfo;
 			if(gcm){
-				device = await deviceGetterById(gcm.senderId);
+				let senderId = gcm.senderId;
+				if(!senderId && gcm.push){
+					senderId = gcm.push.senderId;
+				}
+				device = await deviceGetterById(senderId);
 			}
 		}
 		if(device){

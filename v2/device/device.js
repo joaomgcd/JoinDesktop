@@ -781,7 +781,11 @@ export class Device{
         return await ((await this.api).renameDevice({"deviceId":this.deviceId, "deviceName":newName}));
 	}
 	async delete(){
-        return await ((await this.api).unregisterDevice({"deviceId":this.deviceId}));
+		const result = await ((await this.api).unregisterDevice({"deviceId":this.deviceId}));
+		if(result.success){
+			EventBus.post(new DeviceDeleted(this));
+		}
+        return result;
 	}
 	get allowUnsecureContent(){
 		return AppContext.context.allowUnsecureContent;
@@ -1184,6 +1188,11 @@ class ConnectViaLocalNetworkSuccess{
 	}
 }
 class ConnectViaLocalNetworkFailure{
+	constructor(device){
+		this.device = device;
+	}
+}
+class DeviceDeleted{
 	constructor(device){
 		this.device = device;
 	}

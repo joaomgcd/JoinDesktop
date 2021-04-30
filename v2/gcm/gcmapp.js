@@ -177,6 +177,11 @@ export class GCMPush extends GCMBaseApp{
 			if(push.url){
 				await Util.openWindow(push.url);
 			}
+			if(push.files){
+				for(const file of push.files){
+					await Util.openWindow(file)
+				}
+			}
 			return;
 		}
 		if(notificationAction == GCMPushBase.notificationActionCopyUrl.action){
