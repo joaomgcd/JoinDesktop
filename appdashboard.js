@@ -184,7 +184,7 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
                     new SettingKeyboardShortcutPlayPause(),
                 ])}),   
                 new Tab({title:"Actions",controlContent:new ControlSettings([
-                    new SettingCustomActions({devices}),
+                    new SettingCustomActions({devices,canRunCommandLineCommands:true}),
                 ])}),   
                 new Tab({title:"Clipboard Sync",controlContent:new ControlSettings([
                     new SettingClipboardSync({devices})
@@ -349,17 +349,25 @@ export class AppDashboard extends App{
         UtilDOM.addScriptFile("./v2/google/drive/googledrive.js");
         await this.loadAppContext();
         const query = Util.getQueryObject();
-        if(!query.notificationpopup){
-            await super.load();
-            await this.showNewVersionInfo();
-            await this.uploadIpAddressesFile();
-        }else{
-            await this.loadEssentials();
-
-            this.onRequestReplyMessage = null;
-            const {AppDashboardNotifications} = await import("./appdashboardhelpernotifications.js");
-            const helperNotifications = new AppDashboardNotifications(this);
-            await helperNotifications.load();
+        
+        const doIt = async () =>{
+            if(!query.notificationpopup){            
+                await super.load();
+                await this.showNewVersionInfo();
+                await this.uploadIpAddressesFile();
+            }else{
+                await this.loadEssentials();
+    
+                this.onRequestReplyMessage = null;
+                const {AppDashboardNotifications} = await import("./appdashboardhelpernotifications.js");
+                const helperNotifications = new AppDashboardNotifications(this);
+                await helperNotifications.load();
+            }
+        }
+        try{
+            await doIt();
+        }catch(error){            
+            await ControlDialogOk.showAndWait({title:"Error Loading Join Desktop",text:`Couldn't load the app. (${error}). Please check your connection and try again.`,timeout:30000})
         }
     }
     applyTheme(theme,accent){
@@ -387,6 +395,7 @@ export class AppDashboard extends App{
     }
     async showNewVersionInfo(){
         const appInfo = await this.appInfo;
+        this.controlTop.versionNumber = appInfo.version;
         const key = "lastupdatelogshown";
         const lastVersionShown = parseFloat(AppContext.context.localStorage.get(key))
         if(lastVersionShown && lastVersionShown >= parseFloat(appInfo.version)) return;
@@ -426,6 +435,9 @@ export class AppDashboard extends App{
 
         await ControlDialogOk.showAndWait({title:"Downloading now!",text:`Ok will now download the new version!<br/><br/> Will automatically update the app once downloaded.`,timeout:30000})
         await ServerEventBus.post(new RequestInstallLatestUpdate());
+    }
+    get areShortcutsGlobal(){
+        return true;
     }
     async loadShortcuts(){
 

@@ -9,7 +9,7 @@ export class ControlCustomActions extends Control {
      * 
      * @param {CustomActions} customActions 
      */ 
-    constructor(customActions,args = {devices}){
+    constructor(customActions,args = {devices,canRunCommandLineCommands}){
         super();
         this.customActions = customActions;
         this.args = args;
@@ -82,10 +82,11 @@ export class ControlCustomAction extends Control {
      * 
      * @param {CustomAction} customAction
      */ 
-    constructor(customAction,{devices}){
+    constructor(customAction,{devices,canRunCommandLineCommands}){
         super();
         this.customAction = customAction;
         this.devices = devices;
+        this.canRunCommandLineCommands = canRunCommandLineCommands;
     }
     getHtml(){
         return `

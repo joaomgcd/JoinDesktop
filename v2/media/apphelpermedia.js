@@ -131,6 +131,8 @@ export class AppHelperMedia extends AppHelperBase{
     }
     async onGCMMediaInfo(gcm){
         const device = await app.getDevice(gcm.senderId);
+        if(!device) return;
+        
         const mediaInfo = new MediaInfo(gcm,device);
         await this.updateMediaInfo(mediaInfo);
     }

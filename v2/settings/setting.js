@@ -87,7 +87,7 @@ export class SettingCompanionAppPortToConnect extends SettingTextInput{
             label:"Join Desktop Port",
             placeholder:"Port",
             subtext:`
-            <div>Use the Join Desktop app if you want a more fully featured experience, like support for clipboard sync and keyboard shortcuts.</div>
+            <div>Use the Join Desktop app if you want a more fully featured experience, like support for clipboard sync, global keyboard shortcuts and command line actions.</div>
             <div>Learn more about the desktop app and what it can do <a target="_blank" href="https://joaoapps.com/join/desktop/">here</a>.</div>
             `
         })
@@ -588,12 +588,13 @@ export class SettingCustomActions extends Setting{
     set value(toSet){
         super.value = JSON.stringify(toSet);
     }
-    constructor(args = {devices}){
+    constructor(args = {devices,canRunCommandLineCommands:false}){
         super({
             id:SettingCustomActions.id,
             label:"Custom Actions",
             subtext: `<h4>These actions will show up in your device command list in the Join popup. Use Tasker (Android), EventGhost (Windows), Node-RED (Windows,Linux,Mac) or IFTTT (web) to react to them. More info <a href="https://joaoapps.com/join/actions/">here</a>.</h4>`,
-            devices: args.devices
+            devices: args.devices,
+            canRunCommandLineCommands: args.canRunCommandLineCommands
         })
     }
     async updateCustomAction(customAction){

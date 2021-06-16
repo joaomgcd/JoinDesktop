@@ -94,7 +94,8 @@ export class ControlDevices extends Control {
         if(!this.deviceControls || this.deviceControls.length == 0){
             UtilDOM.hide(this.devicesControl);
             UtilDOM.show(this.noDevicesControl);
-            UtilDOM.show(this.loadingDevicesControl);
+            UtilDOM.hide(this.loadingDevicesControl);
+            UtilDOM.hide(this.fileDragOverElement);
             return;
         }
         UtilDOM.hide(this.noDevicesControl);

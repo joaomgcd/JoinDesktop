@@ -65,7 +65,8 @@ export class MediaInfos extends Array{
         return mediaInfos;
     }
     static async fromLocalNetwork({device,token}){
-        const raw = await device.getViaLocalNetwork({path:`media`,token});
+        let path = `media`;
+        const raw = await device.getViaLocalNetwork({path,token});
         const result = new MediaInfos(raw.payload,device);
         return result;
     }

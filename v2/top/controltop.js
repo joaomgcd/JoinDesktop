@@ -23,6 +23,7 @@ export class ControlTop extends Control{
         this.imageHomeElement = await this.$("#imagehome");
         this.imageMenuElement = await this.$("#imagemenu");
         this.messageElement = await this.$("#topmessage");
+        this.versionElement = await this.$("#topversion");
         this.tabsElement = await this.$("#toptabs");
         this.appNameElement = await this.$("#appname");
         this.appNameArrowDownElement = await this.$("#appnamearrowdown");
@@ -80,6 +81,9 @@ export class ControlTop extends Control{
     }
     set rightImage(value){
         UtilDOM.setImageSourceOrHide(this.elementRightImage,value);
+    }
+    set versionNumber(versionNumber){
+       this.versionElement.innerHTML = `v${versionNumber}`;
     }
     async hideMessage(){
         await this.setMessage(null);

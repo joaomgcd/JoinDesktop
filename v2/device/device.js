@@ -749,7 +749,11 @@ export class Device{
 		if(!this.canContactLocalNetworkKey) throw `Can't contact ${this.deviceName} via local network`;
 
 		var url = `${this.localNetworkServerAddress}${path}`
-		return await UtilWeb.get({url,token});
+		const extraHeaders = {
+			"allowUnsecureContent":this.allowUnsecureContent,
+			"deviceId":AppContext.context.getMyDeviceId()
+		}
+		return await UtilWeb.get({url,token,extraHeaders});
 	}
 	set socket(socket){
 		this._socket = socket;
@@ -809,19 +813,25 @@ export class Device{
 
 		if(!this.hasLocalNetworkCapabilities) throw "Can't contact via local network";
 
-		const resultPromise = EventBus.waitFor(ConnectViaLocalNetworkSuccess, 10000);
-
-		await this.setToRemoteNetwork(true);
-		const workedRightAway = await this.testLocalNetwork();
-		if(workedRightAway) return new ConnectViaLocalNetworkSuccess(this);
-
 		let response = false;
 		try{
-			response = await resultPromise;
-			response = response.device.canContactViaLocalNetwork
+
+			const resultPromise = EventBus.waitFor(ConnectViaLocalNetworkSuccess, 10000);
+
+			await this.setToRemoteNetwork(true);
+			const workedRightAway = await this.testLocalNetwork();
+			if(workedRightAway) return new ConnectViaLocalNetworkSuccess(this);
+			
+			try{
+				response = await resultPromise;
+				response = response.device.canContactViaLocalNetwork
+			}catch{
+				response = false;
+			}
 		}catch{
 			response = false;
 		}
+
 		console.log("Result test local network",response);
 		return response;
 	}

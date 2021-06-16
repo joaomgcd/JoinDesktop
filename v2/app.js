@@ -218,6 +218,9 @@ export class App{
         const dbShortcut = new DBKeyboardShortcut(this.db);
         return await dbShortcut.getCommand(shortcut);
     }
+    get areShortcutsGlobal(){
+        return false;
+    }
     async loadShortcuts(){ 
         const shortcutsAndCommands = await this.configuredShortcutsAndCommands;
         if(shortcutsAndCommands.length == 0) return;

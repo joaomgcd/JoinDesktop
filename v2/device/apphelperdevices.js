@@ -106,7 +106,11 @@ export class AppHelperDevices extends AppHelperBase{
         await app.addKeyboardShortcutAndCommand(shortcutAndCommand);
 
         await this.updateKeyboardShortcutsOnCommands();
-        await ControlDialogOk.showAndWait({title:"Shortcut Configured!",text:`Press ${shortcut} to run the ${command.getText()} command on the last selected device!`});
+        let text = `Press ${shortcut} to run the ${command.getText()} command on the last selected device!`;
+        if(!app.areShortcutsGlobal){
+            text += `<br/><br/>Note: shortcuts will only work while this window is in focus! Use the <a target="_null" href="https://joaoapps.com/join/desktop/">Desktop App</a> to get shortcuts that work globally!`;
+        }
+        await ControlDialogOk.showAndWait({title:"Shortcut Configured!",text});
     }
     async updateKeyboardShortcutsOnCommands(){
         this.controlCommands.shortcutsAndCommands = await app.configuredShortcutsAndCommands;

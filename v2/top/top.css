@@ -4,6 +4,7 @@
     box-shadow: 0 1px 5px 0 rgba(60,64,67,.15), 0 4px 4px 0 rgba(60,64,67,.10), 0 -0.1px 3px 0 rgba(60,64,67,.08);
 	background-color: var(--theme-accent-color);
 	color: var(--theme-text-color-on-accent);
+    position: relative;
 }
 #top svg{
     fill: var(--theme-text-color-on-accent);
@@ -124,6 +125,12 @@
 }
 #minimizeapp{
     right: 14px;
+}
+#topversion{    
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 60%;
 }
 @keyframes rotating {
 	from {	transform: rotate(0deg);	}

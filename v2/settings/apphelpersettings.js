@@ -153,7 +153,7 @@ export class AppHelperSettings extends AppHelperBase{
                     new SettingThemeTextColorOnAccent(),
                 ])}),
                 new Tab({title:"Actions",controlContent:new ControlSettings([
-                    new SettingCustomActions({devices}),
+                    new SettingCustomActions({devices,canRunCommandLineCommands:false}),
                 ])}),
                 new Tab({title:"Automation",controlContent:new ControlSettings([
                     new SettingEventGhostNodeRedPort(),

@@ -24,8 +24,11 @@ export class ControlMediaInfos extends Control{
         return "./v2/media/mediainfos.css";
     }
     findMediaInfoControls(mediaInfoOrInfos){
+        const controlsMediaInfos = this.controlsMediaInfos;
+        if(controlsMediaInfos == null) return null;
+
         mediaInfoOrInfos = mediaInfoOrInfos.asMediaInfos;
-        return this.controlsMediaInfos.find(controlMediaInfoDevice=>controlMediaInfoDevice.mediaInfos.matches(mediaInfoOrInfos));
+        return controlsMediaInfos.find(controlMediaInfoDevice=>controlMediaInfoDevice.mediaInfos.matches(mediaInfoOrInfos));
     }
     async updateMediaInfos(mediaInfos){
         let controlMediaInfoDevice = this.findMediaInfoControls(mediaInfos);
@@ -66,6 +69,7 @@ export class ControlMediaInfos extends Control{
             UtilDOM.hide(this.noMediaInfosElement);            
             for(const mediaInfos of this.mediaInfoLists){
                 if(!mediaInfos || mediaInfos.length == 0) continue;
+                if(!mediaInfos.device) continue;
 
                 const controlMediaInfoDevice = new ControlMediaInfoDevice(mediaInfos,this.tokenGetter);
                 const render = await controlMediaInfoDevice.render();

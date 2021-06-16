@@ -418,7 +418,7 @@ export class ControlSettingCustomActions extends ControlSettingContent{
         this.settingElement.innerHTML = "";
         const {ControlCustomActions} = await import("../customactions/controlcustomactions.js");
         const customActions = await this.setting.value;
-        this.controlCustomActions = new ControlCustomActions(customActions,{devices:this.setting.devices});
+        this.controlCustomActions = new ControlCustomActions(customActions,this.setting);
         const render = await this.controlCustomActions.render();
         this.settingElement.appendChild(render);
     }

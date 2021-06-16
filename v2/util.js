@@ -151,6 +151,10 @@ class Util{
     }
     static async openWindow(url,options){
         if(!Util.isInServiceWorker){
+            //If URL is http we can't download because we're https and Chrome doesn't allow it.            
+            if(url.startsWith("http:")){
+                url = url.replace("&download=1","").replace("?download=1","");
+            }
             if(options && options.popup){
                 const width = options.popup.width || 250;
                 const height = options.popup.height || 250;
@@ -490,6 +494,8 @@ class Util{
         };
     }
     static getNumbers(str,minNumber) {
+        if(!str) return null;
+
         const regexString = `[0-9\.]{${minNumber},}`;
         const regex = new RegExp(regexString,"g");
         return str.match(regex);
