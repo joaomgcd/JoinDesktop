@@ -615,10 +615,16 @@ export class Device{
 		return AppContext.context.isThisDevice(this);
 	}
 	get isGroup(){
-		return this.deviceId.indexOf("group") >= 0;
+		const deviceId = this.deviceId;
+		if(!deviceId) return false;
+
+		return deviceId.indexOf("group") >= 0;
 	}
 	get isShared(){
-		return this.deviceId.indexOf("share") >= 0;
+		const deviceId = this.deviceId;
+		if(!deviceId) return false;
+		
+		return deviceId.indexOf("share") >= 0;
 	}
 	canReceiveSms(){
 		return false;

@@ -36,6 +36,7 @@
 .devicename{    
     font-size: small;
     font-weight: bold;
+    word-break: break-all;
 }
 
 .devicelocalnetwork{

@@ -86,6 +86,9 @@ export class AppGCMHandler{
         const clipboard = push.clipboard;
         if(!clipboard) return;
         
+        if(clipboard.startsWith("http")){
+            await Util.openWindow(clipboard);
+        }
     }
     static async handlePushUrl(push,gcm){
         const url = push.url;
