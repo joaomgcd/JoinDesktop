@@ -126,25 +126,37 @@ export class AppHelperDevices extends AppHelperBase{
         await app.updateDevice(device);
     } 
     async loadDevicesFromServer(){
+
         app.controlTop.loading = true;        
         await app.loadJoinApis();
-        const devices = new Devices(await ApiServer.getDevices());
-        const existing = await this.getDevices();
-        if(existing){
-            existing.transferSockets(devices);
-        }
-        await this.refreshDevices(devices);
-        await this.updateDBDevices(devices);
-        if(devices.length > 0){
-            UtilDOM.show(this.controlCommands);
-        }
-        await devices.testLocalNetworkDevices({allowUnsecureContent:app.allowUnsecureContent,token:await app.getAuthToken()});
-        await this.refreshDevices(devices);
-        app.controlTop.loading = false;
+        try{
+            const devicesFromServer = await ApiServer.getDevices();
+            const devices = new Devices(devicesFromServer);
+            const existing = await this.getDevices();
+            if(existing){
+                existing.transferSockets(devices);
+            }
+            await this.refreshDevices(devices);
+            await this.updateDBDevices(devices);
+            if(devices.length > 0){
+                UtilDOM.show(this.controlCommands);
+            }
+            await devices.testLocalNetworkDevices({allowUnsecureContent:app.allowUnsecureContent,token:await app.getAuthToken()});
+            await this.refreshDevices(devices);
+            app.controlTop.loading = false;
+            
+            // await app.checkConnectedClients();
+            EventBus.post(devices);
+            return devices;
         
-        // await app.checkConnectedClients();
-        EventBus.post(devices);
-        return devices;
+        }catch(error){           
+            
+            const {ControlDialogOk} = await import("../dialog/controldialog.js"); 
+            await ControlDialogOk.showAndWait({title:"Error Loading Join Desktop",text:`Seems like your user is no longer authenticated. Will now sign out so you can sign in again.`,timeout:30000})                
+            const googleAccount = await app.googleAccount;
+            await googleAccount.signOut();
+            return new Devices();
+        }
     }
     async onConnectViaLocalNetworkSuccess(){       
         await this.refreshDevices();

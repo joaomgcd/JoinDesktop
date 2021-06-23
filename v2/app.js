@@ -632,7 +632,7 @@ export class App{
                 return;
             }  
             if(!this.myDeviceName){
-                const confirmed	= confirm("Do you want to register this browser as a Join device so you can interact with it remotely?\n\nPlease note that this is a beta feature and may not fully work yet.")
+                const confirmed	= confirm("Do you want to register this browser as a Join device so you can interact with it remotely?")
                 this.alreadyAskedRegistration = true;
                 if(!confirmed) return;
                 

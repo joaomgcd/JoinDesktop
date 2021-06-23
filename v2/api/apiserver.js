@@ -39,6 +39,8 @@ const deleteAutorization = async (endpoint,parameters) => await del(`${JOIN_BASE
 export class ApiServer{
     static async getDevices(){
         const result = await getRegistration("listDevices");
+        if(!result.success) throw Error(result.errorMessage);
+        
         return result.records;
         // const result = await gapi.client.registration.listDevices();
         // const devicesRaw = result.result.records;

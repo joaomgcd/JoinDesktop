@@ -366,7 +366,7 @@ export class AppDashboard extends App{
         }
         try{
             await doIt();
-        }catch(error){            
+        }catch(error){
             await ControlDialogOk.showAndWait({title:"Error Loading Join Desktop",text:`Couldn't load the app. (${error}). Please check your connection and try again.`,timeout:30000})
         }
     }
