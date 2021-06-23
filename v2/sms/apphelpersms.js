@@ -59,8 +59,13 @@ export class AppHelperSMS extends AppHelperBase{
         await app.addElement(this.controlSmsConversation);
         UtilDOM.hide(this.controlSmsConversation);
 
-        await app.loadFcmClient();
-        this.contacts = await this.device.loadContacts(await this.getDbGoogleDriveBaseArgs());
+        await app.loadFcmClient();   
+        try{
+            this.contacts = await this.device.loadContacts(await this.getDbGoogleDriveBaseArgs());
+        }catch(error){
+            console.log("Couldn't load contacts", error);
+            this.contacts = new Contacts();
+        }
         await this.setMode({address:this.address,byBrowser:false});
     }
     async setModeDependingOnUrl(byBrowser){
