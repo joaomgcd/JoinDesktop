@@ -6,7 +6,7 @@ import './v2/extensions.js';
 import { App,RequestLoadDevicesFromServer } from "./v2/app.js";
 import {AppHelperSettings} from "./v2/settings/apphelpersettings.js"
 import { ControlSettings } from "./v2/settings/controlsetting.js";
-import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync, SettingCustomActions, SettingUseNativeNotifications, SettingNotificationTimeout, SettingRequireEncryptionForCommandLine, SettingKeyboardShortcutSkipSong, SettingKeyboardShortcutPreviousSong, SettingKeyboardShortcutPlayPause, SettingThemeBackgroundColor, SettingThemeBackgroundPanelColor, SettingThemeTextColor, SettingThemeTextColorOnAccent } from "./v2/settings/setting.js";
+import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync, SettingCustomActions, SettingUseNativeNotifications, SettingNotificationTimeout, SettingRequireEncryptionForCommandLine, SettingKeyboardShortcutSkipSong, SettingKeyboardShortcutPreviousSong, SettingKeyboardShortcutPlayPause, SettingThemeBackgroundColor, SettingThemeBackgroundPanelColor, SettingThemeTextColor, SettingThemeTextColorOnAccent, SettingAutoLaunch } from "./v2/settings/setting.js";
 import { AppGCMHandler } from "./v2/gcm/apphelpergcm.js";
 import { ControlDialogInput, ControlDialogOk } from "./v2/dialog/controldialog.js";
 import { AppContext } from "./v2/appcontext.js";
@@ -167,6 +167,8 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
     get settingsList(){
         return (async () => {
             const devices = await this.app.devicesFromDb;
+            const autoLaunchState = await this.app.autoLaunchState;
+            console.log("AutoLaunch state",autoLaunchState);
             return new ControlTabs([    
                 new Tab({title:"Theme",controlContent:new ControlSettings([
                     new SettingTheme(),
@@ -196,6 +198,7 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
                     new SettingCompanionAppPortToReceive(),
                     new SettingEncryptionPassword(),
                     new SettingRequireEncryptionForCommandLine(),
+                    new SettingAutoLaunch(autoLaunchState),
                     new SettingUseNativeNotifications(),
                     new SettingNotificationTimeout(),
                 ])}),
@@ -278,6 +281,8 @@ class RequestSetClipboard{
     }
 }
 class ResponseClipboard{}
+class RequestAutoLaunchState{}
+class ResponseAutoLaunchState{}
 class RequestListenForShortcuts{
     constructor(shortcuts){
         this.shortcuts = shortcuts;
@@ -292,6 +297,12 @@ class RequestDownloadAndOpenFile{
     }
 }
 class RequestInstallLatestUpdate{}
+
+class RequestToggleAutoLaunch{
+    constructor(enable){
+        this.enable = enable;
+    }
+}
 class Changes{
     static async getAll(){
         const info = await UtilWeb.get("changes.json");
@@ -373,6 +384,9 @@ export class AppDashboard extends App{
     applyTheme(theme,accent){
         super.applyTheme(theme,accent);
         EventBus.post({},"ThemeApplied");
+    }
+    get autoLaunchState(){
+        return ServerEventBus.postAndWaitForResponse(new RequestAutoLaunchState(),ResponseAutoLaunchState,5000);
     }
     async uploadIpAddressesFile(){
         const deviceId = this.myDeviceId;
@@ -588,6 +602,10 @@ export class AppDashboard extends App{
     }
     async onRequestRunCommandLineCommand(request){
         await ServerEventBus.post(request);
+    }
+    async onRequestAutoLaunchChanged(request){
+        console.log("Enabling autolaunch: " + request.enabled)
+        await ServerEventBus.post(new RequestToggleAutoLaunch(request.enabled));
     }
     get isBrowserRegistered(){
         return true;

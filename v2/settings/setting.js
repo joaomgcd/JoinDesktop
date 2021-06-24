@@ -620,4 +620,38 @@ export class SettingCustomActions extends Setting{
         this.value = customActions;
     }
 }
+
+export class SettingAutoLaunch extends SettingBoolean{  
+    static get id(){
+        return "SettingAutoLaunch";
+    } 
+    constructor({enabled}){
+        super({
+            id:SettingAutoLaunch.id,
+            label:"Auto-Launch",
+            subtext:`If set, app will automatically launch when you boot up your system.`
+        })
+        if(enabled === null || enabled === undefined) return;
+
+        super.value = enabled;
+    }
+    get isDbSetting(){
+        return false;
+    }
+    get value(){
+        return (async ()=>{
+            const value = await super.value;
+            return value == true || value == "true";
+        })()
+    }
+    set value(v){
+        super.value = v
+        EventBus.post(new RequestAutoLaunchChanged(v));
+    }
+}
 class RequestRefreshSettings{}
+class RequestAutoLaunchChanged{
+    constructor(enabled){
+        this.enabled = enabled;
+    }
+}

@@ -278,6 +278,13 @@ export class ControlSettingContentColorBoolean extends ControlSettingContent{
             </div>
         `
     }
+    getStyle(){
+        return `
+            .settingboolean, input{
+                cursor: pointer;
+            }
+        `
+    }
    
     async renderSpecific({root}){
         this.settingElement = root;  

@@ -18,6 +18,8 @@ import { CommandLine } from './commandline.js';
 
 const path = require('path')
 const Store = require('./store.js');
+const AutoLaunch = require('auto-launch');
+
 const storeWindowBounds = new Store({
     configName: 'window',
     defaults: {}
@@ -145,6 +147,12 @@ class Server{
             this.sendToPageEventBus(new ClipboardChanged(text));
         });
         this.clipboardChecker.start();
+        const appPath = process.execPath;
+        console.log(`Instancing AutoLaunch for path ${appPath}`);
+        this.autoLaunch = new AutoLaunch({
+            name: 'Join Desktop',
+            path: appPath,
+          });
         
         
         
@@ -228,6 +236,27 @@ class Server{
     }
     async onRequestSetClipboard(request){
         this.clipboardChecker.setClipboardText(request.text);
+    }
+    async onRequestAutoLaunchState(){
+        const isEnabled = await this.autoLaunch.isEnabled();
+        this.sendToPageEventBus(new ResponseAutoLaunchState(isEnabled,process.execPath))
+    }
+    async onRequestToggleAutoLaunch(request){
+        const enableRequest = request.enable;
+        if(enableRequest === null || enableRequest === undefined) return;
+
+        console.log(`Requested autolaunch: ${enableRequest}`);
+        const isEnabled = await this.autoLaunch.isEnabled();
+        console.log(`Was autolaunch enabled: ${isEnabled}`);
+        if (isEnabled == enableRequest) return;
+
+        if(enableRequest){
+            console.log(`Enabling autolaunch`);
+            await this.autoLaunch.enable();
+        }else{
+            console.log(`Disabling autolaunch`);
+            await this.autoLaunch.disable();
+        }
     }
     async onRequestToggleDevOptions(){
         this.window.webContents.toggleDevTools()
@@ -410,6 +439,12 @@ class ClipboardChanged{
 class ResponseClipboard{
     constructor(text){
         this.text = text;
+    }
+}
+class ResponseAutoLaunchState{
+    constructor(enabled,execPath){
+        this.enabled = enabled;
+        this.execPath = execPath;
     }
 }
 class ResponseSystemTheme{
