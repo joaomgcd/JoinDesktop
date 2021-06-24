@@ -259,6 +259,17 @@ class GCMLocalNetworkTest extends GCMGenericPush{}
 class GCMWebSocketRequest extends GCMGenericPush{}
 class GCMLocalNetworkTestRequest extends GCMGenericPush{}
 class GCMRespondFile extends GCMBaseServiceWorker{}
+class GCMFolder extends GCMBaseServiceWorker{
+	async modifyNotification(notification,index){
+		if(!this.senderId) return;
+
+		const device = await this.getSender();
+		if(!device) return;
+
+		notification.title = "File Browser";
+		notification.body = `${device.deviceName} responded with its files`;
+	}
+}
 class GCMDeviceNotOnLocalNetwork extends GCMGenericPush{
 	async modifyNotification(notification,index){
 		if(!this.senderId) return;

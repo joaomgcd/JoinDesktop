@@ -1,7 +1,7 @@
 {
     "changes":[
         {
-            "version": "1.0.1",
+            "version": "1.0.2",
             "log":[
                 "First public release",
                 "Added Auto Launch option"
