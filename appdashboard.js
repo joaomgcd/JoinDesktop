@@ -6,7 +6,7 @@ import './v2/extensions.js';
 import { App,RequestLoadDevicesFromServer } from "./v2/app.js";
 import {AppHelperSettings} from "./v2/settings/apphelpersettings.js"
 import { ControlSettings } from "./v2/settings/controlsetting.js";
-import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync, SettingCustomActions, SettingUseNativeNotifications, SettingNotificationTimeout, SettingRequireEncryptionForCommandLine, SettingKeyboardShortcutSkipSong, SettingKeyboardShortcutPreviousSong, SettingKeyboardShortcutPlayPause, SettingThemeBackgroundColor, SettingThemeBackgroundPanelColor, SettingThemeTextColor, SettingThemeTextColorOnAccent, SettingAutoLaunch } from "./v2/settings/setting.js";
+import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync, SettingCustomActions, SettingUseNativeNotifications, SettingNotificationTimeout, SettingRequireEncryptionForCommandLine, SettingKeyboardShortcutSkipSong, SettingKeyboardShortcutPreviousSong, SettingKeyboardShortcutPlayPause, SettingThemeBackgroundColor, SettingThemeBackgroundPanelColor, SettingThemeTextColor, SettingThemeTextColorOnAccent, SettingAutoLaunch, SettingLaunchMinimized } from "./v2/settings/setting.js";
 import { AppGCMHandler } from "./v2/gcm/apphelpergcm.js";
 import { ControlDialogInput, ControlDialogOk } from "./v2/dialog/controldialog.js";
 import { AppContext } from "./v2/appcontext.js";
@@ -199,6 +199,7 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
                     new SettingEncryptionPassword(),
                     new SettingRequireEncryptionForCommandLine(),
                     new SettingAutoLaunch(autoLaunchState),
+                    new SettingLaunchMinimized(),
                     new SettingUseNativeNotifications(),
                     new SettingNotificationTimeout(),
                 ])}),
@@ -363,6 +364,7 @@ export class AppDashboard extends App{
         
         const doIt = async () =>{
             if(!query.notificationpopup){            
+                await this.minimizeIfNeeded();
                 await super.load();
                 await this.showNewVersionInfo();
                 await this.uploadIpAddressesFile();
@@ -387,6 +389,13 @@ export class AppDashboard extends App{
     }
     get autoLaunchState(){
         return ServerEventBus.postAndWaitForResponse(new RequestAutoLaunchState(),ResponseAutoLaunchState,5000);
+    }
+    async minimizeIfNeeded(){
+        const settingLaunchMinimizes = new SettingLaunchMinimized();
+        const shouldMinimize = await settingLaunchMinimizes.value;
+        if(!shouldMinimize) return;
+
+        this.onMinimizeAppClicked(new MinimizeAppClicked());
     }
     async uploadIpAddressesFile(){
         const deviceId = this.myDeviceId;
@@ -666,3 +675,5 @@ export class AppDashboard extends App{
     //     this.controlLogs.addLog(new Log(notificationInfo));
     // }
 }
+
+class MinimizeAppClicked{}

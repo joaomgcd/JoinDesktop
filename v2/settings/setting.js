@@ -649,6 +649,31 @@ export class SettingAutoLaunch extends SettingBoolean{
         EventBus.post(new RequestAutoLaunchChanged(v));
     }
 }
+
+export class SettingLaunchMinimized extends SettingBoolean{  
+    static get id(){
+        return "SettingLaunchMinimized";
+    } 
+    constructor(){
+        super({
+            id:SettingLaunchMinimized.id,
+            label:"Launch Minimized",
+            subtext:`If set, app will launch minimized to the system tray instead of opening the window right away.`
+        })
+    }
+    get isDbSetting(){
+        return false;
+    }
+    get value(){
+        return (async ()=>{
+            const value = await super.value;
+            return value == true || value == "true";
+        })()
+    }
+    set value(v){
+        super.value = v;
+    }
+}
 class RequestRefreshSettings{}
 class RequestAutoLaunchChanged{
     constructor(enabled){
