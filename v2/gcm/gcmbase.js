@@ -44,7 +44,21 @@ class GCMBase{
 			}
 		})();	
 	}
+	get gcmRawNoEncryption(){
+		if(!this.senderId){
+			this.senderId = this.myDeviceId;
+		}		
+		return (async()=>{
+			return {
+				"json": await this.jsonNoEncryption,
+				"type": this.type
+			}
+		})();	
+	}
 	get json(){
+		return JSON.stringify(this);
+	}
+	get jsonNoEncryption(){
 		return JSON.stringify(this);
 	}
     //abstract

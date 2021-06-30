@@ -104,7 +104,7 @@ export class SenderIP extends Sender {
 					const result = await fetch(url,postOptions);
 					const textResult = await result.text();
 					return Sender.newSuccessResult;
-				}catch{
+				}catch(error){
 					if(options.secondTry) return {"success":false,"error": typeof error == "string" ? error : error.message};
 					options.secondTry = true;
 					return await doForOneDevice(options);

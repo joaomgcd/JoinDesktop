@@ -1,4 +1,5 @@
-const fetch = require('node-fetch');
+//const fetch = require('node-fetch');
+const fetch = require('electron-fetch').default;
 const Store = require('./store.js');
 const authStore = new Store({
     configName: 'auth',
@@ -65,7 +66,7 @@ class GoogleAuth{
             const result = await fetch("https://oauth2.googleapis.com/token",options);
             const refreshResultObject = await result.json();
             Object.assign(authData,refreshResultObject);
-            console.log("Result from google auth refresh", authData);
+            // console.log("Result from google auth refresh", authData);
             GoogleAuth.authData = authData;
             return authData.access_token;
         })();

@@ -3,7 +3,7 @@ import {createHttpTerminator} from 'http-terminator';
 var url = require('url');
 const {GCMServer} = require("./gcmserver.js");
 const {ClipboardChecker} = require("./clipboardchecker.js");
-const { globalShortcut,ipcMain ,app,nativeImage,BrowserWindow,Tray,Menu, MenuItem,nativeTheme } = require('electron')
+const { globalShortcut,ipcMain ,app,nativeImage,BrowserWindow,Tray,Menu, MenuItem,nativeTheme,screen } = require('electron')
 const {GoogleAuth} = require('./googleauth.js');
 const {ServerNotification} = require('./servernotification.js');
 const {EventBus} = require("../v2/eventbus.js")
@@ -75,13 +75,19 @@ class Server{
         // const iconPath = UtilServer.getServerFilePath(`../images/join.png`);
         
         // Create the browser window.
-        const bounds = storeWindowBounds.getData();
+        let bounds = storeWindowBounds.getData();
+        console.log("Stored bounds",bounds);
+        console.log("Primary display", screen.getPrimaryDisplay().workArea);
         if(!bounds.width){
             bounds.width = 750;
         }
         if(!bounds.height){
             bounds.height = 800;
         }
+        // if(bounds.width > 1920 || bounds.height > 1080){
+        //     console.log("resetting bounds");
+        //     bounds = {x:500,y:500,width:750,height:800};
+        // }
         const args = {
             frame: false, 
             icon: appIcon,   
@@ -96,6 +102,22 @@ class Server{
         const mainWindow = new BrowserWindow(args)
         mainWindow.on("close",()=>{
             const bounds = mainWindow.getBounds();
+            console.log("Fetched bounds",bounds);
+            bounds.x += 8;
+            bounds.y += 8;
+            bounds.width -= 16;
+            bounds.height -= 16;
+            // if(bounds.x < 0){
+            //     const offset = bounds.x;
+            //     bounds.x = 0;
+            //     bounds.width = bounds.width + (2 * offset);
+            // }
+            // if(bounds.y < 0){
+            //     const offset = bounds.y;
+            //     bounds.y = 0;
+            //     bounds.height = bounds.height + (2 * offset);
+            // }
+            console.log("Storing bounds",bounds);
             storeWindowBounds.setData(bounds);
             // storeSettings.set("width",)
         });
@@ -240,6 +262,24 @@ class Server{
     async onRequestAutoLaunchState(){
         const isEnabled = await this.autoLaunch.isEnabled();
         this.sendToPageEventBus(new ResponseAutoLaunchState(isEnabled,process.execPath))
+    }
+    async onRequestListDisplays(){
+        const displays = screen.getAllDisplays();
+        for(const display of displays){
+            if(display.bounds.x < 0){
+                display.label = "Left";
+            }
+            if(display.bounds.x > 0){
+                display.label = "Right";
+            }
+            if(display.bounds.x == 0){
+                display.label = "Main";
+                display.isMain = true;
+            }else{                
+                display.isMain = false;
+            }
+        }
+        this.sendToPageEventBus(new ResponseListDisplays(displays))
     }
     async onRequestToggleAutoLaunch(request){
         const enableRequest = request.enable;
@@ -445,6 +485,11 @@ class ResponseAutoLaunchState{
     constructor(enabled,execPath){
         this.enabled = enabled;
         this.execPath = execPath;
+    }
+}
+class ResponseListDisplays{
+    constructor(displays){
+        this.displays = displays
     }
 }
 class ResponseSystemTheme{

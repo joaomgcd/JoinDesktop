@@ -76,7 +76,7 @@ export class AppGCMHandler{
             const {SettingEventGhostNodeRedPort} = await import("../settings/setting.js");
             const settingEventGhostNodeRedPort = new SettingEventGhostNodeRedPort();
             const isSendingToApp = await settingEventGhostNodeRedPort.value;
-            if(isSendingToApp){
+            if(isSendingToApp && !push.commandLine){
                 notification = null;
             }
         }

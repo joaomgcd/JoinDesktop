@@ -148,7 +148,9 @@ export class AppHelperSMS extends AppHelperBase{
         }
 
         const args = await this.getDbGoogleDriveBaseArgs({address});
-        await this.controlSmsConversation.setSmsConversation(await this.device.loadSmsConversation(args));       
+        const smsConversation = await this.device.loadSmsConversation(args);
+        // console.log("Loading SMS conversation",smsConversation);
+        await this.controlSmsConversation.setSmsConversation(smsConversation);       
 
         await this.reloadConversationFromNetwork(address);
     }

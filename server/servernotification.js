@@ -18,6 +18,10 @@ const stringHash = str => {
       configName: 'notifications',
       defaults: []
   });
+  const storeNotificationSettings = new Store({
+      configName: 'notificationSettings',
+      defaults: {}
+  });
 let debugging = false;
 class WindowNotifications extends Array{	
 	constructor(initial){
@@ -143,14 +147,23 @@ class WindowNotifications extends Array{
 
         const width = request.width;
         const height = request.height;
-        const display = screen.getPrimaryDisplay();
+        let display = screen.getPrimaryDisplay();
+        const displayIdForNotificationsFromSettings = storeNotificationSettings.get(KEY_NOTIFICATION_DISPLAY);
+        if(displayIdForNotificationsFromSettings){
+            const allDisplays = screen.getAllDisplays();
+            const found = allDisplays.find(display => display.id == displayIdForNotificationsFromSettings);
+            if(found){
+                display = found;
+                console.log("Showing notification on selected display", display);
+            }
+        }
         const displayWidth = display.workArea.width;
         const displayHeight = display.workArea.height;
-        const position = {x:displayWidth - width-16,y:displayHeight - Math.min(height,displayHeight)}
+        const position = {x:displayWidth - width-16 + display.workArea.x,y:displayHeight - Math.min(height,displayHeight) + display.workArea.y}
 
         if(debugging) return;
 
-        // console.log("Chaging window by request",request,position);
+        console.log("Chaging window by request",request,position);
         this.window.setPosition(position.x, position.y);
         this.window.setSize(width,height,true);
         this.window.blur();
@@ -239,7 +252,12 @@ class WindowNotifications extends Array{
         windowNotification.hidden = true;
         await this.sendNotificationsToPage();
     }
+    async onRequestChangeNotificationDisplay(request){
+        console.log("Changing notification display",request);
+        storeNotificationSettings.set(KEY_NOTIFICATION_DISPLAY,request.displayId);
+    }
 }
+const KEY_NOTIFICATION_DISPLAY = "KEY_NOTIFICATION_DISPLAY";
 class RequestNotificationInfo{}
 class RequestReplyMessageFromServer{}
 class ResultNotificationAction{

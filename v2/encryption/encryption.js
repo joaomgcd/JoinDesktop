@@ -79,6 +79,17 @@ const decryptArray = (values, encryptedPassword)=>{
     encryptedPassword = getEncryptedPasswordBytesFromBase64(encryptedPassword);
     
     const results = values.map(value => decrypt(value,encryptedPassword));
+    const fieldsToDecrypt = {};
+    for(const prop in values){
+        if(!isNaN(prop)) continue;
+
+        const value = values[prop];
+        if(Util.isFunction(value)) continue;
+
+        fieldsToDecrypt[prop] = value;
+    }
+    const decryptedFields = decryptFields(fieldsToDecrypt,encryptedPassword);
+    Object.assign(results,decryptedFields);
     return results;
 }
 const  decryptString = (value, encryptedPassword) => {

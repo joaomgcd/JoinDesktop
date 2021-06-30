@@ -328,6 +328,34 @@ export class SettingTheme extends SettingSingleOption{
         })
     }
 }
+export class SettingNotificationsDisplay extends SettingSingleOption{
+    static get id(){
+        return "SettingNotificationsDisplay";
+    }
+    get value(){
+        const fromSuper = super.value;
+        if(fromSuper) return fromSuper;
+
+        const mainDisplay = this.displays.find(display => display.isMain);
+        if(!mainDisplay) return null;
+
+        return mainDisplay.id;
+    }
+    set value(val){
+        super.value = val;
+        
+        EventBus.post(new RequestNotificationDisplayChanged(val));
+    }
+    constructor(displays){
+        super({
+            id:SettingNotificationsDisplay.id,
+            label:"Notifications Display",
+            subtext:"Display on which to show non-native notifications",
+            options:displays
+        })
+        this.displays = displays;
+    }
+}
 export class SettingColor extends Setting{
     //options is {id,label}
     constructor(args){
@@ -678,5 +706,10 @@ class RequestRefreshSettings{}
 class RequestAutoLaunchChanged{
     constructor(enabled){
         this.enabled = enabled;
+    }
+}
+class RequestNotificationDisplayChanged{
+    constructor(displayId){
+        this.displayId = displayId;
     }
 }

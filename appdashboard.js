@@ -6,7 +6,7 @@ import './v2/extensions.js';
 import { App,RequestLoadDevicesFromServer } from "./v2/app.js";
 import {AppHelperSettings} from "./v2/settings/apphelpersettings.js"
 import { ControlSettings } from "./v2/settings/controlsetting.js";
-import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync, SettingCustomActions, SettingUseNativeNotifications, SettingNotificationTimeout, SettingRequireEncryptionForCommandLine, SettingKeyboardShortcutSkipSong, SettingKeyboardShortcutPreviousSong, SettingKeyboardShortcutPlayPause, SettingThemeBackgroundColor, SettingThemeBackgroundPanelColor, SettingThemeTextColor, SettingThemeTextColorOnAccent, SettingAutoLaunch, SettingLaunchMinimized } from "./v2/settings/setting.js";
+import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync, SettingCustomActions, SettingUseNativeNotifications, SettingNotificationTimeout, SettingRequireEncryptionForCommandLine, SettingKeyboardShortcutSkipSong, SettingKeyboardShortcutPreviousSong, SettingKeyboardShortcutPlayPause, SettingThemeBackgroundColor, SettingThemeBackgroundPanelColor, SettingThemeTextColor, SettingThemeTextColorOnAccent, SettingAutoLaunch, SettingLaunchMinimized, SettingNotificationsDisplay } from "./v2/settings/setting.js";
 import { AppGCMHandler } from "./v2/gcm/apphelpergcm.js";
 import { ControlDialogInput, ControlDialogOk } from "./v2/dialog/controldialog.js";
 import { AppContext } from "./v2/appcontext.js";
@@ -168,7 +168,9 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
         return (async () => {
             const devices = await this.app.devicesFromDb;
             const autoLaunchState = await this.app.autoLaunchState;
+            const displays = await this.app.displayList;
             console.log("AutoLaunch state",autoLaunchState);
+            console.log("Displays",displays);
             return new ControlTabs([    
                 new Tab({title:"Theme",controlContent:new ControlSettings([
                     new SettingTheme(),
@@ -202,6 +204,7 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
                     new SettingLaunchMinimized(),
                     new SettingUseNativeNotifications(),
                     new SettingNotificationTimeout(),
+                    new SettingNotificationsDisplay(displays),
                 ])}),
             ]);
             // return new ControlSettings([
@@ -284,6 +287,8 @@ class RequestSetClipboard{
 class ResponseClipboard{}
 class RequestAutoLaunchState{}
 class ResponseAutoLaunchState{}
+class RequestListDisplays{}
+class ResponseListDisplays{}
 class RequestListenForShortcuts{
     constructor(shortcuts){
         this.shortcuts = shortcuts;
@@ -302,6 +307,11 @@ class RequestInstallLatestUpdate{}
 class RequestToggleAutoLaunch{
     constructor(enable){
         this.enable = enable;
+    }
+}
+class RequestChangeNotificationDisplay{
+    constructor(displayId){
+        this.displayId = displayId;
     }
 }
 class Changes{
@@ -389,6 +399,13 @@ export class AppDashboard extends App{
     }
     get autoLaunchState(){
         return ServerEventBus.postAndWaitForResponse(new RequestAutoLaunchState(),ResponseAutoLaunchState,5000);
+    }
+    get displayList(){
+        return (async()=>{ 
+            const result = await ServerEventBus.postAndWaitForResponse(new RequestListDisplays(),ResponseListDisplays,5000);
+            return result.displays;
+        })();
+        
     }
     async minimizeIfNeeded(){
         const settingLaunchMinimizes = new SettingLaunchMinimized();
@@ -537,7 +554,7 @@ export class AppDashboard extends App{
         //await GCMBase.executeGcmFromJson(gcmRaw.type,gcmRaw.json);
         //Need to decrypt possible encrypted fields so convert to gcm first
         const gcm = await GCMBase.getGCMFromJson(webSocketGCM.gcmRaw.type,webSocketGCM.gcmRaw.json)
-        const raw = await gcm.gcmRaw;
+        const raw = await gcm.gcmRawNoEncryption;
         window.api.send("gcm",raw);
     }
     async onDevices(devices){
@@ -615,6 +632,17 @@ export class AppDashboard extends App{
     async onRequestAutoLaunchChanged(request){
         console.log("Enabling autolaunch: " + request.enabled)
         await ServerEventBus.post(new RequestToggleAutoLaunch(request.enabled));
+    }
+    async onRequestNotificationDisplayChanged(request){
+        const displays = await this.displayList;
+        const displayToShowNotificationsOn = displays.find(display=>display.id == request.displayId);
+        if(!displayToShowNotificationsOn){
+            console.error("Can't change notifications to display with id",request.displayId);
+            return;
+        }
+
+        console.log("Notification display changed: ",displayToShowNotificationsOn)
+        await ServerEventBus.post(new RequestChangeNotificationDisplay(request.displayId));
     }
     get isBrowserRegistered(){
         return true;
