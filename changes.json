@@ -8,7 +8,8 @@
                 "Fixed Auto clipboard sync when encryption is enabled",
                 "Fixed authenticating if a system-wide proxy is used",
                 "Don't forward command line pushes to automation apps if automation is enabled",
-                "Fixed sending files while encryption is enabled"
+                "Fixed sending files while encryption is enabled",
+                "Fixed some notifications while encryption is enabled"
             ]
         } ,
         {
