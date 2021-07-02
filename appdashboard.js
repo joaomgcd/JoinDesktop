@@ -119,7 +119,7 @@ class FCMClientDashboard{
         // delete notification.icon;
         // delete notification.badge;
         // Object.assign(notification.data,await gcm.gcmRaw);
-        const gcmRaw = await gcm.gcmRaw;
+        const gcmRaw = await gcm.gcmRawNoEncryption;
         const {SettingUseNativeNotifications} = await import("./v2/settings/setting.js");
         notification.native = await new SettingUseNativeNotifications().value;
         
