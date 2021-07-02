@@ -196,7 +196,7 @@ export class CommandSendCommand extends CommandPush{
 		return true;
     }
     async customizePush({device,push}){
-        var text = await prompt("Command to send");
+        var text = await prompt("Command to send",null,9999999);
         if(!text) return;
 
         push.text = text;
@@ -359,7 +359,7 @@ export class CommandWrite extends CommandPush{
 		return device.canWrite();
     }
     async customizePush({device,push}){
-        push.clipboard = await prompt(`What do you want to write on your ${device.deviceName}?`);
+        push.clipboard = await prompt(`What do you want to write on your ${device.deviceName}?`,null,99999999);
         if(!push.clipboard) return;
 
         return push;

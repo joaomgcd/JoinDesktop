@@ -351,7 +351,7 @@ export class AppDashboard extends App{
         Util.setClipboardText = async text => {
             await ServerEventBus.post(new RequestSetClipboard(text));
         }
-        self["prompt"] = async (title,initialText) => await ControlDialogInput.showAndWait({title,initialText: (initialText ? initialText : ""),placeholder:""});
+        self["prompt"] = async (title,initialText,timeout) => await ControlDialogInput.showAndWait({title,initialText: (initialText ? initialText : ""),placeholder:"",timeout: (timeout ? timeout : null) });
         self["alert"] = async text => await ControlDialogOk.showAndWait({text,title:"Join"});
         window.api.receive("log", async data => {
             //this.controlLogs.addLog(new Log(data));
