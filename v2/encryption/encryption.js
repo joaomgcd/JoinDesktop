@@ -44,7 +44,7 @@ this._hasher;e=d.finalize(e);d.reset();return d.finalize(this._oKey.clone().conc
 a[0]++}h.sigBytes=4*c;return h}});g.PBKDF2=function(d,b,e){return n.create(e).compute(d,b)}})();
 
 
-const encryptString = (text, password) => {
+const encryptString = async (text, password) => {
     if(!password){
         return text;
     }
@@ -56,17 +56,20 @@ const encryptString = (text, password) => {
     const finalString = ivBase64 + "=:=" + encryptedText
     return finalString;
 }
-const encryptArray = (texts, password)=> {
+const encryptArray = async (texts, password) => {
     if(!password){
         return texts;
     }
-    return texts.map(text=>Encryption.encrypt(text,password));
+    const result = await Promise.all(texts.map(async text=>{
+        return await Encryption.encrypt(text,password)
+    }));
+    return result;
 }
-const encrypt = (value, password) => {
+const encrypt = async (value, password) => {
     if(!password) return value;
 
-    if(Util.isString(value)) return encryptString(value,password);
-    if(Util.isArray(value)) return encryptArray(value,password);
+    if(Util.isString(value)) return await encryptString(value,password);
+    if(Util.isArray(value)) return await encryptArray(value,password);
 }
 const getEncryptedPasswordBytesFromBase64 = (base64EncryptedPassword)=>{
     if(!Util.isString(base64EncryptedPassword)) return base64EncryptedPassword;
@@ -180,7 +183,7 @@ class Encryption{
     }
     static async encrypt(value){
         try{
-            return encrypt(value,await Encryption.encryptionPassword);
+            return await encrypt(value,await Encryption.encryptionPassword);
         }catch(error){
             console.log("Couldn't encrypt",value,error);
             return value;
