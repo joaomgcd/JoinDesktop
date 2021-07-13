@@ -95,7 +95,7 @@ export class GCMPush extends GCMBaseApp{
             const url = push.url;
             if(!url) return;
 
-			setTitle("Opened URL")
+			setTitle("Received Link")
 			setText(`${url}`);
         }
         const handleFiles = async push => {

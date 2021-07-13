@@ -41,6 +41,7 @@ class LocalStorage{
             localStorage.removeItem(key);
         }catch(error){
             try{
+                console.error("Removing from local storage",key);
                 getServerStore().remove(key);
             }catch{
                 console.error("Can't delete from local storage",error);

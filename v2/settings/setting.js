@@ -670,6 +670,27 @@ export class SettingShowLinksAsNotificationsOnly extends SettingBoolean{
         super.value = v
     }
 }
+export class SettingHideTextInNotifications extends SettingBoolean{  
+    static get id(){
+        return "SettingHideTextInNotifications";
+    } 
+    constructor(){
+        super({
+            id:SettingHideTextInNotifications.id,
+            label:"Hide Text In Notifications",
+            subtext:`If enabled, notifications will not show the original notification text. You can see the real text in the Join app itself, in the notifications tab.`
+        })
+    }
+    get value(){
+        return (async ()=>{
+            const value = await super.value;
+            return value == true || value == "true";
+        })()
+    }
+    set value(v){
+        super.value = v
+    }
+}
 
 export class SettingAutoLaunch extends SettingBoolean{  
     static get id(){

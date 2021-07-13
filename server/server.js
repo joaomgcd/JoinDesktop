@@ -9,7 +9,7 @@ const {ServerNotification} = require('./servernotification.js');
 const {EventBus} = require("../v2/eventbus.js")
 import { DevicesServer } from "./serverdevices.js";
 import { AppContext } from "../v2/appcontext.js";
-import { SettingCompanionAppPortToReceive } from '../v2/settings/setting.js';
+import { SettingCompanionAppPortToReceive, SettingHideTextInNotifications } from '../v2/settings/setting.js';
 import { Util } from '../v2/util.js';
 import { ServerKeyboardShortcuts } from './serverkeyboardshortcut.js';
 import { AutoUpdater } from './autoupdater.js';
@@ -53,6 +53,9 @@ class Server{
     }
     get serverPort(){
         return AppContext.context.localStorage.get(SettingCompanionAppPortToReceive.id);
+    }
+    get hideTextInNotifications(){
+        return AppContext.context.localStorage.get(SettingHideTextInNotifications.id);
     }
     async createServer(){
         if(this.httpTerminator){
@@ -193,6 +196,7 @@ class Server{
             }
             args.notification.senderId = gcm.senderId;
             args.notification.authToken = await GoogleAuth.accessToken;
+            args.notification.hideText = this.hideTextInNotifications;
             const notification = new ServerNotification(args.notification);
             notification.show(async action=>{
                 console.log("Performing action!",action,type);
@@ -297,6 +301,9 @@ class Server{
             console.log(`Disabling autolaunch`);
             await this.autoLaunch.disable();
         }
+    }
+    async onRequestToggleHideTextInNotifications(request){
+        AppContext.context.localStorage
     }
     async onRequestToggleDevOptions(){
         this.window.webContents.toggleDevTools()

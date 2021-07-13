@@ -46,6 +46,9 @@ export class AppDashboardNotifications extends AppHelperBase{
         for(const optionsSingle of options){
             optionsSingle.device = await app.getDevice(optionsSingle.senderId);            
             optionsSingle.canClose = true;
+            if(optionsSingle.hideText){
+                optionsSingle.text = "Hidden Text";
+            }
         }
         console.log("Got notification infos",options);
         const {NotificationInfo} = await import("./v2/notification/notificationinfo.js")
