@@ -94,6 +94,14 @@ export class AppGCMHandler{
         const url = push.url;
         if(!url) return;
 
+        const {SettingShowLinksAsNotificationsOnly} = await import("../settings/setting.js");
+        const settingShowLinksAsNotificationsOnly = new SettingShowLinksAsNotificationsOnly();
+        const onlyShowNotification = await settingShowLinksAsNotificationsOnly.value;
+        if(onlyShowNotification){ 
+            console.log("Not opening link right away because of setting!");
+            return;
+        }
+
         const opened = await Util.openWindow(url);
         if(!opened) return;
 

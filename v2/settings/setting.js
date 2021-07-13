@@ -649,6 +649,28 @@ export class SettingCustomActions extends Setting{
     }
 }
 
+export class SettingShowLinksAsNotificationsOnly extends SettingBoolean{  
+    static get id(){
+        return "SettingShowLinksAsNotificationsOnly";
+    } 
+    constructor(){
+        super({
+            id:SettingShowLinksAsNotificationsOnly.id,
+            label:"Receive Links As Notifications Only",
+            subtext:`If enabled, will only show a notification when receiving a link instead of opening the link right away. Click the notification to open the received link.`
+        })
+    }
+    get value(){
+        return (async ()=>{
+            const value = await super.value;
+            return value == true || value == "true";
+        })()
+    }
+    set value(v){
+        super.value = v
+    }
+}
+
 export class SettingAutoLaunch extends SettingBoolean{  
     static get id(){
         return "SettingAutoLaunch";
