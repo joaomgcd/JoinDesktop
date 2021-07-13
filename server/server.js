@@ -327,10 +327,16 @@ class Server{
             this.window.hide();
             // tray.displayBalloon({title:"Still Running",content:"To close Join right click this icon."})
         }else{
+
             this.onCloseAppClicked();
         }
     }
-    async onMinimizeToTaskBarAppClicked(){
+    async onMinimizeToTaskBarAppClicked(args = {hideWindowIfWindows}){
+        if(args.hideWindowIfWindows && this.isWindowsSystem){
+            console.log("Is Windows and wants to hide window...")
+            await this.onMinimizeAppClicked();
+            return;
+        }
         this.window.minimize();
     }
     async onRequestSendPush(request){

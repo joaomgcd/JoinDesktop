@@ -417,7 +417,7 @@ export class AppDashboard extends App{
         const shouldMinimize = await settingLaunchMinimizes.value;
         if(!shouldMinimize) return;
 
-        this.onMinimizeAppClicked(new MinimizeAppClicked());
+        this.onMinimizeToTaskBarAppClicked(new MinimizeToTaskBarAppClicked({"hideWindowIfWindows":true}));
     }
     async uploadIpAddressesFile(){
         const deviceId = this.myDeviceId;
@@ -710,3 +710,10 @@ export class AppDashboard extends App{
 }
 
 class MinimizeAppClicked{}
+
+class MinimizeToTaskBarAppClicked{
+    constructor(args){
+        Object.assign(this,args);
+    }
+
+}

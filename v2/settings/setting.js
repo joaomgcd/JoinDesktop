@@ -729,7 +729,7 @@ export class SettingLaunchMinimized extends SettingBoolean{
         super({
             id:SettingLaunchMinimized.id,
             label:"Launch Minimized",
-            subtext:`If set, app will launch minimized to the system tray instead of opening the window right away.`
+            subtext:`If set, app will launch minimized instead of opening the window right away. If on Windows will minimize to System Tray, if not will only minimize.`
         })
     }
     get isDbSetting(){
