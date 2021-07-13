@@ -460,6 +460,10 @@ export class ServerNotification{
                         }
                             
                     }
+                    if(!action && this.native){
+                        // reject("Invalid native action",action);
+                        return;
+                    }
                     console.log("Clicked notification",action);
                     resolve(action);
                     if(onClickCallback){

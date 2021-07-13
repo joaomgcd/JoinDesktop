@@ -183,7 +183,7 @@ export class SettingUseNativeNotifications extends SettingBoolean{
         super({
             id:SettingUseNativeNotifications.id,
             label:"Use Native Notifications",
-            subtext:`If set, will use your OS' native notification system which is more restricted than Join's internal one.`
+            subtext:`If set, will use your OS' native notification system which is more restricted than Join's internal one and may not show all notifications. If you use non-native notifications you can still see a stored list of your past notifications in the notifications tab inside the Join app.`
         })
     }
     get isDbSetting(){
