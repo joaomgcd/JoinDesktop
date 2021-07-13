@@ -5,6 +5,7 @@
     color:white;
     overflow-y: auto;
     animation: slidein 0.3s ease-in 0.0s forwards;
+    flex-grow: 1;
 }
 @keyframes slidein {
     from {height: 0;}
@@ -38,3 +39,6 @@
     font-weight: bolder;
     margin-left: 8px;
 } 
+.apifield{
+    margin-bottom:12px;
+}

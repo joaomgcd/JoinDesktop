@@ -49,7 +49,7 @@ export class ControlApiBuilder extends Control{
     onRequestGenerateUrl(){
         if(!this.apiKey) return;
 
-        var url = window.location.origin.replace("8081","8080");
+        var url = window.location.origin.replace("8081","8080").replace("file://","https://joinjoaomgcd.appspot.com");
         url = `${url}/_ah/api/messaging/v1/sendPush?apikey=${this.apiKey}`
 
         var toAppend = "";

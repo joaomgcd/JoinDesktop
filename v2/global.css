@@ -152,7 +152,7 @@ textarea{
   
   /* active state */
   input:focus ~ label, input:not([type=checkbox]):valid ~ label ,#generatedUrl label		{
-    top:-20px;
+    top:-8px;
     font-size:14px;
     color:var(--theme-accent-color);
   }
