@@ -99,6 +99,9 @@ export class UtilServer{
         if(needsFilePrefix){
             urlOrFile = `file://${urlOrFile}`
         }
+        if(!urlOrFile.includes("://")){
+            urlOrFile = `https://${urlOrFile}`;
+        }
         console.log("Opening url or file",urlOrFile)
         shell.openExternal(urlOrFile);
     }

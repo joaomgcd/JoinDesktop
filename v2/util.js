@@ -150,6 +150,10 @@ class Util{
         })();
     }
     static async openWindow(url,options){
+        if(!url) return;
+        if(!url.includes("://")){
+            url = `https://${url}`;
+        }
         if(!Util.isInServiceWorker){
             //If URL is http we can't download because we're https and Chrome doesn't allow it.            
             if(url.startsWith("http:")){
