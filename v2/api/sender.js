@@ -38,8 +38,12 @@ export class SendResults extends Array {
 		this.merge(results)
 	}
 	merge(other){
-		for(var result of other){
-			this.push(new SendResult(result.messageId,result.success,result.message));
+		try{
+			for(var result of other){
+				this.push(new SendResult(result.messageId,result.success,result.message));
+			}
+		}catch{
+			//do nothing if other is not iterable
 		}
 		this.success = this.count(result=>result.success);
 		this.failure = this.count(result=>!result.success);

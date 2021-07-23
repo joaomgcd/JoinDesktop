@@ -223,7 +223,8 @@ export class AppHelperDevices extends AppHelperBase{
     }
     async onRequestResetApiKey(){
         try{
-            if(!this.confirmApiKeyDelete()) return;
+            const shouldReset = await this.confirmApiKeyDelete();
+            if(!shouldReset) return;
 
             this._apiKey = await ApiServer.resetApiKey();   
             app.showToast({text:`API Key reset!`});
@@ -234,7 +235,9 @@ export class AppHelperDevices extends AppHelperBase{
     }
     async onRequestDeleteApiKey(){
         try{
-            if(!this.confirmApiKeyDelete()) return;
+            const shouldReset = await this.confirmApiKeyDelete();
+            if(!shouldReset) return;
+            
             await ApiServer.deleteApiKey();
             this._apiKey = null;
             await this.apiBuilder.generateUrl(null);
