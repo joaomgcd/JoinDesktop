@@ -6,7 +6,7 @@ import './v2/extensions.js';
 import { App,RequestLoadDevicesFromServer } from "./v2/app.js";
 import {AppHelperSettings} from "./v2/settings/apphelpersettings.js"
 import { ControlSettings } from "./v2/settings/controlsetting.js";
-import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync, SettingCustomActions, SettingUseNativeNotifications, SettingNotificationTimeout, SettingRequireEncryptionForCommandLine, SettingKeyboardShortcutSkipSong, SettingKeyboardShortcutPreviousSong, SettingKeyboardShortcutPlayPause, SettingThemeBackgroundColor, SettingThemeBackgroundPanelColor, SettingThemeTextColor, SettingThemeTextColorOnAccent, SettingAutoLaunch, SettingLaunchMinimized, SettingNotificationsDisplay, SettingShowLinksAsNotificationsOnly, SettingHideTextInNotifications } from "./v2/settings/setting.js";
+import { SettingEncryptionPassword, SettingTheme, SettingThemeAccentColor,SettingCompanionAppPortToReceive, SettingKeyboardShortcutLastCommand, SettingKeyboardShortcutShowWindow, SettingEventGhostNodeRedPort, SettingClipboardSync, SettingClipboardCommand, SettingCustomActions, SettingUseNativeNotifications, SettingNotificationTimeout, SettingRequireEncryptionForCommandLine, SettingKeyboardShortcutSkipSong, SettingKeyboardShortcutPreviousSong, SettingKeyboardShortcutPlayPause, SettingThemeBackgroundColor, SettingThemeBackgroundPanelColor, SettingThemeTextColor, SettingThemeTextColorOnAccent, SettingAutoLaunch, SettingLaunchMinimized, SettingNotificationsDisplay, SettingShowLinksAsNotificationsOnly, SettingHideTextInNotifications } from "./v2/settings/setting.js";
 import { AppGCMHandler } from "./v2/gcm/apphelpergcm.js";
 import { ControlDialogInput, ControlDialogOk } from "./v2/dialog/controldialog.js";
 import { AppContext } from "./v2/appcontext.js";
@@ -192,6 +192,7 @@ export class AppHelperSettingsDashboard extends AppHelperSettings{
                 ])}),   
                 new Tab({title:"Clipboard Sync",controlContent:new ControlSettings([
                     new SettingClipboardSync({devices})
+                    // new SettingClipboardCommand()
                 ])}),
                 new Tab({title:"Automation",controlContent:new ControlSettings([
                     new SettingEventGhostNodeRedPort(),
@@ -337,7 +338,7 @@ export class AppDashboard extends App{
     }
     async load(){
         AppContext.context.allowUnsecureContent = true;
-        window.oncontextmenu = () => ServerEventBus.post(new RequestToggleDevOptions())
+        window.oncontextmenu = () => ServerEventBus.post(new RequestToggleDevOptions());
         // AppGCMHandler.handlePushUrl = (push)=> {
         //     const url = push.url;
         //     if(!url) return;
@@ -630,6 +631,12 @@ export class AppDashboard extends App{
         const devices = await this.getDevices(deviceIdsToSendTo);
         console.log("Sending auto clipboard", gcm, devices);
         await devices.send(gcm);
+        
+        // const settingClipboardCommand = new SettingClipboardCommand();
+        // const clipboardCommand = await settingClipboardCommand.value;
+        // if(clipboardCommand){
+        //     await devices.sendPush({text:clipboardCommand})
+        // }
     }
     async onRequestRunCommandLineCommand(request){
         await ServerEventBus.post(request);

@@ -20,8 +20,8 @@ export class ApiFields extends Array{
         this.push(new ApiField({id:"group",label:"Notification Group (Android 7 and above) - allows you to join notifications in different groups"}));
         this.push(new ApiField({id:"category",label:"Notification Category (Android 8 and above) - allows you to customize notification properties"}));
         this.push(new ApiField({id:"notificationId",label:"Notification ID - set the same ID to replace a previous notification"}));
-        this.push(new ApiField({id:"urlclipboard",label:"Clipboard"}));
-        this.push(new ApiField({id:"urlfile",label:"File (must be a publicly accessible URL)"}));
+        this.push(new ApiField({id:"clipboard",label:"Clipboard"}));
+        this.push(new ApiField({id:"file",label:"File (must be a publicly accessible URL)"}));
         this.push(new ApiField({id:"callnumber",label:"Phone Call Number"}));
         this.push(new ApiField({id:"smsnumber",label:"SMS Number - if sending SMS must also fill in SMS Text below"}));
         this.push(new ApiField({id:"smstext",label:"SMS Text - if sending SMS must also fill in SMS Number above"}));

@@ -2,7 +2,7 @@
   "name": "com.joaomgcd.join",
   "productName": "Join Desktop",
   "homepage": "https://joaoapps.com/join/desktop",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "A companion app for the Join website",
   "main": "main_esm.js",
   "scripts": {
@@ -72,8 +72,14 @@
       ]
     },
     "win": {
-      "target": "squirrel",
+      "target": [
+        "portable",
+        "squirrel"
+      ],
       "icon": "build/icon.ico"
+    },
+    "portable": {
+      "artifactName": "join_portable.exe"
     },
     "squirrelWindows": {
       "loadingGif": "joinloading.png"

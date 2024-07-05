@@ -480,7 +480,7 @@ class GoogleDrive {
 		}
 	}
 	static getFileIdFromUrl(fileUrl) {
-		if (fileUrl.indexOf("drive.google.com/file/d") < 0) {
+		if (fileUrl.indexOf("drive.google.com/file/d") < 0 && fileUrl.indexOf("https://www.googleapis.com/drive/v2/files/") < 0) {
 			return null;
 		}
 		var match = fileUrl.match(/[^/\\.\\?&=]{20,}/);

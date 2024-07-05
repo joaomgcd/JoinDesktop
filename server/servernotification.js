@@ -219,8 +219,11 @@ class WindowNotifications extends Array{
         console.log("Mouse entered");
     }
     async closeWindowIfNoNotifications(){
-        if(this.notificationsToShow.length > 0) return;
-
+        if(this.notificationsToShow.length > 0){ 
+            await EventBus.post(new ExistingNotifications());
+            return;
+        }
+        await EventBus.post(new NoNotifications());
         console.log("No notifications. Closing window.");
         await this.closeWindow();
     }
@@ -236,6 +239,7 @@ class WindowNotifications extends Array{
         if(!this.window) return;       
 
         console.log("Notifications cleared. Closing window.");
+        await EventBus.post(new NoNotifications(options));        
         await this.closeWindow();
     }
     async onRequestReplyMessage(request){
@@ -346,6 +350,8 @@ class StoredNotifications{
         this.options = options;
     }
 }
+class ExistingNotifications{}
+class NoNotifications{}
 export class ServerNotification{
     // constructor(args){
     //     Object.assign(this,args);

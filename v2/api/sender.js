@@ -1,4 +1,5 @@
 import '../extensions.js';
+// import { FCMLegacyToV1Converter } from './fcmLegacyToV1Converter.js'
 export class Sender {
 	static get newMessageId(){
 		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -70,14 +71,17 @@ export class SenderGCM extends Sender{
 				'Content-Type': 'application/json; charset=UTF-8'
 			}
 		}
-		var url = "https://fcm.googleapis.com/fcm/send";
-		const result = await fetch(url, postOptions);
-		if(result.status != 200){
-			const textResult = await result.text();
-			throw textResult;
-		}
+		// var url = "https://fcm.googleapis.com/fcm/send";
+		// const result = await fetch(url, postOptions);
+		// const FCMLegacyToV1Converter = await import("./fcmLegacyToV1Converter.js");
+		const fcmLegacyToV1Converter = new FCMLegacyToV1Converter();
+		const results = await fcmLegacyToV1Converter.doLegacyRequest(content);
+		// if(result.status != 200){
+		// 	const textResult = await result.text();
+		// 	throw textResult;
+		// }
 
-		const results = await result.json();
+		// const results = await result.json();
 
 		const finalResults = results.results.map(result=>{
 			if(result.message_id){

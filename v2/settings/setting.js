@@ -125,6 +125,22 @@ export class SettingEventGhostNodeRedPort extends SettingTextInput{
         })
     }
 }
+export class SettingClipboardCommand extends SettingTextInput{
+    static get id(){
+        return "SettingClipboardCommand";
+    }
+    get isDbSetting(){
+        return true;
+    }
+    constructor(){
+        super({
+            id:SettingClipboardCommand.id,
+            label:"Clipboard Command",
+            placeholder:"Optional",
+            subtext:`If set, every time your PC clipboard changes the command will be sent to the devices selected above. In Tasker you can react to this with the 'Command' event and in the task use the 'Get Clipboard' action to retrieve the latest clipboard contents.`
+        })
+    }
+}
 class SettingIntInput extends SettingTextInput{    
     get value(){
         return (async ()=>{
